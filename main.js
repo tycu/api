@@ -11,12 +11,12 @@ var start = function() {
     keys.events = 'events';
     keys.politicians = 'politicians';
     keys.pacs = 'pacs';
-    keys.reverseChronologicalEventList = 'reverse_chronological_event_list';
-    keys.politicianChronologicalEvents = function(iden) {
-        return 'politician_chronological_events_' + iden
-    }
+    keys.reverseChronologicalEvents = 'reverse_chronological_events';
+    keys.politicianReverseChronologicalEvents = function(iden) {
+        return 'politician_reverse_chronological_events_' + iden
+    };
 
-    app.use(require('body-parser').json())
+    app.use(require('body-parser').json());
 
     app.use(function(req, res, next) {
         if (req.body) {
@@ -32,7 +32,7 @@ var start = function() {
 
     app.get('/v1/events', function(req, res) {
         var start = req.query.start || 0
-        redis.lrange(keys.reverseChronologicalEventList, start, 9, function(err, reply) {
+        redis.lrange(keys.reverseChronologicalEvents, start, 9, function(err, reply) {
             getEvents(reply, function(err, events) {
                 if (err) {
                     res.sendStatus(500);
@@ -46,7 +46,7 @@ var start = function() {
     });
 
     app.get('/v1/politicians/:iden/events', function(req, res) {
-        var key = keys.politicianChronologicalEvents(req.params.iden);
+        var key = keys.politicianReverseChronologicalEvents(req.params.iden);
         var start = req.query.start || 0
         redis.zrange(key, start, 9, function(err, reply) {
             getEvents(reply, function(err, events) {
@@ -75,7 +75,7 @@ var start = function() {
                 });
             });
             tasks.push(function(callback) {
-                redis.lpush(keys.reverseChronologicalEventList, req.body.iden, function(err, reply) {
+                redis.lpush(keys.reverseChronologicalEvents, req.body.iden, function(err, reply) {
                     callback(err, reply);
                 });
             });
@@ -87,7 +87,7 @@ var start = function() {
                     res.json(req.body);
 
                     // Add this event to the politician's chronological event list
-                    updatePoliticianChronologicalEvents(req.body, function(err, reply) {
+                    updatePoliticianReverseChronologicalEvents(req.body, function(err, reply) {
                         if (err) {
                             console.error(err)
                         }
@@ -123,8 +123,8 @@ var start = function() {
                         } else {
                             res.json(req.body);
 
-                            // Update the current politician's chronological events list
-                            updatePoliticianChronologicalEvents(req.body, function(err, reply) {
+                            // Update the current politician's reverse chronological events list
+                            updatePoliticianReverseChronologicalEvents(req.body, function(err, reply) {
                                 if (err) {
                                     console.error(err);
                                 }
@@ -132,7 +132,7 @@ var start = function() {
 
                             // If this event used to be attached to a different politician, remove it
                             if (event.politician && event.politician.iden != req.body.politician) {
-                                removeFromPoliticianChronologicalEvents(event, function(err, reply) {
+                                removeFromPoliticianReverseChronologicalEvents(event, function(err, reply) {
                                     if (err) {
                                         console.error(err);
                                     }
@@ -153,7 +153,7 @@ var start = function() {
                 } else if (event) {
                     var tasks = [];
                     tasks.push(function(callback) {
-                        removeFromPoliticianChronologicalEvents(event, function (err, reply) {
+                        removeFromPoliticianReverseChronologicalEvents(event, function (err, reply) {
                             callback(err, reply);
                         });
                     });
@@ -163,7 +163,7 @@ var start = function() {
                         });
                     });
                     tasks.push(function(callback) {
-                        redis.lrem(keys.reverseChronologicalEventList, 0, req.params.iden, function(err, reply) {
+                        redis.lrem(keys.reverseChronologicalEvents, 0, req.params.iden, function(err, reply) {
                             callback(err, reply);
                         });
                     });
@@ -372,18 +372,18 @@ var start = function() {
         });
     };
 
-    var updatePoliticianChronologicalEvents = function(event, callback) {
+    var updatePoliticianReverseChronologicalEvents = function(event, callback) {
         if (event.politician) {
-            var key = keys.politicianChronologicalEvents(event.politician);
+            var key = keys.politicianReverseChronologicalEvents(event.politician);
             redis.zadd(key, -event.created, event.iden, function(err, reply) {
                 callback(err, reply);
             });
         }
     };
 
-    var removeFromPoliticianChronologicalEvents = function(event, callback) {
+    var removeFromPoliticianReverseChronologicalEvents = function(event, callback) {
         if (event.politician) {
-            var key = keys.politicianChronologicalEvents(event.politician.iden);
+            var key = keys.politicianReverseChronologicalEvents(event.politician.iden);
             redis.zrem(key, event.iden, function(err, reply) {
                 callback(err, reply);
             });

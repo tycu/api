@@ -1,16 +1,18 @@
 'use strict';
 
 window.onload = function() {
-    var pac = {}
+    var content = document.getElementById('content');
     var name = document.getElementById('name');
     var submit = document.getElementById('submit');
     var error = document.getElementById('error');
+
+    var pac = {};
 
     if (location.query['iden']) {
         submit.textContent = 'Update';
         submit.disabled = true;
 
-        get('/v1/pacs/' + location.query['iden'], function(res) {
+        get(host() + '/v1/pacs/' + location.query['iden'], function(res) {
             if (res) {
                 console.log(res)
                 pac = res
@@ -18,7 +20,7 @@ window.onload = function() {
                 name.value = pac.name || ''
                 submit.disabled = false;
             } else {
-                document.body.innerHTML = 'Unable to load pac';
+                content.innerHTML = 'Unable to load pac';
             }
         });
     }
@@ -29,16 +31,16 @@ window.onload = function() {
 
         pac.name = name.value;
 
-        var url = '/v1/pacs'
+        var endpoint = '/v1/pacs'
         if (pac.iden) {
-            url += '/' + pac.iden
+            endpoint += '/' + pac.iden
         }
 
-        post(url, pac, function(res) {
+        post(host() + endpoint, pac, function(res) {
             submit.disabled = false;
 
             if (res) {
-                window.location = '/internal/pac.html?iden=' + res.iden;
+                window.location.replace('/internal/pac.html?iden=' + res.iden);
             } else {
                 error.textContent = 'Save failed';
             }

@@ -1,7 +1,9 @@
 'use strict';
 
 window.onload = function() {
-    get('/v1/politicians' + location.search, function(res) {
+    var content = document.getElementById('content');
+    
+    get(host() + '/v1/politicians' + location.search, function(res) {
         if (res) {
             res.politicians.forEach(function(politician) {
                 var p = document.createElement('p');
@@ -17,10 +19,10 @@ window.onload = function() {
                 var div = document.createElement('div');
                 div.appendChild(p);
 
-                document.body.appendChild(div);
+                content.appendChild(div);
             });
         } else {
-            document.body.innerHTML = 'Unable to load politicians'
+            content.innerHTML = 'Unable to load politicians'
         }
     });
 };

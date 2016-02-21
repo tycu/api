@@ -1,7 +1,9 @@
 'use strict';
 
 window.onload = function() {
-    get('/v1/pacs', function(res) {
+    var content = document.getElementById('content');
+
+    get(host() + '/v1/pacs', function(res) {
         if (res) {
             res.pacs.forEach(function(pac) {
                 var edit = document.createElement('a');
@@ -12,15 +14,15 @@ window.onload = function() {
                 var span = document.createElement('span');
                 span.textContent = pac.name;
 
-                var div = document.createElement('div');
-                div.appendChild(span)
-                div.appendChild(space());
-                div.appendChild(edit);
+                var p = document.createElement('p');
+                p.appendChild(span)
+                p.appendChild(space());
+                p.appendChild(edit);
 
-                document.body.appendChild(div);
+                content.appendChild(p);
             });
         } else {
-            document.body.innerHTML = 'Unable to load pacs'
+            content.innerHTML = 'Unable to load pacs'
         }
     });
 };

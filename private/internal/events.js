@@ -1,7 +1,9 @@
 'use strict';
 
 window.onload = function() {
-    get('/v1/events' + location.search, function(res) {
+    var content = document.getElementById('content');
+
+    get(host() + '/v1/events' + location.search, function(res) {
         if (res) {
             res.events.forEach(function(event) {
                 var edit = document.createElement('a');
@@ -31,10 +33,10 @@ window.onload = function() {
                 div.firstChild.appendChild(space());
                 div.firstChild.appendChild(remove);
 
-                document.body.appendChild(div);
+                content.appendChild(div);
             });
         } else {
-            document.body.innerHTML = 'Unable to load events'
+            content.innerHTML = 'Unable to load events'
         }
     });
 };
