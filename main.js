@@ -10,6 +10,7 @@ var start = function() {
     var keys = {};
     keys.events = 'events';
     keys.politicians = 'politicians';
+    keys.pacs = 'pacs';
     keys.reverseChronologicalEventList = 'reverse_chronological_event_list';
     keys.politicianChronologicalEvents = function(iden) {
         return 'politician_chronological_events_' + iden
@@ -125,7 +126,7 @@ var start = function() {
                             // Update the current politician's chronological events list
                             updatePoliticianChronologicalEvents(req.body, function(err, reply) {
                                 if (err) {
-                                    console.error(err)
+                                    console.error(err);
                                 }
                             });
 
@@ -133,7 +134,7 @@ var start = function() {
                             if (event.politician && event.politician.iden != req.body.politician) {
                                 removeFromPoliticianChronologicalEvents(event, function(err, reply) {
                                     if (err) {
-                                        console.error(err)
+                                        console.error(err);
                                     }
                                 });
                             }
@@ -186,23 +187,15 @@ var start = function() {
                     res.sendStatus(500);
                 } else {
                     var politicians = [];
-                    Object.keys(reply).forEach(function(iden) {
-                        politicians.push(JSON.parse(reply[iden]));
-                    });
-
-                    politicians.sort(function(a, b) {
-                        if (a.name > b.name) {
-                            return 1;
-                        } else if (a.name < b.name) {
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    });
+                    if (reply) {
+                        Object.keys(reply).forEach(function(iden) {
+                            politicians.push(JSON.parse(reply[iden]));
+                        });
+                    }
 
                     res.json({
-                        'politicians': politicians
-                    })
+                        'politicians': sortByName(politicians)
+                    });
                 }
             });
         });
@@ -244,6 +237,74 @@ var start = function() {
                     req.body.iden = req.params.iden
 
                     redis.hset(keys.politicians, req.params.iden, JSON.stringify(req.body), function (err, reply) {
+                        if (err) {
+                            res.sendStatus(500);
+                        } else {
+                            res.json(req.body);
+                        }
+                    });
+                } else {
+                    res.sendStatus(404);
+                }
+            });
+        });
+
+        app.get('/v1/pacs', function(req, res) {
+            redis.hgetall(keys.pacs, function(err, reply) {
+                if (err) {
+                    res.sendStatus(500);
+                } else {
+                    var pacs = [];
+                    if (reply) {
+                        Object.keys(reply).forEach(function(iden) {
+                            pacs.push(JSON.parse(reply[iden]));
+                        });
+                    }
+
+                    res.json({
+                        'pacs': sortByName(pacs)
+                    })
+                }
+            });
+        });
+
+        app.post('/v1/pacs', function(req, res) {
+            var now = Date.now() / 1000;
+            req.body.created = now;
+            req.body.modified = now;
+            req.body.iden = Math.random().toString(36).slice(2);
+
+            redis.hset(keys.pacs, req.body.iden, JSON.stringify(req.body), function (err, reply) {
+                if (err) {
+                    res.sendStatus(500);
+                } else {
+                    res.json(req.body);
+                }
+            });
+        });
+
+        app.get('/v1/pacs/:iden', function(req, res) {
+            getPac(req.params.iden, function(err, pac) {
+                if (err) {
+                    res.sendStatus(500);
+                } else if (pac) {
+                    res.json(pac);
+                } else {
+                    res.sendStatus(404);
+                }
+            });
+        });
+
+        app.post('/v1/pacs/:iden', function(req, res) {
+            getPac(req.params.iden, function(err, pac) {
+                if (err) {
+                    res.sendStatus(500);
+                } else if (pac) {
+                    var now = Date.now() / 1000;
+                    req.body.modified = now;
+                    req.body.iden = req.params.iden
+
+                    redis.hset(keys.pacs, req.params.iden, JSON.stringify(req.body), function (err, reply) {
                         if (err) {
                             res.sendStatus(500);
                         } else {
@@ -299,6 +360,18 @@ var start = function() {
         });
     };
 
+    var getPac = function(iden, callback) {
+        redis.hget(keys.pacs, iden, function(err, reply) {
+            if (err) {
+                callback(err);
+            } else if (reply) {
+                callback(null, JSON.parse(reply));
+            } else {
+                callback(null, null);
+            }
+        });
+    };
+
     var updatePoliticianChronologicalEvents = function(event, callback) {
         if (event.politician) {
             var key = keys.politicianChronologicalEvents(event.politician);
@@ -315,22 +388,36 @@ var start = function() {
                 callback(err, reply);
             });
         }
-    }
+    };
 
     var getEvents = function(idens, callback) {
         var tasks = [];
-        idens.forEach(function(iden) {
-            tasks.push(function(callback) {
-                getEvent(iden, function(err, event) {
-                    callback(err, event);
+        if (idens) {
+            idens.forEach(function(iden) {
+                tasks.push(function(callback) {
+                    getEvent(iden, function(err, event) {
+                        callback(err, event);
+                    });
                 });
             });
-        });
+        }
 
         async.parallel(tasks, function(err, results) {
             callback(err, results);
         });
-    }
+    };
+
+    var sortByName = function(items) {
+        return items.sort(function(a, b) {
+            if (a.name > b.name) {
+                return 1;
+            } else if (a.name < b.name) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
+    };
 };
 
 require('throng')(start, {
