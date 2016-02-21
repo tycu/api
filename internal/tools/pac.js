@@ -40,7 +40,7 @@ window.onload = function() {
             submit.disabled = false;
 
             if (res) {
-                window.location.replace('/internal/pac.html?iden=' + res.iden);
+                window.location.replace('/tools/pac.html?iden=' + res.iden);
             } else {
                 error.textContent = 'Save failed';
             }

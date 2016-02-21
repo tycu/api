@@ -14,10 +14,10 @@ var host = function() {
     }
 };
 
-document.addEventListener("DOMContentLoaded", function(event) {
+document.addEventListener('DOMContentLoaded', function(event) {
     var title = document.createElement('a');
-    title.href = '/internal'
-    title.id = "title"
+    title.href = '/tools'
+    title.id = 'title'
     title.textContent = 'Tally'
 
     var dev = document.createElement('span');
@@ -40,11 +40,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
     var devLabel = document.createElement('label');
     devLabel.htmlFor = devRadio.id
-    devLabel.textContent = 'development';
+    devLabel.textContent = ' development';
     
     var prodLabel = document.createElement('label');
     prodLabel.htmlFor = prodRadio.id
-    prodLabel.textContent = 'production';
+    prodLabel.textContent = ' production';
 
     dev.appendChild(devRadio);
     dev.appendChild(devLabel);
@@ -53,10 +53,19 @@ document.addEventListener("DOMContentLoaded", function(event) {
     prod.appendChild(prodLabel);
 
     var header = document.createElement('div');
-    header.id = "header";
+    header.id = 'header';
     header.appendChild(title);
     header.appendChild(dev);
     header.appendChild(prod);
+
+    var adminKey = document.createElement('input');
+    adminKey.type = 'text';
+    adminKey.placeholder = 'Admin Key';
+    adminKey.style.display = 'inline-block';
+    adminKey.style.width = '300px';
+    adminKey.style.margin = '0 0 0 28px';
+
+    header.appendChild(adminKey);
 
     document.body.insertBefore(header, document.body.firstChild);
 
@@ -78,5 +87,14 @@ document.addEventListener("DOMContentLoaded", function(event) {
             localStorage.server = 'production';
         }
         location.reload();
+    };
+
+    adminKey.value = localStorage.adminKey || '';
+
+    adminKey.onkeypress = function(e) {
+        if (e.keyCode == 13) {
+            localStorage.adminKey = adminKey.value;
+            location.reload();
+        }
     };
 });

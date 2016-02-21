@@ -19,6 +19,7 @@ var get = function(url, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
     xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.adminKey);
 
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
@@ -35,6 +36,7 @@ var del = function(url, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', url, true);
     xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.adminKey);
 
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
@@ -52,6 +54,7 @@ var post = function(url, body, callback) {
     xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.adminKey);
 
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {

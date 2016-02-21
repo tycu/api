@@ -7,7 +7,7 @@ window.onload = function() {
         if (res) {
             res.events.forEach(function(event) {
                 var edit = document.createElement('a');
-                edit.href = '/internal/event.html?iden=' + event.iden;
+                edit.href = '/tools/event.html?iden=' + event.iden;
                 edit.style.fontWeight = 'bold';
                 edit.textContent = 'Edit';
 
