@@ -1,7 +1,6 @@
 {
   "name": "tally-api",
   "version": "1.0.0",
-  "main": "main.js",
   "dependencies": {
     "async": "^1.5.2",
     "body-parser": "^1.15.0",
@@ -13,6 +12,6 @@
     "node": "5.6.0"
   },
   "scripts": {
-    "start": "nf start -w"
+    "start": "node main.js"
   }
 }
