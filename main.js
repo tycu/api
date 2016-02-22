@@ -112,6 +112,10 @@ var start = function() {
 
     });
 
+    app.get('v1/scoreboards/top', function(req, res) {
+
+    });
+
     // -----------------------------------------------------------------------------
 
     app.post('/v1/events', function(req, res) {
