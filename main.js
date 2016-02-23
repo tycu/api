@@ -29,7 +29,7 @@ var start = function() {
 
     // -----------------------------------------------------------------------------
 
-    app.use(require('cors'));
+    app.use(require('cors')());
 
     app.use(require('body-parser').json());
 
