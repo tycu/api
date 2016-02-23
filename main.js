@@ -4,8 +4,14 @@ var port = process.env.PORT || 5000;
 var start = function() {
     var express = require('express');
     var app = express();
-    var redis = require("redis").createClient();
     var async = require("async");
+
+    var redis;
+    if (process.env.REDISCLOUD_URL) {
+        redis = require("redis").createClient(process.env.REDISCLOUD_URL);
+    } else {
+        redis = require("redis").createClient();
+    }
 
     var keys = {};
     keys.events = 'events';
