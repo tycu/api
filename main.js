@@ -29,6 +29,8 @@ var start = function() {
 
     // -----------------------------------------------------------------------------
 
+    app.use(require('cors'));
+
     app.use(require('body-parser').json());
 
     app.use(function(req, res, next) {
