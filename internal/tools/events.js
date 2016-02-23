@@ -18,7 +18,7 @@ window.onload = function() {
                 remove.onclick = function() {
                     var confirmed = confirm('Delete this event?');
                     if (confirmed) {
-                        del('/v1/events/' + event.iden, function(res) {
+                        del(host() + '/v1/events/' + event.iden, function(res) {
                             if (res) {
                                 location.reload();
                             }
