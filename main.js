@@ -8,7 +8,7 @@ var start = function() {
 
     var redis;
     if (process.env.REDISCLOUD_URL) {
-        redis = require("redis").createClient(process.env.REDISCLOUD_URL);
+        redis = require("redis").createClient(process.env.REDISCLOUD_URL, { 'no_ready_check': true });
     } else {
         redis = require("redis").createClient();
     }
