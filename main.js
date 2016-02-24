@@ -29,6 +29,16 @@ var start = function() {
 
     // -----------------------------------------------------------------------------
 
+    if (process.env.NODE_ENV == 'production') {
+        if (req.headers['x-forwarded-proto'] !== 'https') {
+            res.redirect(301, ['https://', req.get('Host'), req.url].join(''));
+        } else {
+            next();
+        }
+    } else {
+        app.use(express.static('internal'));
+    }
+
     app.use(require('cors')());
 
     app.use(require('body-parser').json());
@@ -429,10 +439,6 @@ var start = function() {
             }
         });
     });
-
-    if (process.env.NODE_ENV != 'production') {
-        app.use(express.static('internal'));
-    }
 
     // -----------------------------------------------------------------------------
 
