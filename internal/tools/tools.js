@@ -8,7 +8,7 @@ var space = function() {
 
 var host = function() {
     if (localStorage.server == 'production') {
-        return 'https://tallyus.herokuapp.com';
+        return 'http://api.tally.us';
     } else {
         return 'http://localhost:5000';
     }

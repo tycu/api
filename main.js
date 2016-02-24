@@ -55,6 +55,12 @@ var start = function() {
         next();
     });
 
+    app.get('/', function(req, res) {
+        res.json({
+            'hello_world': true
+        });
+    });
+
     app.get('/v1/events', function(req, res) {
         var start = req.query.start || 0
         redis.lrange(keys.reverseChronologicalEvents, start, 9, function(err, reply) {
