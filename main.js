@@ -69,7 +69,7 @@ var start = function() {
 
     app.get('/', function(req, res) {
         res.json({
-            'hello_world': true
+            'helloWorld': true
         });
     });
 

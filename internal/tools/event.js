@@ -3,6 +3,7 @@
 window.onload = function() {
     var content = document.getElementById('content');
     var politicians = document.getElementById('politicians');
+    var headline = document.getElementById('headline');
     var summary = document.getElementById('summary');
     var submit = document.getElementById('submit');
     var error = document.getElementById('error');
@@ -18,8 +19,9 @@ window.onload = function() {
             if (res) {
                 console.log(res)
                 event = res
-                summary.value = event.summary || ''
                 politicians.value = event.politician && event.politician.iden
+                headline.value = event.headline || ''
+                summary.value = event.summary || ''
                 submit.disabled = false;
             } else {
                 content.innerHTML = 'Unable to load event';
@@ -45,8 +47,9 @@ window.onload = function() {
         submit.disabled = true;
         error.textContent = '';
 
-        event.summary = summary.value;
         event.politician = politicians.value
+        event.headline = headline.value || ''
+        event.summary = summary.value;
 
         var endpoint = '/v1/events'
         if (event.iden) {

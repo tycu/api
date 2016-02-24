@@ -27,7 +27,7 @@ window.onload = function() {
                 };
 
                 var div = document.createElement('div');
-                div.innerHTML = markdown.toHTML(event.summary);
+                div.innerHTML = markdown.toHTML(event.headline || '<no headline>');
                 div.firstChild.appendChild(space());
                 div.firstChild.appendChild(edit);
                 div.firstChild.appendChild(space());
