@@ -95,7 +95,7 @@ var start = function() {
                                         })
                                     } else {
                                         res.sendStatus(500)
-                                        console.error('Entry for ' + userIden + ' missing in ' + keys.userIdenToToken)
+                                        console.error('entry for ' + userIden + ' missing in ' + keys.userIdenToToken)
                                     }
                                 })
                             } else {
@@ -209,7 +209,7 @@ var start = function() {
                 // Add this event to the politician's chronological event list
                 updatePoliticianReverseChronologicalEvents(req.body, function(err, reply) {
                     if (err) {
-                        console.error(err)
+                        console.error('failed to add event ' + req.body.iden + ' to politician ' + req.body.politician + ' reverse chronological events')
                     }
                 })
             }
@@ -251,7 +251,7 @@ var start = function() {
                         // Update the current politician's reverse chronological events list
                         updatePoliticianReverseChronologicalEvents(req.body, function(err, reply) {
                             if (err) {
-                                console.error(err)
+                                console.error('failed to update event ' + req.body.iden + ' to politician ' + req.body.politician + ' reverse chronological events')
                             }
                         })
 
@@ -259,7 +259,7 @@ var start = function() {
                         if (event.politician && event.politician.iden != req.body.politician) {
                             removeFromPoliticianReverseChronologicalEvents(event, function(err, reply) {
                                 if (err) {
-                                    console.error(err)
+                                    console.error('failed to remove event ' + req.body.iden + ' from politician ' + req.body.politician + ' reverse chronological events')
                                 }
                             })
                         }
