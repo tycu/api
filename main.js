@@ -151,8 +151,24 @@ var start = function() {
     })
 
     app.get('/v1/users/me', function(req, res) {
-        // Look up the user that owns the token in the authorization header
-        // return the user
+        redis.hget(keys.tokenToUserIden, req.token, function(err, reply) {
+            if (err) {
+                res.sendStatus(500)
+            } else if (reply) {
+                redis.hget(keys.users, reply, function(err, reply) {
+                    if (err) {
+                        res.sendStatus(500)
+                    } else if (reply) {
+                        res.json(JSON.parse(reply))
+                    } else {
+                        res.sendStatus(500)
+                        console.error('entry for ' + userIden + ' missing in ' + keys.users)
+                    }
+                })
+            } else {
+                res.sendStatus(401)
+            }
+        })
     })
 
     app.get('/v1/events', function(req, res) {
