@@ -1,17 +1,17 @@
-'use strict';
+'use strict'
 
 window.onload = function() {
-    var content = document.getElementById('content');
-    var name = document.getElementById('name');
-    var thumbnailUrl = document.getElementById('thumbnailUrl');
-    var submit = document.getElementById('submit');
-    var error = document.getElementById('error');
+    var content = document.getElementById('content')
+    var name = document.getElementById('name')
+    var thumbnailUrl = document.getElementById('thumbnailUrl')
+    var submit = document.getElementById('submit')
+    var error = document.getElementById('error')
 
-    var politician = {};
+    var politician = {}
 
     if (location.query['iden']) {
-        submit.textContent = 'Update';
-        submit.disabled = true;
+        submit.textContent = 'Update'
+        submit.disabled = true
 
         get(host() + '/v1/politicians/' + location.query['iden'], function(res) {
             if (res) {
@@ -20,18 +20,18 @@ window.onload = function() {
                 document.title = 'Update ' + politician.name + ' - Tally'
                 name.value = politician.name || ''
                 thumbnailUrl.value = politician.thumbnailUrl || ''
-                submit.disabled = false;
+                submit.disabled = false
             } else {
-                content.innerHTML = 'Unable to load politician';
+                content.innerHTML = 'Unable to load politician'
             }
-        });
+        })
     }
 
     submit.onclick = function() {
-        submit.disabled = true;
-        error.textContent = '';
+        submit.disabled = true
+        error.textContent = ''
 
-        politician.name = name.value;
+        politician.name = name.value
         politician.thumbnailUrl = thumbnailUrl.value
 
         var endpoint = '/v1/politicians'
@@ -40,13 +40,13 @@ window.onload = function() {
         }
 
         post(host() + endpoint, politician, function(res) {
-            submit.disabled = false;
+            submit.disabled = false
 
             if (res) {
-                window.location.replace('/tools/politician.html?iden=' + res.iden);
+                window.location.replace('/tools/politician.html?iden=' + res.iden)
             } else {
-                error.textContent = 'Save failed';
+                error.textContent = 'Save failed'
             }
-        });
-    };
-};
+        })
+    }
+}

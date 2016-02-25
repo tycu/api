@@ -1,16 +1,16 @@
-'use strict';
+'use strict'
 
 window.onload = function() {
-    var content = document.getElementById('content');
-    var name = document.getElementById('name');
-    var submit = document.getElementById('submit');
-    var error = document.getElementById('error');
+    var content = document.getElementById('content')
+    var name = document.getElementById('name')
+    var submit = document.getElementById('submit')
+    var error = document.getElementById('error')
 
-    var pac = {};
+    var pac = {}
 
     if (location.query['iden']) {
-        submit.textContent = 'Update';
-        submit.disabled = true;
+        submit.textContent = 'Update'
+        submit.disabled = true
 
         get(host() + '/v1/pacs/' + location.query['iden'], function(res) {
             if (res) {
@@ -18,18 +18,18 @@ window.onload = function() {
                 pac = res
                 document.title = 'Update ' + pac.name + ' - Tally'
                 name.value = pac.name || ''
-                submit.disabled = false;
+                submit.disabled = false
             } else {
-                content.innerHTML = 'Unable to load pac';
+                content.innerHTML = 'Unable to load pac'
             }
-        });
+        })
     }
 
     submit.onclick = function() {
-        submit.disabled = true;
-        error.textContent = '';
+        submit.disabled = true
+        error.textContent = ''
 
-        pac.name = name.value;
+        pac.name = name.value
 
         var endpoint = '/v1/pacs'
         if (pac.iden) {
@@ -37,13 +37,13 @@ window.onload = function() {
         }
 
         post(host() + endpoint, pac, function(res) {
-            submit.disabled = false;
+            submit.disabled = false
 
             if (res) {
-                window.location.replace('/tools/pac.html?iden=' + res.iden);
+                window.location.replace('/tools/pac.html?iden=' + res.iden)
             } else {
-                error.textContent = 'Save failed';
+                error.textContent = 'Save failed'
             }
-        });
-    };
-};
+        })
+    }
+}
