@@ -204,6 +204,11 @@ var start = function() {
         req.body.modified = now
         req.body.iden = generateIden()
 
+        if (!isValidEvent(req.body)) {
+            res.sendStatus(400)
+            return
+        }
+
         var tasks = []
         tasks.push(function(callback) {
             redis.hset(keys.events, req.body.iden, JSON.stringify(req.body), function(err, reply) {
@@ -257,6 +262,11 @@ var start = function() {
                 var now = Date.now() / 1000
                 req.body.modified = now
                 req.body.iden = req.params.iden
+
+                if (!isValidEvent(req.body)) {
+                    res.sendStatus(400)
+                    return
+                }
 
                 redis.hset(keys.events, req.params.iden, JSON.stringify(req.body), function(err, reply) {
                     if (err) {
@@ -362,6 +372,11 @@ var start = function() {
         req.body.modified = now
         req.body.iden = generateIden()
 
+        if (!isValidPolitician(req.body)) {
+            res.sendStatus(400)
+            return
+        }
+
         redis.hset(keys.politicians, req.body.iden, JSON.stringify(req.body), function(err, reply) {
             if (err) {
                 res.sendStatus(500)
@@ -401,6 +416,11 @@ var start = function() {
                 var now = Date.now() / 1000
                 req.body.modified = now
                 req.body.iden = req.params.iden
+
+                if (!isValidPolitician(req.body)) {
+                    res.sendStatus(400)
+                    return
+                }
 
                 redis.hset(keys.politicians, req.params.iden, JSON.stringify(req.body), function(err, reply) {
                     if (err) {
@@ -466,6 +486,11 @@ var start = function() {
         req.body.modified = now
         req.body.iden = generateIden()
 
+        if (!isValidPac(req.body)) {
+            res.sendStatus(400)
+            return
+        }
+
         redis.hset(keys.pacs, req.body.iden, JSON.stringify(req.body), function(err, reply) {
             if (err) {
                 res.sendStatus(500)
@@ -506,6 +531,11 @@ var start = function() {
                 req.body.modified = now
                 req.body.iden = req.params.iden
 
+                if (!isValidPac(req.body)) {
+                    res.sendStatus(400)
+                    return
+                }
+
                 redis.hset(keys.pacs, req.params.iden, JSON.stringify(req.body), function(err, reply) {
                     if (err) {
                         res.sendStatus(500)
@@ -540,7 +570,7 @@ var start = function() {
     // -----------------------------------------------------------------------------
 
     var generateIden = function() {
-        return Math.random().toString(36).slice(2)
+        return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
     }
 
     var getEvent = function(iden, callback) {
@@ -562,6 +592,23 @@ var start = function() {
             } else {
                 callback()
             }
+        })
+    }
+
+    var getEvents = function(idens, callback) {
+        var tasks = []
+        if (idens) {
+            idens.forEach(function(iden) {
+                tasks.push(function(callback) {
+                    getEvent(iden, function(err, event) {
+                        callback(err, event)
+                    })
+                })
+            })
+        }
+
+        async.parallel(tasks, function(err, results) {
+            callback(err, results)
         })
     }
 
@@ -607,21 +654,32 @@ var start = function() {
         }
     }
 
-    var getEvents = function(idens, callback) {
-        var tasks = []
-        if (idens) {
-            idens.forEach(function(iden) {
-                tasks.push(function(callback) {
-                    getEvent(iden, function(err, event) {
-                        callback(err, event)
-                    })
-                })
-            })
-        }
+    var isValidIdentity = function(entity) {
+        return entity.iden && entity.created && entity.modified
+    }
 
-        async.parallel(tasks, function(err, results) {
-            callback(err, results)
-        })
+    var isValidPolitician = function(politician) {
+        if (!isValidIdentity(politician)) {
+            return false
+        }
+        if (politician.thumbnailUrl && politician.thumbnailUrl.indexOf('https://static.tally.us/') != 0) {
+            return false
+        }
+        return true
+    }
+
+    var isValidEvent = function(event) {
+        if (!isValidIdentity(event)) {
+            return false
+        }
+        return true
+    }
+
+    var isValidPac = function(pac) {
+        if (!isValidIdentity(pac)) {
+            return false
+        }
+        return true
     }
 
     var sortByName = function(items) {
