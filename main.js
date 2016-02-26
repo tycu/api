@@ -40,8 +40,6 @@ var start = function() {
                 next()
             }
         })
-    } else {
-        app.use(express.static('internal'))
     }
 
     app.use(require('cors')())
