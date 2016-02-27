@@ -6,7 +6,12 @@ var start = function() {
     var app = express()
     var async = require("async")
     var request = require('request')
-    var crypto = require('crypto');
+    var crypto = require('crypto')
+
+    var gcloud = require('gcloud')({
+        'projectId': 'tally-us',
+        'keyFilename': 'tally-api-service-account.json'
+    })
 
     var redis
     if (process.env.REDISCLOUD_URL) {
@@ -27,6 +32,8 @@ var start = function() {
     keys.userIdenToToken = 'user_iden_to_token'
     keys.facebookUserIdToUserIden = 'facebook_user_id_to_user_iden'
     keys.users = 'users'
+
+    var baseImageUrl = 'https://tally.imgix.net'
 
     var adminKey = 'btxc21dRkHj9aauM9a4lXOxiuNoENtve'
 
@@ -561,6 +568,43 @@ var start = function() {
 
     // -----------------------------------------------------------------------------
 
+    app.post('/internal/upload-image', function(req, res) {
+        if (req.token != adminKey) {
+            res.sendStatus(403)
+            return
+        }
+
+        var fileTypeExtensions = {
+            'image/jpeg': '.jpg',
+            'image/png': '.png'
+        }
+
+        var extension = fileTypeExtensions[req.query.fileType]
+        if (!extension) {
+            res.sendStatus(400)
+            return
+        }
+
+        var fileName = generateIden() + extension
+
+        var bucket = gcloud.storage().bucket('static.tally.us');
+        var file = bucket.file('images/' + fileName);
+
+        req.pipe(file.createWriteStream({
+            'metadata': {
+                'contentType': 'image/jpeg'
+            }
+        })).on('error', function(e) {
+            res.sendStatus(500)
+        }).on('finish', function() {
+            res.status(200).json({
+                'imageUrl': baseImageUrl + '/images/' + fileName
+            })
+        })
+    })
+
+    // -----------------------------------------------------------------------------
+
     app.listen(port, function() {
         console.log('tally-api listening on port ' + port)
     })
@@ -660,7 +704,7 @@ var start = function() {
         if (!isValidIdentity(politician)) {
             return false
         }
-        if (politician.thumbnailUrl && politician.thumbnailUrl.indexOf('https://static.tally.us/') != 0) {
+        if (politician.thumbnailUrl && politician.thumbnailUrl.indexOf(baseImageUrl) != 0) {
             return false
         }
         return true
