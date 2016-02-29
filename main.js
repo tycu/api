@@ -69,26 +69,30 @@ var start = function() {
         if (req.headers.authorization) {
             var parts = req.headers.authorization.split(' ')
             if (parts.length == 2 && parts[0] == 'Bearer') {
-                var token = parts[1]
-                redis.hget(keys.tokenToUserIden, token, function(err, reply) {
-                    if (err) {
-                        res.sendStatus(500)
-                    } else if (reply) {
-                        redis.hget(keys.users, reply, function(err, reply) {
-                            if (err) {
-                                res.sendStatus(500)
-                            } else if (reply) {
-                                req.user = JSON.parse(reply)
-                                next()
-                            } else {
-                                res.sendStatus(500)
-                                console.error('entry for ' + userIden + ' missing in ' + keys.users)
-                            }
-                        })
-                    } else {
-                        res.sendStatus(401)
-                    }
-                })
+                req.token = parts[1]
+                if (req.token == adminKey) {
+                    next()
+                } else {
+                    redis.hget(keys.tokenToUserIden, req.token, function(err, reply) {
+                        if (err) {
+                            res.sendStatus(500)
+                        } else if (reply) {
+                            redis.hget(keys.users, reply, function(err, reply) {
+                                if (err) {
+                                    res.sendStatus(500)
+                                } else if (reply) {
+                                    req.user = JSON.parse(reply)
+                                    next()
+                                } else {
+                                    res.sendStatus(500)
+                                    console.error('entry for ' + userIden + ' missing in ' + keys.users)
+                                }
+                            })
+                        } else {
+                            res.sendStatus(401)
+                        }
+                    })
+                }
             } else {
                 res.sendStatus(401)
             }
