@@ -132,6 +132,7 @@ var start = function() {
                             } else {
                                 var user = {
                                     'iden': generateIden(),
+                                    'facebookId': info.id,
                                     'name': info.name,
                                     'email': info.email
                                 }
