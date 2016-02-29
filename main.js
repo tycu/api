@@ -69,15 +69,37 @@ var start = function() {
         if (req.headers.authorization) {
             var parts = req.headers.authorization.split(' ')
             if (parts.length == 2 && parts[0] == 'Bearer') {
-                req.token = parts[1]
+                var token = parts[1]
+                redis.hget(keys.tokenToUserIden, token, function(err, reply) {
+                    if (err) {
+                        res.sendStatus(500)
+                    } else if (reply) {
+                        redis.hget(keys.users, reply, function(err, reply) {
+                            if (err) {
+                                res.sendStatus(500)
+                            } else if (reply) {
+                                req.user = JSON.parse(reply)
+                                next()
+                            } else {
+                                res.sendStatus(500)
+                                console.error('entry for ' + userIden + ' missing in ' + keys.users)
+                            }
+                        })
+                    } else {
+                        res.sendStatus(401)
+                    }
+                })
+            } else {
+                res.sendStatus(401)
             }
+        } else {
+            next()
         }
-        next()
     })
 
     app.get('/', function(req, res) {
         res.json({
-            'helloWorld': true
+            'revitalizingDemocracy': true
         })
     })
 
@@ -156,24 +178,7 @@ var start = function() {
     })
 
     app.get('/v1/users/me', function(req, res) {
-        redis.hget(keys.tokenToUserIden, req.token, function(err, reply) {
-            if (err) {
-                res.sendStatus(500)
-            } else if (reply) {
-                redis.hget(keys.users, reply, function(err, reply) {
-                    if (err) {
-                        res.sendStatus(500)
-                    } else if (reply) {
-                        res.json(JSON.parse(reply))
-                    } else {
-                        res.sendStatus(500)
-                        console.error('entry for ' + userIden + ' missing in ' + keys.users)
-                    }
-                })
-            } else {
-                res.sendStatus(401)
-            }
-        })
+        res.json(req.user)
     })
 
     app.get('/v1/events', function(req, res) {
@@ -562,8 +567,16 @@ var start = function() {
 
     })
 
-    app.get('v1/scoreboards/top', function(req, res) {
+    app.get('/v1/scoreboards/weekly', function(req, res) {
+        res.json({})
+    })
 
+    app.get('/v1/scoreboards/monthly', function(req, res) {
+        res.json({})
+    })
+
+    app.get('/v1/scoreboards/all-time', function(req, res) {
+        res.json({})
     })
 
     // -----------------------------------------------------------------------------
