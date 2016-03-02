@@ -111,7 +111,21 @@ module.exports = function(app, redis) {
                     'source': req.body.cardToken,
                     'description': req.user.iden,
                 }, function(err, customer) {
-                    redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
+                    req.user.hasCard = true
+
+                    var tasks = []
+                    tasks.push(function(callback) {
+                        redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
+                            callback(err, reply)
+                        })
+                    })
+                    tasks.push(function(callback) {
+                        redis.hset(redisKeys.users, req.user.iden, JSON.stringify(req.user), function(err, reply) {
+                            callback(err, reply)
+                        })
+                    })
+
+                    async.parallel(tasks, function(err, results) {
                         if (err) {
                             res.sendStatus(500)
                             console.error(err)
