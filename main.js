@@ -47,14 +47,18 @@ var start = function() {
     // If the authorization header is present, verify the token and set req.user
     app.use(function(req, res, next) {
         if (!req.headers.authorization) {
-            next()
+            if (req.url == '/v1/authenticate') {
+                next()
+            } else {
+                res.sendStatus(401)
+            }
             return
         }
 
         var parts = req.headers.authorization.split(' ')
         if (parts.length == 2 && parts[0] == 'Bearer') {
             var token = parts[1]
-            redis.hget(redisKeys.tokenToUserIden, token, function(err, reply) {
+            redis.hget(redisKeys.accessTokenToUserIden, token, function(err, reply) {
                 if (err) {
                     res.sendStatus(500)
                     console.error(err)

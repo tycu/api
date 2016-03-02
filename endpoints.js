@@ -4,6 +4,7 @@ var async = require("async")
 var request = require('request')
 var crypto = require('crypto')
 var redisKeys = require('./redis-keys')
+var stripe = require('stripe')('sk_test_rtBOxo0prIIbfVocTi4l1gPC')
 
 module.exports = function(app, redis) {
     app.get('/', function(req, res) {
@@ -13,7 +14,7 @@ module.exports = function(app, redis) {
     })
 
     app.post('/v1/authenticate', function(req, res) {
-        getFacebookUserInfo(req.body.accessToken, function(valid, info) {
+        getFacebookUserInfo(req.body.facebookToken, function(valid, info) {
             if (valid && info) {
                 redis.hget(redisKeys.facebookUserIdToUserIden, info.id, function(err, reply) {
                     if (err) {
@@ -21,17 +22,17 @@ module.exports = function(app, redis) {
                         console.error(err)
                     } else if (reply) {
                         var userIden = reply
-                        redis.hget(redisKeys.userIdenToToken, userIden, function(err, reply) {
+                        redis.hget(redisKeys.userIdenToAccessToken, userIden, function(err, reply) {
                             if (err) {
                                 res.sendStatus(500)
                                 console.error(err)
                             } else if (reply) {
                                 res.json({
-                                    'token': reply
+                                    'accessToken': reply
                                 })
                             } else {
                                 res.sendStatus(500)
-                                console.error('entry for ' + userIden + ' missing in ' + redisKeys.userIdenToToken)
+                                console.error('entry for ' + userIden + ' missing in ' + redisKeys.userIdenToAccessToken)
                             }
                         })
                     } else {
@@ -42,7 +43,7 @@ module.exports = function(app, redis) {
                             'email': info.email
                         }
 
-                        var token = crypto.randomBytes(64).toString('hex');
+                        var accessToken = crypto.randomBytes(64).toString('hex')
 
                         var tasks = []
                         tasks.push(function(callback) {
@@ -51,12 +52,12 @@ module.exports = function(app, redis) {
                             })
                         })
                         tasks.push(function(callback) {
-                            redis.hset(redisKeys.userIdenToToken, user.iden, token, function(err, reply) {
+                            redis.hset(redisKeys.userIdenToAccessToken, user.iden, accessToken, function(err, reply) {
                                 callback(err, reply)
                             })
                         })
                         tasks.push(function(callback) {
-                            redis.hset(redisKeys.tokenToUserIden, token, user.iden, function(err, reply) {
+                            redis.hset(redisKeys.accessTokenToUserIden, accessToken, user.iden, function(err, reply) {
                                 callback(err, reply)
                             })
                         })
@@ -72,7 +73,7 @@ module.exports = function(app, redis) {
                                 console.error(err)
                             } else {
                                 res.json({
-                                    'token': token
+                                    'accessToken': accessToken
                                 })
                             }
                         })
@@ -84,21 +85,53 @@ module.exports = function(app, redis) {
         })
     })
 
-    app.post('/v1/get-profile', function(req, res) {
-        var user = req.user
-        user.donations = []
+    app.post('/v1/set-card', function(req, res) {
+        if (!req.body.cardToken) {
+            res.sendStatus(400)
+            return
+        }
 
-        res.json(user)
+        redis.hget(redisKeys.userIdenToStripeCustomerId, req.user.iden, function(err, reply) {
+            if (err) {
+                res.sendStatus(500)
+                console.error(err)
+            } else if (reply) {
+                stripe.customers.update(reply, {
+                    'source': req.body.cardToken
+                }, function(err, customer) {
+                    if (err) {
+                        res.sendStatus(500)
+                        console.error(err)
+                    } else {
+                        res.sendStatus(200)
+                    }
+                })
+            } else {
+                stripe.customers.create({
+                    'source': req.body.cardToken,
+                    'description': req.user.iden,
+                }, function(err, customer) {
+                    redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
+                        if (err) {
+                            res.sendStatus(500)
+                            console.error(err)
+                        } else {
+                            res.sendStatus(200)
+                        }
+                    })
+                })
+            }
+        })
     })
 }
 
-var getFacebookUserInfo = function(accessToken, callback) {
+var getFacebookUserInfo = function(facebookToken, callback) {
     var appIdAndSecret = '980119325404337|55224c68bd1df55da4bcac85dc879906'
-    var url = 'https://graph.facebook.com/v2.5/debug_token?access_token=' + appIdAndSecret + '&input_token=' + accessToken
+    var url = 'https://graph.facebook.com/v2.5/debug_token?access_token=' + appIdAndSecret + '&input_token=' + facebookToken
     request.get(url, function(err, res, body) {
         if (res.statusCode == 200) {
             if (JSON.parse(body).data.is_valid) {
-                var url = 'https://graph.facebook.com/v2.5/me?fields=id,name,email&access_token=' + accessToken
+                var url = 'https://graph.facebook.com/v2.5/me?fields=id,name,email&access_token=' + facebookToken
                 request.get(url, function(err, res, body) {
                     if (res.statusCode == 200) {
                         callback(true, JSON.parse(body))

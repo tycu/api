@@ -8,6 +8,7 @@
     "express": "^4.13.4",
     "redis": "^2.4.2",
     "request": "^2.69.0",
+    "stripe": "^4.4.0",
     "throng": "^2.0.1"
   },
   "engines": {
