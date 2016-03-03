@@ -5,8 +5,11 @@ var request = require('request')
 var crypto = require('crypto')
 var redisKeys = require('./redis-keys')
 var stripe = require('stripe')('sk_test_rtBOxo0prIIbfVocTi4l1gPC')
+var sendgrid  = require('sendgrid')('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')
 
 module.exports = function(app, redis) {
+    var entities = require('./entities')(redis)
+
     app.get('/', function(req, res) {
         res.json({
             'revitalizingDemocracy': true
@@ -36,11 +39,15 @@ module.exports = function(app, redis) {
                             }
                         })
                     } else {
+                        var now = Date.now() / 1000
+
                         var user = {
                             'iden': generateIden(),
                             'facebookId': info.id,
                             'name': info.name,
-                            'email': info.email
+                            'email': info.email,
+                            'created': now,
+                            'modified': now
                         }
 
                         var accessToken = crypto.randomBytes(64).toString('hex')
@@ -75,6 +82,8 @@ module.exports = function(app, redis) {
                                 res.json({
                                     'accessToken': accessToken
                                 })
+
+                                // Sendgrid send sign up email
                             }
                         })
                     }
@@ -93,8 +102,46 @@ module.exports = function(app, redis) {
             })
         })
         tasks.push(function(callback) {
-            listDonations(req.user.iden, function(err, donations) {
-                callback(err, donations)
+            entities.listUserDonations(req.user.iden, function(err, donations) {
+                if (err) {
+                    callback(err)
+                } else {
+                    var tasks = []
+                    donations.forEach(function(donation) {
+                        tasks.push(function(callback) {
+                            entities.getEvent(donation.event, function(err, event) {
+                                if (err) {
+                                    callback(err)
+                                } else {
+                                    delete event.supportPacs
+                                    delete event.opposePacs
+                                    
+                                    donation.event = event
+
+                                    entities.getPolitician(event.politician, function(err, politician) {
+                                        event.politician = politician
+                                        callback(err)
+                                    })
+                                }
+                            })
+                        })
+                        tasks.push(function(callback) {
+                            entities.getPac(donation.pac, function(err, pac) {
+                                donation.pac = pac
+                                callback(err)
+                            })
+                        })
+                    })
+
+                    async.parallel(tasks, function(err, results) {
+                        if (err) {
+                            callback(err)
+                        } else {
+                            console.log(donations)
+                            callback(err, donations)
+                        }
+                    })
+                }
             })
         })
 
@@ -128,6 +175,9 @@ module.exports = function(app, redis) {
         if (req.body.cityStateZip) {
             req.user.cityStateZip = req.body.cityStateZip
         }
+
+        var now = Date.now() / 1000
+        req.user.modified = now
 
         redis.hset(redisKeys.users, req.user.iden, JSON.stringify(req.user), function(err, reply) {
             if (err) {
@@ -163,7 +213,9 @@ module.exports = function(app, redis) {
             } else {
                 stripe.customers.create({
                     'source': req.body.cardToken,
-                    'description': req.user.iden,
+                    'metadata': {
+                        'userIden': req.user.iden
+                    }
                 }, function(err, customer) {
                     redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
                         if (err) {
@@ -178,36 +230,140 @@ module.exports = function(app, redis) {
         })
     })
 
-    var listDonations = function(userIden, callback) {
-        redis.lrange(redisKeys.userReverseChronologicalDonations(userIden), 0, -1, function(err, reply) {
+    app.post('/v1/create-donation', function(req, res) {
+        if (!req.body.eventIden || !req.body.pacIden || !req.body.amount) {
+            res.sendStatus(400)
+            return
+        }
+
+        var tasks = []
+        tasks.push(function(callback) {
+            redis.hget(redisKeys.userIdenToStripeCustomerId, req.user.iden, function(err, reply) {
+                callback(err, reply)
+            })
+        })
+        tasks.push(function(callback) {
+            entities.getEvent(req.body.eventIden, function(err, event) {
+                callback(err, event)
+            })
+        })
+        tasks.push(function(callback) {
+            entities.getPac(req.body.pacIden, function(err, pac) {
+                callback(err, pac)
+            })
+        })
+
+        async.parallel(tasks, function(err, results) {
             if (err) {
-                callback(err)
+                res.sendStatus(500)
+                console.error(err)
             } else {
-                var tasks = []
-                reply.forEach(function(iden) {
-                    tasks.push(function(callback) {
-                        redis.hget(redisKeys.donations, iden, function(err, reply) {
+                var customerId = results[0]
+                if (!customerId) {
+                    res.sendStatus(400)
+                    return
+                }
+
+                var event = results[1]
+                if (!event) {
+                    res.sendStatus(400)
+                    return
+                }
+
+                var pac = results[2]
+                if (!pac) {
+                    res.sendStatus(400)
+                    return
+                }
+
+                var support
+                if (event.supportPacs.indexOf(pac.iden) != -1) {
+                    support = true
+                } else if (event.opposePacs.indexOf(pac.iden) != -1) {
+                    support = false
+                } else {
+                    res.sendStatus(400)
+                    return
+                }
+
+                // Ensure the user hasn't already donated to this event
+                redis.hget(redisKeys.eventIdenToUserDonationIden(req.user.iden), event.iden, function(err, reply) {
+                    if (err) {
+                        console.error(err)
+                        res.sendStatus(500)
+                    } else if (reply) {
+                        res.sendStatus(400)
+                    } else {
+                        stripe.charges.create({
+                            'amount': req.body.amount * 100, // Amount is in dollars, Strip API is in cents
+                            'currency': 'usd',
+                            'customer': customerId,
+                            'metadata': {
+                                'eventIden': event.iden,
+                                'pacIden': pac.iden,
+                                'support': support
+                            }
+                        }, function(err, charge) {
                             if (err) {
-                                callback(err)
-                            } else if (reply) {
-                                callback(null, JSON.parse(reply))
+
+
+
+
+                                console.error(err)
+                                res.sendStatus(400)
                             } else {
-                                callback()
+                                var now = Date.now() / 1000
+
+                                var donation = {
+                                    'iden': generateIden(),
+                                    'created': now,
+                                    'modified': now,
+                                    'chargeId': charge.id,
+                                    'amount': req.body.amount,
+                                    'event': event.iden,
+                                    'pac': pac.iden,
+                                    'support': support
+                                }
+
+                                var tasks = []
+                                tasks.push(function(callback) {
+                                    redis.hset(redisKeys.donations, donation.iden, JSON.stringify(donation), function(err, reply) {
+                                        callback(err, reply)
+                                    })
+                                })
+                                tasks.push(function(callback) {
+                                    redis.lpush(redisKeys.userReverseChronologicalDonations(req.user.iden), donation.iden, function(err, reply) {
+                                        callback(err, reply)
+                                    })
+                                })
+                                tasks.push(function(callback) {
+                                    redis.hset(redisKeys.eventIdenToUserDonationIden(req.user.iden), event.iden, donation.iden, function(err, reply) {
+                                        callback(err, reply)
+                                    })
+                                })
+                                // tasks.push(function(callback) {
+                                // })
+                                // tasks.push(function(callback) {
+                                // })
+                                // tasks.push(function(callback) {
+                                // })
+                                // tasks.push(function(callback) {
+                                // })
+
+                                async.series(tasks, function(err, results) {
+                                    if (err) {
+                                        console.error(err)
+                                    }
+
+                                    res.sendStatus(200)
+                                })
                             }
                         })
-                    })
-                })
-
-                async.series(tasks, function(err, results) {
-                    if (err) {
-                        callback(err)
-                    } else {
-                        callback(null, results)
                     }
                 })
             }
         })
-    }
+    })
 }
 
 var generateIden = function() {
