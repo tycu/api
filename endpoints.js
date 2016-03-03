@@ -85,6 +85,33 @@ module.exports = function(app, redis) {
         })
     })
 
+    app.post('/v1/get-user-data', function(req, res) {
+        var tasks = []
+        tasks.push(function(callback) {
+            redis.hget(redisKeys.userIdenToStripeCustomerId, req.user.iden, function(err, reply) {
+                callback(err, reply)
+            })
+        })
+        tasks.push(function(callback) {
+            listDonations(req.user.iden, function(err, donations) {
+                callback(err, donations)
+            })
+        })
+
+        async.parallel(tasks, function(err, results) {
+            if (err) {
+                res.sendStatus(500)
+                console.error(err)
+            } else {
+                res.json({
+                    'profile': req.user,
+                    'chargeable': !!results[0],
+                    'donations': results[1]
+                })
+            }
+        })
+    })
+
     app.post('/v1/update-profile', function(req, res) {
         if (req.body.name) {
             req.user.name = req.body.name
@@ -138,21 +165,7 @@ module.exports = function(app, redis) {
                     'source': req.body.cardToken,
                     'description': req.user.iden,
                 }, function(err, customer) {
-                    req.user.hasCard = true
-
-                    var tasks = []
-                    tasks.push(function(callback) {
-                        redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
-                            callback(err, reply)
-                        })
-                    })
-                    tasks.push(function(callback) {
-                        redis.hset(redisKeys.users, req.user.iden, JSON.stringify(req.user), function(err, reply) {
-                            callback(err, reply)
-                        })
-                    })
-
-                    async.parallel(tasks, function(err, results) {
+                    redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
                         if (err) {
                             res.sendStatus(500)
                             console.error(err)
@@ -164,6 +177,41 @@ module.exports = function(app, redis) {
             }
         })
     })
+
+    var listDonations = function(userIden, callback) {
+        redis.lrange(redisKeys.userReverseChronologicalDonations(userIden), 0, -1, function(err, reply) {
+            if (err) {
+                callback(err)
+            } else {
+                var tasks = []
+                reply.forEach(function(iden) {
+                    tasks.push(function(callback) {
+                        redis.hget(redisKeys.donations, iden, function(err, reply) {
+                            if (err) {
+                                callback(err)
+                            } else if (reply) {
+                                callback(null, JSON.parse(reply))
+                            } else {
+                                callback()
+                            }
+                        })
+                    })
+                })
+
+                async.series(tasks, function(err, results) {
+                    if (err) {
+                        callback(err)
+                    } else {
+                        callback(null, results)
+                    }
+                })
+            }
+        })
+    }
+}
+
+var generateIden = function() {
+    return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
 }
 
 var getFacebookUserInfo = function(facebookToken, callback) {
@@ -185,8 +233,4 @@ var getFacebookUserInfo = function(facebookToken, callback) {
         }
         callback(false)
     })
-}
-
-var generateIden = function() {
-    return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
 }
