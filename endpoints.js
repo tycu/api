@@ -85,6 +85,33 @@ module.exports = function(app, redis) {
         })
     })
 
+    app.post('/v1/update-profile', function(req, res) {
+        if (req.body.name) {
+            req.user.name = req.body.name
+        }
+        if (req.body.occupation) {
+            req.user.occupation = req.body.occupation
+        }
+        if (req.body.employer) {
+            req.user.employer = req.body.employer
+        }
+        if (req.body.streetAddress) {
+            req.user.streetAddress = req.body.streetAddress
+        }
+        if (req.body.cityStateZip) {
+            req.user.cityStateZip = req.body.cityStateZip
+        }
+
+        redis.hset(redisKeys.users, req.user.iden, JSON.stringify(req.user), function(err, reply) {
+            if (err) {
+                res.sendStatus(500)
+                console.error(err)
+            } else {
+                res.sendStatus(200)
+            }
+        })
+    })
+
     app.post('/v1/set-card', function(req, res) {
         if (!req.body.cardToken) {
             res.sendStatus(400)
