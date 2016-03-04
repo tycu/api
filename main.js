@@ -47,7 +47,7 @@ var start = function() {
     // If the authorization header is present, verify the token and set req.user
     app.use(function(req, res, next) {
         if (!req.headers.authorization) {
-            if (req.url == '/v1/authenticate') {
+            if (req.url == '/' || req.url == '/v1/authenticate') {
                 next()
             } else {
                 res.sendStatus(401)
