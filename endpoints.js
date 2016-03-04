@@ -83,7 +83,7 @@ module.exports = function(app, redis) {
                                     'accessToken': accessToken
                                 })
 
-                                // Sendgrid send sign up email
+                                // Send sign up email
                             }
                         })
                     }
@@ -115,7 +115,7 @@ module.exports = function(app, redis) {
                                 } else {
                                     delete event.supportPacs
                                     delete event.opposePacs
-                                    
+
                                     donation.event = event
 
                                     entities.getPolitician(event.politician, function(err, politician) {
@@ -137,7 +137,6 @@ module.exports = function(app, redis) {
                         if (err) {
                             callback(err)
                         } else {
-                            console.log(donations)
                             callback(err, donations)
                         }
                     })
@@ -204,7 +203,7 @@ module.exports = function(app, redis) {
                     'source': req.body.cardToken
                 }, function(err, customer) {
                     if (err) {
-                        res.sendStatus(500)
+                        res.sendStatus(400)
                         console.error(err)
                     } else {
                         res.sendStatus(200)
@@ -219,7 +218,7 @@ module.exports = function(app, redis) {
                 }, function(err, customer) {
                     redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
                         if (err) {
-                            res.sendStatus(500)
+                            res.sendStatus(400)
                             console.error(err)
                         } else {
                             res.sendStatus(200)
@@ -305,10 +304,6 @@ module.exports = function(app, redis) {
                             }
                         }, function(err, charge) {
                             if (err) {
-
-
-
-
                                 console.error(err)
                                 res.sendStatus(400)
                             } else {
@@ -328,33 +323,47 @@ module.exports = function(app, redis) {
                                 var tasks = []
                                 tasks.push(function(callback) {
                                     redis.hset(redisKeys.donations, donation.iden, JSON.stringify(donation), function(err, reply) {
-                                        callback(err, reply)
+                                        if (err) {
+                                            console.error(err)
+                                        }
+                                        callback()
                                     })
                                 })
                                 tasks.push(function(callback) {
                                     redis.lpush(redisKeys.userReverseChronologicalDonations(req.user.iden), donation.iden, function(err, reply) {
-                                        callback(err, reply)
+                                        if (err) {
+                                            console.error(err)
+                                        }
+                                        callback()
                                     })
                                 })
                                 tasks.push(function(callback) {
                                     redis.hset(redisKeys.eventIdenToUserDonationIden(req.user.iden), event.iden, donation.iden, function(err, reply) {
-                                        callback(err, reply)
+                                        if (err) {
+                                            console.error(err)
+                                        }
+                                        callback()
                                     })
                                 })
-                                // tasks.push(function(callback) {
-                                // })
-                                // tasks.push(function(callback) {
-                                // })
-                                // tasks.push(function(callback) {
-                                // })
-                                // tasks.push(function(callback) {
-                                // })
+                                tasks.push(function(callback) {
+                                    var key = support ? 'support' : 'oppose'
+                                    redis.hincrby(redisKeys.eventDonationTotals(event.iden), key, donation.amount, function(err, reply) {
+                                        if (err) {
+                                            console.error(err)
+                                        }
+                                        callback()
+                                    })
+                                })
+                                tasks.push(function(callback) {
+                                    redis.incrby(redisKeys.donationsSum, donation.amount, function(err, reply) {
+                                        if (err) {
+                                            console.error(err)
+                                        }
+                                        callback()
+                                    })
+                                })
 
                                 async.series(tasks, function(err, results) {
-                                    if (err) {
-                                        console.error(err)
-                                    }
-
                                     res.sendStatus(200)
                                 })
                             }

@@ -11,10 +11,14 @@ module.exports = {
     'facebookUserIdToUserIden': 'facebook_user_id_to_user_iden',
     'userIdenToStripeCustomerId': 'user_iden_to_stripe_customer_id',
     'donations': 'donations',
+    'donationsSum': 'donations_sum',
     'eventIdenToUserDonationIden': function(userIden) {
         return 'user_' + userIden + '_event_iden_to_donation_iden'
     },
     'userReverseChronologicalDonations': function(userIden) {
         return 'user_' + userIden + '_reverse_chronological_donations'
+    },
+    'eventDonationTotals': function(eventIden) {
+        return 'event_' + eventIden + '_donation_totals'
     }
 }
