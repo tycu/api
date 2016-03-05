@@ -20,5 +20,11 @@ module.exports = {
     },
     'eventDonationTotals': function(eventIden) {
         return 'event_' + eventIden + '_donation_totals'
+    },
+    'politicianDonationTotals': function(politicianIden) {
+        return 'politician_' + politicianIden + '_donation_totals'
+    },
+    'userDonationsSum': function(userIden) {
+        return 'user_' + userIden + '_donation_sum'
     }
 }

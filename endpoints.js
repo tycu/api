@@ -355,7 +355,24 @@ module.exports = function(app, redis) {
                                     })
                                 })
                                 tasks.push(function(callback) {
+                                    var key = support ? 'support' : 'oppose'
+                                    redis.hincrby(redisKeys.politicianDonationTotals(event.politician), key, donation.amount, function(err, reply) {
+                                        if (err) {
+                                            console.error(err)
+                                        }
+                                        callback()
+                                    })
+                                })
+                                tasks.push(function(callback) {
                                     redis.incrby(redisKeys.donationsSum, donation.amount, function(err, reply) {
+                                        if (err) {
+                                            console.error(err)
+                                        }
+                                        callback()
+                                    })
+                                })
+                                tasks.push(function(callback) {
+                                    redis.incrby(redisKeys.userDonationsSum(req.user.iden), donation.amount, function(err, reply) {
                                         if (err) {
                                             console.error(err)
                                         }
