@@ -82,8 +82,6 @@ module.exports = function(app, redis) {
                                 res.json({
                                     'accessToken': accessToken
                                 })
-
-                                // Send sign up email
                             }
                         })
                     }
