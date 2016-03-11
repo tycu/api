@@ -100,21 +100,21 @@ module.exports = function(app, redis) {
             })
         })
         tasks.push(function(callback) {
-            entities.listUserDonations(req.user.iden, function(err, donations) {
+            entities.listUserContributions(req.user.iden, function(err, contributions) {
                 if (err) {
                     callback(err)
                 } else {
                     var tasks = []
-                    donations.forEach(function(donation) {
+                    contributions.forEach(function(contribution) {
                         tasks.push(function(callback) {
-                            entities.getEvent(donation.event, function(err, event) {
+                            entities.getEvent(contribution.event, function(err, event) {
                                 if (err) {
                                     callback(err)
                                 } else {
                                     delete event.supportPacs
                                     delete event.opposePacs
 
-                                    donation.event = event
+                                    contribution.event = event
 
                                     entities.getPolitician(event.politician, function(err, politician) {
                                         event.politician = politician
@@ -124,8 +124,8 @@ module.exports = function(app, redis) {
                             })
                         })
                         tasks.push(function(callback) {
-                            entities.getPac(donation.pac, function(err, pac) {
-                                donation.pac = pac
+                            entities.getPac(contribution.pac, function(err, pac) {
+                                contribution.pac = pac
                                 callback(err)
                             })
                         })
@@ -135,7 +135,7 @@ module.exports = function(app, redis) {
                         if (err) {
                             callback(err)
                         } else {
-                            callback(err, donations)
+                            callback(err, contributions)
                         }
                     })
                 }
@@ -150,7 +150,7 @@ module.exports = function(app, redis) {
                 res.json({
                     'profile': req.user,
                     'chargeable': !!results[0],
-                    'donations': results[1]
+                    'contributions': results[1]
                 })
             }
         })
@@ -227,7 +227,7 @@ module.exports = function(app, redis) {
         })
     })
 
-    app.post('/v1/create-donation', function(req, res) {
+    app.post('/v1/create-contribution', function(req, res) {
         if (!req.body.eventIden || !req.body.pacIden || !req.body.amount) {
             res.sendStatus(400)
             return
@@ -283,105 +283,96 @@ module.exports = function(app, redis) {
                     return
                 }
 
-                // Ensure the user hasn't already donated to this event
-                redis.hget(redisKeys.eventIdenToUserDonationIden(req.user.iden), event.iden, function(err, reply) {
+                
+                stripe.charges.create({
+                    'amount': req.body.amount * 100, // Amount is in dollars, Strip API is in cents
+                    'currency': 'usd',
+                    'customer': customerId,
+                    'metadata': {
+                        'eventIden': event.iden,
+                        'pacIden': pac.iden,
+                        'support': support
+                    }
+                }, function(err, charge) {
                     if (err) {
                         console.error(err)
-                        res.sendStatus(500)
-                    } else if (reply) {
                         res.sendStatus(400)
                     } else {
-                        stripe.charges.create({
-                            'amount': req.body.amount * 100, // Amount is in dollars, Strip API is in cents
-                            'currency': 'usd',
-                            'customer': customerId,
-                            'metadata': {
-                                'eventIden': event.iden,
-                                'pacIden': pac.iden,
-                                'support': support
-                            }
-                        }, function(err, charge) {
-                            if (err) {
-                                console.error(err)
-                                res.sendStatus(400)
-                            } else {
-                                var now = Date.now() / 1000
+                        var now = Date.now() / 1000
 
-                                var donation = {
-                                    'iden': generateIden(),
-                                    'created': now,
-                                    'modified': now,
-                                    'chargeId': charge.id,
-                                    'amount': req.body.amount,
-                                    'event': event.iden,
-                                    'pac': pac.iden,
-                                    'support': support
+                        var contribution = {
+                            'iden': generateIden(),
+                            'created': now,
+                            'modified': now,
+                            'chargeId': charge.id,
+                            'amount': req.body.amount,
+                            'event': event.iden,
+                            'pac': pac.iden,
+                            'support': support
+                        }
+
+                        var tasks = []
+                        tasks.push(function(callback) {
+                            redis.hset(redisKeys.contributions, contribution.iden, JSON.stringify(contribution), function(err, reply) {
+                                if (err) {
+                                    console.error(err)
                                 }
+                                callback()
+                            })
+                        })
+                        tasks.push(function(callback) {
+                            redis.lpush(redisKeys.userReverseChronologicalContributions(req.user.iden), contribution.iden, function(err, reply) {
+                                if (err) {
+                                    console.error(err)
+                                }
+                                callback()
+                            })
+                        })
+                        tasks.push(function(callback) {
+                            redis.hset(redisKeys.eventIdenToUserContributionIden(req.user.iden), event.iden, contribution.iden, function(err, reply) {
+                                if (err) {
+                                    console.error(err)
+                                }
+                                callback()
+                            })
+                        })
+                        tasks.push(function(callback) {
+                            var key = support ? 'support' : 'oppose'
+                            redis.hincrby(redisKeys.eventContributionTotals(event.iden), key, contribution.amount, function(err, reply) {
+                                if (err) {
+                                    console.error(err)
+                                }
+                                callback()
+                            })
+                        })
+                        tasks.push(function(callback) {
+                            var key = support ? 'support' : 'oppose'
+                            redis.hincrby(redisKeys.politicianContributionTotals(event.politician), key, contribution.amount, function(err, reply) {
+                                if (err) {
+                                    console.error(err)
+                                }
+                                callback()
+                            })
+                        })
+                        tasks.push(function(callback) {
+                            redis.incrby(redisKeys.contributionsSum, contribution.amount, function(err, reply) {
+                                if (err) {
+                                    console.error(err)
+                                }
+                                callback()
+                            })
+                        })
+                        tasks.push(function(callback) {
+                            redis.incrby(redisKeys.userContributionsSum(req.user.iden), contribution.amount, function(err, reply) {
+                                if (err) {
+                                    console.error(err)
+                                }
+                                callback()
+                            })
+                        })
 
-                                var tasks = []
-                                tasks.push(function(callback) {
-                                    redis.hset(redisKeys.donations, donation.iden, JSON.stringify(donation), function(err, reply) {
-                                        if (err) {
-                                            console.error(err)
-                                        }
-                                        callback()
-                                    })
-                                })
-                                tasks.push(function(callback) {
-                                    redis.lpush(redisKeys.userReverseChronologicalDonations(req.user.iden), donation.iden, function(err, reply) {
-                                        if (err) {
-                                            console.error(err)
-                                        }
-                                        callback()
-                                    })
-                                })
-                                tasks.push(function(callback) {
-                                    redis.hset(redisKeys.eventIdenToUserDonationIden(req.user.iden), event.iden, donation.iden, function(err, reply) {
-                                        if (err) {
-                                            console.error(err)
-                                        }
-                                        callback()
-                                    })
-                                })
-                                tasks.push(function(callback) {
-                                    var key = support ? 'support' : 'oppose'
-                                    redis.hincrby(redisKeys.eventDonationTotals(event.iden), key, donation.amount, function(err, reply) {
-                                        if (err) {
-                                            console.error(err)
-                                        }
-                                        callback()
-                                    })
-                                })
-                                tasks.push(function(callback) {
-                                    var key = support ? 'support' : 'oppose'
-                                    redis.hincrby(redisKeys.politicianDonationTotals(event.politician), key, donation.amount, function(err, reply) {
-                                        if (err) {
-                                            console.error(err)
-                                        }
-                                        callback()
-                                    })
-                                })
-                                tasks.push(function(callback) {
-                                    redis.incrby(redisKeys.donationsSum, donation.amount, function(err, reply) {
-                                        if (err) {
-                                            console.error(err)
-                                        }
-                                        callback()
-                                    })
-                                })
-                                tasks.push(function(callback) {
-                                    redis.incrby(redisKeys.userDonationsSum(req.user.iden), donation.amount, function(err, reply) {
-                                        if (err) {
-                                            console.error(err)
-                                        }
-                                        callback()
-                                    })
-                                })
-
-                                async.series(tasks, function(err, results) {
-                                    res.sendStatus(200)
-                                })
-                            }
+                        async.series(tasks, function(err, results) {
+                            res.sendStatus(200)
                         })
                     }
                 })
