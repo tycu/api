@@ -1,0 +1,4 @@
+
+# Command line access to production Redis database
+
+    redis-cli -h pub-redis-12675.us-east-1-4.3.ec2.garantiadata.com -p 12675 -a 35CTGBTHuclyEFNu
