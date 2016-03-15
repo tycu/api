@@ -101,44 +101,7 @@ module.exports = function(app, redis) {
         })
         tasks.push(function(callback) {
             entities.listUserContributions(req.user.iden, function(err, contributions) {
-                if (err) {
-                    callback(err)
-                } else {
-                    var tasks = []
-                    contributions.forEach(function(contribution) {
-                        tasks.push(function(callback) {
-                            entities.getEvent(contribution.event, function(err, event) {
-                                if (err) {
-                                    callback(err)
-                                } else {
-                                    delete event.supportPacs
-                                    delete event.opposePacs
-
-                                    contribution.event = event
-
-                                    entities.getPolitician(event.politician, function(err, politician) {
-                                        event.politician = politician
-                                        callback(err)
-                                    })
-                                }
-                            })
-                        })
-                        tasks.push(function(callback) {
-                            entities.getPac(contribution.pac, function(err, pac) {
-                                contribution.pac = pac
-                                callback(err)
-                            })
-                        })
-                    })
-
-                    async.parallel(tasks, function(err, results) {
-                        if (err) {
-                            callback(err)
-                        } else {
-                            callback(err, contributions)
-                        }
-                    })
-                }
+                callback(err, contributions)
             })
         })
 
@@ -283,7 +246,6 @@ module.exports = function(app, redis) {
                     return
                 }
 
-                
                 stripe.charges.create({
                     'amount': req.body.amount * 100, // Amount is in dollars, Strip API is in cents
                     'currency': 'usd',
@@ -322,14 +284,6 @@ module.exports = function(app, redis) {
                         })
                         tasks.push(function(callback) {
                             redis.lpush(redisKeys.userReverseChronologicalContributions(req.user.iden), contribution.iden, function(err, reply) {
-                                if (err) {
-                                    console.error(err)
-                                }
-                                callback()
-                            })
-                        })
-                        tasks.push(function(callback) {
-                            redis.hset(redisKeys.eventIdenToUserContributionIden(req.user.iden), event.iden, contribution.iden, function(err, reply) {
                                 if (err) {
                                     console.error(err)
                                 }
