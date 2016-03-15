@@ -42,7 +42,7 @@ module.exports = function(app, redis) {
                         var now = Date.now() / 1000
 
                         var user = {
-                            'iden': generateIden(),
+                            'iden': entities.generateIden(),
                             'facebookId': info.id,
                             'name': info.name,
                             'email': info.email,
@@ -263,7 +263,7 @@ module.exports = function(app, redis) {
                         var now = Date.now() / 1000
 
                         var contribution = {
-                            'iden': generateIden(),
+                            'iden': entities.generateIden(),
                             'created': now,
                             'modified': now,
                             'chargeId': charge.id,
@@ -333,10 +333,6 @@ module.exports = function(app, redis) {
             }
         })
     })
-}
-
-var generateIden = function() {
-    return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
 }
 
 var getFacebookUserInfo = function(facebookToken, callback) {
