@@ -254,9 +254,13 @@ module.exports = function(redis) {
             if (err) {
                 callback(err)
             } else {
-                entities.getContributions(reply, function(err, contributions) {
-                    callback(err, contributions)
-                })
+                if (reply.length > 0) {
+                    entities.getContributions(reply, function(err, contributions) {
+                        callback(err, contributions)
+                    })
+                } else {
+                    callback(null, [])
+                }
             }
         })
     }
