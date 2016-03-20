@@ -276,65 +276,59 @@ module.exports = function(app, redis) {
                         var tasks = []
                         tasks.push(function(callback) {
                             redis.hset(redisKeys.contributions, contribution.iden, JSON.stringify(contribution), function(err, reply) {
-                                if (err) {
-                                    console.error(err)
-                                    console.error(JSON.stringify(contribution))
-                                }
                                 callback(err) // Only this one returns error to stop things to prevent an invalid state
                             })
                         })
                         tasks.push(function(callback) {
                             redis.lpush(redisKeys.userReverseChronologicalContributions(req.user.iden), contribution.iden, function(err, reply) {
-                                if (err) {
-                                    console.error(err)
-                                }
-                                callback()
+                                callback(null, err)
                             })
                         })
                         tasks.push(function(callback) {
                             var key = support ? 'support' : 'oppose'
                             redis.hincrby(redisKeys.eventContributionTotals(event.iden), key, contribution.amount, function(err, reply) {
-                                if (err) {
-                                    console.error(err)
-                                }
-                                callback()
+                                callback(null, err)
                             })
                         })
                         tasks.push(function(callback) {
                             var key = support ? 'support' : 'oppose'
                             redis.hincrby(redisKeys.politicianContributionTotals(event.politician), key, contribution.amount, function(err, reply) {
-                                if (err) {
-                                    console.error(err)
-                                }
-                                callback()
+                                callback(null, err)
                             })
                         })
                         tasks.push(function(callback) {
                             redis.incrby(redisKeys.contributionsSum, contribution.amount, function(err, reply) {
-                                if (err) {
-                                    console.error(err)
-                                }
-                                callback()
+                                callback(null, err)
                             })
                         })
                         tasks.push(function(callback) {
                             redis.incrby(redisKeys.userContributionsSum(req.user.iden), contribution.amount, function(err, reply) {
-                                if (err) {
-                                    console.error(err)
-                                }
-                                callback()
+                                callback(null, err)
                             })
                         })
                         tasks.push(function(callback) {
                             redis.rpush(redisKeys.contributionsOnDay(now), contribution.iden, function(err, reply) {
-                                if (err) {
-                                    console.error(err)
-                                }
-                                callback()
+                                callback(null, err)
                             })
                         })
 
                         async.series(tasks, function(err, results) {
+                            if (err) {
+                                console.error(JSON.stringify(contribution))
+                                console.error(err)
+                            } else {
+                                var errors = results.filter(function(result) {
+                                    return !!result
+                                })
+
+                                if (errors.length > 0) {
+                                    console.error(JSON.stringify(contribution))
+                                    errors.forEach(function(error) {
+                                        console.error(error)
+                                    })
+                                }
+                            }
+
                             res.sendStatus(200)
                         })
                     }
