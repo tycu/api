@@ -38,7 +38,7 @@ module.exports = function(app, redis) {
                                 console.error('entry for ' + userIden + ' missing in ' + redisKeys.userIdenToAccessToken)
                             }
                         })
-                    } else {
+                    } else { // New user
                         var now = Date.now() / 1000
 
                         var user = {
@@ -241,13 +241,13 @@ module.exports = function(app, redis) {
                     support = true
                 } else if (event.opposePacs.indexOf(pac.iden) != -1) {
                     support = false
-                } else {
+                } else { // This PAC is no longer associated with this event
                     res.sendStatus(400)
                     return
                 }
 
                 stripe.charges.create({
-                    'amount': req.body.amount * 100, // Amount is in dollars, Strip API is in cents
+                    'amount': Math.min(req.body.amount * 100, 100 * 100), // Amount is in dollars, Strip API is in cents
                     'currency': 'usd',
                     'customer': customerId,
                     'metadata': {
@@ -278,8 +278,9 @@ module.exports = function(app, redis) {
                             redis.hset(redisKeys.contributions, contribution.iden, JSON.stringify(contribution), function(err, reply) {
                                 if (err) {
                                     console.error(err)
+                                    console.error(JSON.stringify(contribution))
                                 }
-                                callback()
+                                callback(err) // Only this one returns error to stop things to prevent an invalid state
                             })
                         })
                         tasks.push(function(callback) {
@@ -318,6 +319,14 @@ module.exports = function(app, redis) {
                         })
                         tasks.push(function(callback) {
                             redis.incrby(redisKeys.userContributionsSum(req.user.iden), contribution.amount, function(err, reply) {
+                                if (err) {
+                                    console.error(err)
+                                }
+                                callback()
+                            })
+                        })
+                        tasks.push(function(callback) {
+                            redis.rpush(redisKeys.contributionsOnDay(now), contribution.iden, function(err, reply) {
                                 if (err) {
                                     console.error(err)
                                 }
