@@ -276,7 +276,7 @@ module.exports = function(app, redis) {
                         var tasks = []
                         tasks.push(function(callback) {
                             redis.hset(redisKeys.contributions, contribution.iden, JSON.stringify(contribution), function(err, reply) {
-                                callback(err) // Only this one returns error to stop things to prevent an invalid state
+                                callback(err) // Only this one returns error to stop things and prevent an invalid state
                             })
                         })
                         tasks.push(function(callback) {
