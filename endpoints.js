@@ -268,6 +268,7 @@ module.exports = function(app, redis) {
                             'modified': now,
                             'chargeId': charge.id,
                             'amount': req.body.amount,
+                            'user': req.user.iden,
                             'event': event.iden,
                             'pac': pac.iden,
                             'support': support
