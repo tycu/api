@@ -307,7 +307,7 @@ module.exports = function(app, redis) {
                             })
                         })
                         tasks.push(function(callback) {
-                            redis.rpush(redisKeys.contributionsOnDay(now), contribution.iden, function(err, reply) {
+                            redis.rpush(redisKeys.contributionsToday(), contribution.iden, function(err, reply) {
                                 callback(null, err)
                             })
                         })
