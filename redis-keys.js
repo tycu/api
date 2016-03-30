@@ -32,7 +32,6 @@ module.exports = {
 
     // Sorted sets
     'eventsSortedByContributionSums': 'events_sorted_by_contribution_sums',
-    'politiciansSortedByContributionSums': 'politicians_sorted_by_contribution_sums',
     
     // Hashes with 2 fields, support & oppose
     'eventContributionTotals': function(eventIden) {

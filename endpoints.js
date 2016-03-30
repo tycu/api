@@ -303,11 +303,6 @@ module.exports = function(app, redis) {
                             })
                         })
                         tasks.push(function(callback) {
-                            redis.zincrby(redisKeys.politiciansSortedByContributionSums, req.body.amount, event.politician, function(err, reply) {
-                                callback(null, err)
-                            })
-                        })
-                        tasks.push(function(callback) {
                             redis.incrby(redisKeys.contributionsSum, contribution.amount, function(err, reply) {
                                 callback(null, err)
                             })
