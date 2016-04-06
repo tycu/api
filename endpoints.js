@@ -248,7 +248,7 @@ module.exports = function(app, redis) {
 
                 var contributionCents = Math.min(req.body.amount * 100, 100 * 100) // Amount is in dollars, Strip API is in cents
                 var feeCents = Math.max(Math.round(contributionCents * 0.15), 99)
-
+                
                 stripe.charges.create({
                     'amount': (contributionCents + feeCents),
                     'currency': 'usd',
