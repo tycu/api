@@ -250,7 +250,7 @@ module.exports = function(app, redis) {
                 var feeCents = Math.max(Math.round(contributionCents * 0.15), 99)
 
                 stripe.charges.create({
-                    'amount': contributionCents + feeCents
+                    'amount': (contributionCents + feeCents),
                     'currency': 'usd',
                     'customer': customerId,
                     'destination': 'acct_17wOjAKqY1mnS1Yq',
