@@ -164,8 +164,7 @@ module.exports = function(app, redis) {
                     'source': req.body.cardToken
                 }, function(err, customer) {
                     if (err) {
-                        res.sendStatus(400)
-                        console.error(err)
+                        handleStripeError(err, res)
                     } else {
                         res.sendStatus(200)
                     }
@@ -177,14 +176,18 @@ module.exports = function(app, redis) {
                         'userIden': req.user.iden
                     }
                 }, function(err, customer) {
-                    redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
-                        if (err) {
-                            res.sendStatus(400)
-                            console.error(err)
-                        } else {
-                            res.sendStatus(200)
-                        }
-                    })
+                    if (err) {
+                        handleStripeError(err, res)
+                    } else {
+                        redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
+                            if (err) {
+                                res.sendStatus(400)
+                                console.error(err)
+                            } else {
+                                res.sendStatus(200)
+                            }
+                        })
+                    }
                 })
             }
         })
@@ -248,7 +251,7 @@ module.exports = function(app, redis) {
 
                 var contributionCents = Math.min(req.body.amount * 100, 100 * 100) // Amount is in dollars, Strip API is in cents
                 var feeCents = Math.max(Math.round(contributionCents * 0.15), 99)
-                
+
                 stripe.charges.create({
                     'amount': (contributionCents + feeCents),
                     'currency': 'usd',
@@ -262,8 +265,7 @@ module.exports = function(app, redis) {
                     }
                 }, function(err, charge) {
                     if (err) {
-                        console.error(err)
-                        res.sendStatus(400)
+                        handleStripeError(err, res)
                     } else {
                         var now = Date.now() / 1000
 
@@ -368,4 +370,17 @@ var getFacebookUserInfo = function(facebookToken, callback) {
         }
         callback(false)
     })
+}
+
+var handleStripeError = function(err, res) {
+    if (err.rawType == 'card_error' && err.message) {
+        res.status(400).json({
+            'error': {
+                'message': err.message
+            }
+        })
+    } else {
+        res.sendStatus(400)
+        console.error(err)
+    }
 }
