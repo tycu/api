@@ -208,9 +208,11 @@ module.exports = function(app, redis) {
             return
         }
 
+        var usingLiveStripeKey = false
         var stripe
         if (req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S') {
             stripe = require('stripe')(stripeLiveSecretKey)
+            usingLiveStripeKey = true
         } else {
             stripe = require('stripe')(stripeTestSecretKey)
         }
@@ -272,7 +274,7 @@ module.exports = function(app, redis) {
                     'amount': (contributionCents + feeCents),
                     'currency': 'usd',
                     'customer': customerId,
-                    'destination': req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S' ? 'acct_17x01lHDt37fcAHU' : 'acct_17wOjAKqY1mnS1Yq',
+                    'destination': usingLiveStripeKey ? 'acct_17x01lHDt37fcAHU' : 'acct_17wOjAKqY1mnS1Yq',
                     'application_fee': feeCents,
                     'metadata': {
                         'eventIden': event.iden,
@@ -309,37 +311,39 @@ module.exports = function(app, redis) {
                             })
                         })
                         tasks.push(function(callback) {
-                            var key = support ? 'support' : 'oppose'
-                            redis.hincrby(redisKeys.eventContributionTotals(event.iden), key, contribution.amount, function(err, reply) {
-                                callback(null, err)
-                            })
-                        })
-                        tasks.push(function(callback) {
-                            var key = support ? 'support' : 'oppose'
-                            redis.hincrby(redisKeys.politicianContributionTotals(event.politician), key, contribution.amount, function(err, reply) {
-                                callback(null, err)
-                            })
-                        })
-                        tasks.push(function(callback) {
-                            redis.zincrby(redisKeys.eventsSortedByContributionSums, req.body.amount, event.iden, function(err, reply) {
-                                callback(null, err)
-                            })
-                        })
-                        tasks.push(function(callback) {
-                            redis.incrby(redisKeys.contributionsSum, contribution.amount, function(err, reply) {
-                                callback(null, err)
-                            })
-                        })
-                        tasks.push(function(callback) {
                             redis.incrby(redisKeys.userContributionsSum(req.user.iden), contribution.amount, function(err, reply) {
                                 callback(null, err)
                             })
                         })
-                        tasks.push(function(callback) {
-                            redis.rpush(redisKeys.contributionsToday(), contribution.iden, function(err, reply) {
-                                callback(null, err)
+                        if (usingLiveStripeKey) {
+                            tasks.push(function(callback) {
+                                var key = support ? 'support' : 'oppose'
+                                redis.hincrby(redisKeys.eventContributionTotals(event.iden), key, contribution.amount, function(err, reply) {
+                                    callback(null, err)
+                                })
                             })
-                        })
+                            tasks.push(function(callback) {
+                                var key = support ? 'support' : 'oppose'
+                                redis.hincrby(redisKeys.politicianContributionTotals(event.politician), key, contribution.amount, function(err, reply) {
+                                    callback(null, err)
+                                })
+                            })
+                            tasks.push(function(callback) {
+                                redis.zincrby(redisKeys.eventsSortedByContributionSums, req.body.amount, event.iden, function(err, reply) {
+                                    callback(null, err)
+                                })
+                            })
+                            tasks.push(function(callback) {
+                                redis.incrby(redisKeys.contributionsSum, contribution.amount, function(err, reply) {
+                                    callback(null, err)
+                                })
+                            })
+                            tasks.push(function(callback) {
+                                redis.rpush(redisKeys.contributionsToday(), contribution.iden, function(err, reply) {
+                                    callback(null, err)
+                                })
+                            })
+                        }
 
                         async.series(tasks, function(err, results) {
                             if (err) {
