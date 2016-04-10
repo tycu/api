@@ -4,7 +4,6 @@ var async = require("async")
 var request = require('request')
 var crypto = require('crypto')
 var redisKeys = require('./redis-keys')
-var stripe = require('stripe')('sk_test_rtBOxo0prIIbfVocTi4l1gPC')
 var sendgrid  = require('sendgrid')('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')
 
 module.exports = function(app, redis) {
@@ -155,6 +154,13 @@ module.exports = function(app, redis) {
             return
         }
 
+        var stripe
+        if (req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S') {
+            stripe = require('stripe')('sk_live_ENFmtxmEkWjtk9E7a53VF8Kf')
+        } else {
+            stripe = require('stripe')('sk_test_rtBOxo0prIIbfVocTi4l1gPC')
+        }
+
         redis.hget(redisKeys.userIdenToStripeCustomerId, req.user.iden, function(err, reply) {
             if (err) {
                 res.sendStatus(500)
@@ -197,6 +203,13 @@ module.exports = function(app, redis) {
         if (!req.body.eventIden || !req.body.pacIden || !req.body.amount) {
             res.sendStatus(400)
             return
+        }
+
+        var stripe
+        if (req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S') {
+            stripe = require('stripe')('sk_live_ENFmtxmEkWjtk9E7a53VF8Kf')
+        } else {
+            stripe = require('stripe')('sk_test_rtBOxo0prIIbfVocTi4l1gPC')
         }
 
         var tasks = []
