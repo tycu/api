@@ -6,6 +6,9 @@ var crypto = require('crypto')
 var redisKeys = require('./redis-keys')
 var sendgrid  = require('sendgrid')('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')
 
+var stripeTestSecretKey = 'sk_test_rtBOxo0prIIbfVocTi4l1gPC'
+var stripeLiveSecretKey = 'sk_live_ENFmtxmEkWjtk9E7a53VF8Kf'
+
 module.exports = function(app, redis) {
     var entities = require('./entities')(redis)
 
@@ -156,9 +159,9 @@ module.exports = function(app, redis) {
 
         var stripe
         if (req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S') {
-            stripe = require('stripe')('sk_live_ENFmtxmEkWjtk9E7a53VF8Kf')
+            stripe = require('stripe')(stripeLiveSecretKey)
         } else {
-            stripe = require('stripe')('sk_test_rtBOxo0prIIbfVocTi4l1gPC')
+            stripe = require('stripe')(stripeTestSecretKey)
         }
 
         redis.hget(redisKeys.userIdenToStripeCustomerId, req.user.iden, function(err, reply) {
@@ -207,9 +210,9 @@ module.exports = function(app, redis) {
 
         var stripe
         if (req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S') {
-            stripe = require('stripe')('sk_live_ENFmtxmEkWjtk9E7a53VF8Kf')
+            stripe = require('stripe')(stripeLiveSecretKey)
         } else {
-            stripe = require('stripe')('sk_test_rtBOxo0prIIbfVocTi4l1gPC')
+            stripe = require('stripe')(stripeTestSecretKey)
         }
 
         var tasks = []
@@ -269,7 +272,7 @@ module.exports = function(app, redis) {
                     'amount': (contributionCents + feeCents),
                     'currency': 'usd',
                     'customer': customerId,
-                    'destination': 'acct_17wOjAKqY1mnS1Yq',
+                    'destination': req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S' ? 'acct_17x01lHDt37fcAHU' : 'acct_17wOjAKqY1mnS1Yq',
                     'application_fee': feeCents,
                     'metadata': {
                         'eventIden': event.iden,
