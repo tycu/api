@@ -18,19 +18,19 @@ var start = function() {
     // -----------------------------------------------------------------------------
 
     // Require HTTPS in production
-    if (process.env.NODE_ENV == 'production') {
-        app.use(function(req, res, next) {
-            if (req.headers['x-forwarded-proto'] !== 'https') {
-                res.status(403).json({
-                    'error': {
-                        'message': 'This server is only accessible over HTTPS.'
-                    }
-                })
-            } else {
-                next()
-            }
-        })
-    }
+    // if (process.env.NODE_ENV == 'production') {
+    //     app.use(function(req, res, next) {
+    //         if (req.headers['x-forwarded-proto'] !== 'https') {
+    //             res.status(403).json({
+    //                 'error': {
+    //                     'message': 'This server is only accessible over HTTPS.'
+    //                 }
+    //             })
+    //         } else {
+    //             next()
+    //         }
+    //     })
+    // }
 
     app.use(require('cors')())
 
