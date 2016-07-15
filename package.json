@@ -1,6 +1,7 @@
 {
   "name": "tally-api",
   "version": "1.0.0",
+  "description": "tally api",
   "dependencies": {
     "async": "^1.5.2",
     "body-parser": "^1.15.0",
@@ -17,5 +18,7 @@
   },
   "scripts": {
     "start": "node main.js"
-  }
+  },
+  "private": true,
+  "license": "UNLICENSED"
 }
