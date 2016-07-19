@@ -2,6 +2,12 @@
   "name": "tally-api",
   "version": "1.0.0",
   "description": "tally api",
+  "homepage": "https://api.tally.us/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tallyus/api.git"
+  },
+  "devDependencies": {},
   "dependencies": {
     "async": "^1.5.2",
     "body-parser": "^1.15.0",
@@ -13,12 +19,18 @@
     "stripe": "^4.4.0",
     "throng": "^2.0.1"
   },
+  "optionalDependencies": {},
   "engines": {
     "node": "^5.7.0"
   },
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bugs": {
+    "url": "https://github.com/tallyus/api/issues"
+  },
+  "keywords": [],
   "private": true,
   "license": "UNLICENSED"
 }
