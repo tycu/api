@@ -9,14 +9,14 @@ var start = function() {
   var express = require('express');
   var app = express();
   var redisKeys = require('./redis-keys');
-  var db = {};
+  // var db = {};
   var redis;
   // var models = require("../models");
 
   if (process.env.REDISCLOUD_URL) {
-      redis = require("redis").createClient(process.env.REDISCLOUD_URL, { 'no_ready_check': true })
+    redis = require("redis").createClient(process.env.REDISCLOUD_URL, { 'no_ready_check': true })
   } else {
-      redis = require("redis").createClient()
+    redis = require("redis").createClient()
   }
 
   // Require HTTPS in production
@@ -86,37 +86,51 @@ var start = function() {
   });
   require('./endpoints')(app, redis);
 
-  var Sequelize = require("sequelize");
-
-  String.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
-  }
-
-  // NOTE load models for postgres database
-  fs.readdirSync('./models').filter(function(file) {
-    return (file.indexOf("./models") !== 0) && (file !== "index.js");
-  }).forEach(function(file) {
-    require('./config/database.js').init(function(sequelize) {
-
-      // console.log(path.join(__dirname, '/models', file));
-      // var model = sequelize.import(path.join(__dirname, '/models', file));
-      console.log('file', file)
-      var model = file.split('.')[0].capitalize();
-      // console.log(model);
-
-      // require(model)(file, sequelize);
-      db[model.name] = file;
-    });
-  });
 
 
-  console.log(db);
+  var models = fs.readdirSync('./models');
 
+  require(__dirname + '/models/index.js')
+
+  // var Sequelize = require("sequelize");
+  // String.prototype.capitalize = function() {
+  //   return this.charAt(0).toUpperCase() + this.slice(1);
+  // }
+
+  // // NOTE load models for postgres database
+  // fs.readdirSync('./models').filter(function(file) {
+  //   return (file.indexOf("./models") !== 0) && (file !== "index.js");
+  // }).forEach(function(file) {
+  //   require('./config/database.js').init(function(sequelize) {
+
+  //     // console.log(path.join(__dirname, '/models', file));
+  //     // var model = sequelize.import(path.join(__dirname, '/models', file));
+  //     var model = file.split('.')[0].capitalize();
+  //     var whereId = path.join(__dirname, '/models', file)
+
+  //     require(model)(whereId, sequelize);
+  //     db[model.name] = sequelize.import(whereId);
+  //     Object.keys(db).forEach(function(modelName) {
+  //       if (db[modelName].associate) {
+  //         db[modelName].associate(db);
+  //       }
+  //     });
+
+  //     // db.sequelize = sequelize;
+  //     db.Sequelize = Sequelize;
+
+  //   });
+  // });
+
+  // module.exports = db;
+
+
+  //{force: true}
   // models.sequelize.sync().then(function () {
     app.listen(port, function() {
       console.log('tally-api listening on port ' + port)
     })
-  // })
+  // });
 }
 
 require('throng')(start, {
