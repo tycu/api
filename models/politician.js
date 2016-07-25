@@ -1,9 +1,12 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Politician = sequelize.define('Politician', {
+  var Sequelize = require('sequelize');
+  var Politician = sequelize.define('Politician',
+  {
     id: {
       type: DataTypes.INTEGER,
-      field: 'id'
+      field: 'id',
+      primaryKey: true
     },
     thumbnail: {
       type: DataTypes.STRING,
@@ -26,17 +29,31 @@ module.exports = function(sequelize, DataTypes) {
       field: 'twitter_username'
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
       field: 'created_at'
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
       field: 'updated_at'
     }
   }, {
+    underscored: true,
+    paranoid: true,
     classMethods: {
-      associate: function(models) {
-        // associations can be defined here
+    associate: function(models) {
+      Politician.hasMany(models.Event);
+
+
+      // EXAMPLE Associations
+      // User.belongsToMany (User, {
+      //   as: {
+      //     singular: 'Follower',
+      //     plural: 'Followers'
+      //   },
+      //   through: UserFollowers
+      // })
+
+      // Politician.hasMany(models.Contribution, {through: models.Event})
       }
     }
   });

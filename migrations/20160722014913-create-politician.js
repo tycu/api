@@ -1,33 +1,27 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('Contributions', {
+    return queryInterface.createTable('Politicians', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      id: {
-        type: Sequelize.INTEGER
-      },
-      user_id: {
-        type: Sequelize.INTEGER
-      },
-      charge_id: {
-        type: Sequelize.INTEGER
-      },
-      amount: {
+      thumbnail: {
         type: Sequelize.STRING
       },
-      event_id: {
-        type: Sequelize.INTEGER
+      first_name: {
+        type: Sequelize.STRING
       },
-      pac_id: {
-        type: Sequelize.INTEGER
+      last_name: {
+        type: Sequelize.STRING
       },
-      support: {
-        type: Sequelize.BOOLEAN
+      job_title: {
+        type: Sequelize.STRING
+      },
+      twitter_username: {
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,
@@ -40,6 +34,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Contributions');
+    return queryInterface.dropTable('Politicians');
   }
 };

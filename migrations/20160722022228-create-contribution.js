@@ -1,22 +1,36 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('PacEvents', {
+    return queryInterface.createTable('Contributions', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      amount: {
+        type: Sequelize.STRING
+      },
       support: {
         type: Sequelize.BOOLEAN
+      },
+      charge_uuid: {
+        type: Sequelize.INTEGER
+      },
+      user_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Users',
+          key: 'id'
+        },
+        onUpdate: 'cascade',
+        onDelete: 'cascade'
       },
       event_id: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'Events',
-          key: 'id'
-        },
+            model: 'Events',
+            key: 'id'        },
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
@@ -24,8 +38,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         references: {
           model: 'Pacs',
-          key: 'id'
-        },
+          key: 'id'        },
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
@@ -39,19 +52,25 @@ module.exports = {
       }
     }).then(function(results) {
       return queryInterface.addIndex(
-        'PacEvents',
-        ['event_id'],
-        {indexName: 'xi_event_pac_event'}
+        'Contributions',
+        ['user_id'],
+        {indexName: 'xi_user_contribution'}
       )
     }).then(function(results) {
       return queryInterface.addIndex(
-        'PacEvents',
+        'Contributions',
+        ['event_id'],
+        {indexName: 'xi_event_contribution'}
+      )
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'Contributions',
         ['pac_id'],
-        {indexName: 'xi_pac_pac_event'}
+        {indexName: 'xi_pac_contribution'}
       )
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('PacEvents');
+    return queryInterface.dropTable('Contributions');
   }
 };

@@ -8,9 +8,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      id: {
-        type: Sequelize.INTEGER
-      },
       is_pinned: {
         type: Sequelize.BOOLEAN
       },
@@ -21,7 +18,13 @@ module.exports = {
         type: Sequelize.STRING
       },
       politician_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Politicians',
+          key: 'id'
+        },
+        onUpdate: 'cascade',
+        onDelete: 'cascade'
       },
       headline: {
         type: Sequelize.STRING
@@ -37,9 +40,21 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'Events',
+        ['is_pinned'],
+        {indexName: 'xi_pinned_event'}
+      )
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'Events',
+        ['politician_id'],
+        {indexName: 'xi_politician_event'}
+      )
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Events');
+    return queryInterface.dropTable('Pacs');
   }
 };

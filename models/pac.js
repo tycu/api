@@ -1,9 +1,11 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
+  var Sequelize = require('sequelize');
   var Pac = sequelize.define('Pac', {
     id: {
       type: DataTypes.INTEGER,
-      field: 'id'
+      field: 'id',
+      primaryKey: true
     },
     name: {
       type: DataTypes.STRING,
@@ -22,17 +24,19 @@ module.exports = function(sequelize, DataTypes) {
       field: 'twitter_username'
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
       field: 'created_at'
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
       field: 'updated_at'
     }
-  }, {
+}, {
+    underscored: true,
+    paranoid: true,
     classMethods: {
       associate: function(models) {
-        // associations can be defined here
+        Pac.hasMany(models.PacEvent)
       }
     }
   });

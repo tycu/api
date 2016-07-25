@@ -12,9 +12,10 @@ module.exports = {
         type: Sequelize.STRING
       },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
       },
-      facebook_id: {
+      facebook_uuid: {
         type: Sequelize.CHAR,
         defaultValue: null
       },
@@ -33,7 +34,7 @@ module.exports = {
       pic_square: {
         type: Sequelize.STRING
       },
-      stripe_customer_id: {
+      stripe_customer_uuid: {
         type: Sequelize.STRING
       },
       crypted_password: {
@@ -109,6 +110,24 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: null
       }
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'Users',
+        ['email'],
+        {indexName: 'xi'}
+      )
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'Users',
+        ['single_access_token'],
+        {indexName: 'xi_single_access_token_user'}
+      )
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'Users',
+        ['persistence_token'],
+        {indexName: 'xi_persistence_token_user'}
+      )
     });
   },
   down: function(queryInterface, Sequelize) {

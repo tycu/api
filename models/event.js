@@ -1,9 +1,11 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
+  var Sequelize = require('sequelize');
   var Event = sequelize.define('Event', {
     id: {
       type: DataTypes.INTEGER,
-      field: 'id'
+      field: 'id',
+      primaryKey: true
     },
     isPinned: {
       type: DataTypes.BOOLEAN,
@@ -30,17 +32,21 @@ module.exports = function(sequelize, DataTypes) {
       field: 'summary'
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
       field: 'created_at'
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
       field: 'updated_at'
     }
   }, {
+    underscored: true,
+    paranoid: true,
     classMethods: {
       associate: function(models) {
-        // associations can be defined here
+        Event.hasMany(models.Contribution)
+        Event.belongsTo(models.Politician);
+        Event.hasMany(models.EventTweet)
       }
     }
   });

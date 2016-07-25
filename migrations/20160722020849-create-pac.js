@@ -8,9 +8,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      id: {
-        type: Sequelize.INTEGER
-      },
       name: {
         type: Sequelize.STRING
       },
@@ -31,6 +28,12 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'Pacs',
+        ['name'],
+        {indexName: 'xi_name_pac'}
+      )
     });
   },
   down: function(queryInterface, Sequelize) {

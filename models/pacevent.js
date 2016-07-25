@@ -1,9 +1,11 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
+  var Sequelize = require('sequelize');
   var PacEvent = sequelize.define('PacEvent', {
     id: {
       type: DataTypes.INTEGER,
-      field: 'id'
+      field: 'id',
+      primaryKey: true
     },
     eventId: {
       type: DataTypes.INTEGER,
@@ -18,17 +20,20 @@ module.exports = function(sequelize, DataTypes) {
       field: 'support'
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
       field: 'created_at'
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
       field: 'updated_at'
     }
   }, {
+    underscored: true,
+    paranoid: true,
     classMethods: {
       associate: function(models) {
-        // associations can be defined here
+        PacEvent.belongsTo(models.Pac);
+        PacEvent.belongsTo(models.Event);
       }
     }
   });
