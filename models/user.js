@@ -123,6 +123,19 @@ module.exports = function(sequelize, DataTypes) {
       associate: function(models) {
         User.hasMany(models.Contribution);
       }
+    },
+    instanceMethods: {
+      // createSalt: function() {
+      //   return crypto.randomBytes(128).toString('base64');
+      // },
+      // hashPassword: function(salt, pwd) {
+      //   var hmac = crypto.createHmac('sha1', salt);
+
+      //   return hmac.update(pwd).digest('hex');
+      // },
+      // authenticate: function(passwordToMatch) {
+      //   return this.hashPassword(this.salt, passwordToMatch) === this.hashed_pwd;
+      // }
     }
   });
   return User;

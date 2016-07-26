@@ -40,8 +40,8 @@ module.exports = function(sequelize, DataTypes) {
     underscored: true,
     paranoid: true,
     classMethods: {
-    associate: function(models) {
-      Politician.hasMany(models.Event);
+      associate: function(models) {
+        Politician.hasMany(models.Event);
 
 
       // EXAMPLE Associations

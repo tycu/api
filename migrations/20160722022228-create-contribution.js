@@ -15,7 +15,7 @@ module.exports = {
         type: Sequelize.BOOLEAN
       },
       charge_uuid: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       user_id: {
         type: Sequelize.INTEGER,
