@@ -5,7 +5,7 @@ var path = require("path");
 module.exports = {
   up: function (queryInterface, Sequelize) {
     var seedModel = require('../seed_data/contributions_seed.js');
-    // console.log('userSeed', seedModel);
+    // console.log('seedModel', seedModel);
     var instances = [];
     var instanceObject;
 
@@ -17,11 +17,12 @@ module.exports = {
         console.log('instanceObject', instanceObject);
 
         instances.push({
+          id: parseInt(instanceObject.iden, 10),
           charge_uuid: instanceObject.chargeId,
           amount: instanceObject.amount,
-          // user_id: instanceObject.user,
-          // event_id: instanceObject.event,
-          // pac_id: instanceObject.pac,
+          user_id: instanceObject.user,
+          event_id: instanceObject.event,
+          pac_id: instanceObject.pac,
           support: instanceObject.support,
           created_at: new Date(),
           updated_at: new Date()

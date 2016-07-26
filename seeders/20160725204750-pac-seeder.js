@@ -16,6 +16,7 @@ module.exports = {
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
         instances.push({
+          id: instanceObject.iden,
           name: instanceObject.name,
           description: instanceObject.description,
           color: instanceObject.color,

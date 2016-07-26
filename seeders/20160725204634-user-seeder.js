@@ -14,6 +14,7 @@ module.exports = {
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
         instances.push({
+          id: instanceObject.iden,
           name: instanceObject.name,
           facebook_uuid: instanceObject.facebookId,
           email: instanceObject.email,

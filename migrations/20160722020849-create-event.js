@@ -9,7 +9,8 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       is_pinned: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       image_url: {
         type: Sequelize.STRING
