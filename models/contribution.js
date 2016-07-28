@@ -8,44 +8,63 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     amount: {
-      type: DataTypes.STRING,
-      field: 'amount'
+      type: DataTypes.STRING
     },
     chargeUuid: {
-      type: DataTypes.INTEGER,
-      field: 'charge_uuid'
+      type: DataTypes.INTEGER
     },
     support: {
-      type: DataTypes.BOOLEAN,
-      field: 'support'
+      type: DataTypes.BOOLEAN
     },
     userId: {
-      type: DataTypes.INTEGER,
-      field: 'user_id'
+      type: DataTypes.INTEGER
     },
     eventId: {
-      type: DataTypes.INTEGER,
-      field: 'event_id'
+      type: DataTypes.INTEGER
     },
     pacId: {
-      type: DataTypes.INTEGER,
-      field: 'pac_id'
+      type: DataTypes.INTEGER
+    },
+    isDeleted: {
+      type: Sequelize.BOOLEAN
+    },
+    deletedAt: {
+      type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE,
-      field: 'created_at'
+      type: Sequelize.DATE
     },
     updatedAt: {
-      type: Sequelize.DATE,
-      field: 'updated_at'
+      type: Sequelize.DATE
     }
   }, {
-    underscored: true,
     paranoid: true,
     classMethods: {
       associate: function(models) {
         Contribution.belongsTo(models.User);
         Contribution.belongsTo(models.Event);
+      }
+    },
+    defaultScope: {
+      where: {
+        isDeleted: false
+      }
+    },
+    scopes: {
+      deleted: {
+        where: {
+          isDeleted: true
+        }
+      },
+      support: {
+        where: {
+          support: true
+        }
+      },
+      oppose: {
+        where: {
+          support: false
+        }
       }
     }
   });

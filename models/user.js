@@ -9,119 +9,98 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     name: {
-      type: Sequelize.STRING,
-      field: 'name'
+      type: Sequelize.STRING
     },
     email: {
-      type: Sequelize.STRING,
-      field: 'email'
+      type: Sequelize.STRING
     },
     facebookUuid: {
-      type: Sequelize.STRING,
-      field: 'facebook_uuid'
+      type: Sequelize.STRING
     },
     occupation: {
-      type: Sequelize.STRING,
-      field: 'occupation'
+      type: Sequelize.STRING
     },
     employer: {
-      type: Sequelize.STRING,
-      field: 'employer'
+      type: Sequelize.STRING
     },
     streetAddress: {
-      type: Sequelize.STRING,
-      field: 'streetAddress'
+      type: Sequelize.STRING
     },
     cityStateZip: {
-      type: Sequelize.STRING,
-      field: 'cityStateZip'
+      type: Sequelize.STRING
+    },
+    color: {
+      type: Sequelize.STRING
     },
     picSquare: {
-      type: Sequelize.STRING,
-      field: 'pic_square'
+      type: Sequelize.STRING
     },
     stripeCustomerUuid: {
-      type: Sequelize.STRING,
-      field: 'stripe_customer_uiid'
+      type: Sequelize.STRING
     },
     cryptedPassword: {
-      type: Sequelize.STRING,
-      field: 'crypted_password'
+      type: Sequelize.STRING
     },
     passwordSalt: {
-      type: Sequelize.STRING,
-      field: 'password_salt'
+      type: Sequelize.STRING
     },
     persistenceToken: {
-      type: Sequelize.STRING,
-      field: 'persistence_token'
+      type: Sequelize.STRING
     },
     singleAccessToken: {
-      type: Sequelize.STRING,
-      field: 'single_access_token'
+      type: Sequelize.STRING
     },
     perishableToken: {
-      type: Sequelize.STRING,
-      field: 'perishable_token'
+      type: Sequelize.STRING
     },
     state: {
-      type: Sequelize.STRING,
-      field: 'state'
+      type: Sequelize.STRING
     },
     emailVerified: {
-      type: DataTypes.BOOLEAN,
-      field: 'email_verified'
+      type: DataTypes.BOOLEAN
     },
     changePassword: {
-      type: DataTypes.BOOLEAN,
-      field: 'change_password'
+      type: DataTypes.BOOLEAN
     },
     timeZone: {
-      type: Sequelize.STRING,
-      field: 'time_zone'
+      type: Sequelize.STRING
     },
     loginCount: {
-      type: Sequelize.INTEGER,
-      field: 'login_count'
+      type: Sequelize.INTEGER
     },
     failedLoginCount: {
-      type: Sequelize.INTEGER,
-      field: 'failed_login_count'
+      type: Sequelize.INTEGER
     },
     currentLoginIp: {
-      type: Sequelize.STRING,
-      field: 'current_login_ip'
+      type: Sequelize.STRING
     },
     lastLoginIp: {
-      type: Sequelize.STRING,
-      field: 'last_login_ip'
+      type: Sequelize.STRING
     },
     currentLoginAt: {
-      type: Sequelize.DATE,
-      field: 'current_login_at'
+      type: Sequelize.DATE
     },
     lastLoginAt: {
-      type: Sequelize.DATE,
-      field: 'last_login_at'
+      type: Sequelize.DATE
+    },
+    isDeleted: {
+      type: Sequelize.BOOLEAN
     },
     deletedAt: {
-      type: Sequelize.DATE,
-      field: 'deleted_at'
+      type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE,
-      field: 'created_at'
+      type: Sequelize.DATE
     },
     updatedAt: {
-      type: Sequelize.DATE,
-      field: 'updated_at'
+      type: Sequelize.DATE
     }
   }, {
-    underscored: true,
     paranoid: true,
     classMethods: {
       associate: function(models) {
         User.hasMany(models.Contribution);
+        User.hasMany(models.EventTweet);
       }
     },
     instanceMethods: {
@@ -136,6 +115,18 @@ module.exports = function(sequelize, DataTypes) {
       // authenticate: function(passwordToMatch) {
       //   return this.hashPassword(this.salt, passwordToMatch) === this.hashed_pwd;
       // }
+    },
+    defaultScope: {
+      where: {
+        isDeleted: false
+      }
+    },
+    scopes: {
+      deleted: {
+        where: {
+          isDeleted: true
+        }
+      }
     }
   });
   return User;

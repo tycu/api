@@ -14,18 +14,18 @@ module.exports = {
         // console.log('key', k);
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
-        console.log('instanceObject', instanceObject);
+        // console.log('instanceObject', instanceObject);
 
         instances.push({
           id: parseInt(instanceObject.iden, 10),
-          charge_uuid: instanceObject.chargeId,
-          amount: instanceObject.amount,
-          user_id: instanceObject.user,
-          event_id: instanceObject.event,
-          pac_id: instanceObject.pac,
+          chargeUuid: instanceObject.chargeId,
+          amount: parseInt(instanceObject.amount, 10),
+          userId: parseInt(instanceObject.user, 10),
+          eventId: parseInt(instanceObject.event, 10),
+          pacId: parseInt(instanceObject.pac, 10),
           support: instanceObject.support,
-          created_at: new Date(),
-          updated_at: new Date()
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
       }
     }
@@ -34,6 +34,6 @@ module.exports = {
   },
 
   down: function (queryInterface, Sequelize) {
-  //   return queryInterface.bulkDelete('Contributions', null, {});
+    return queryInterface.bulkDelete('Contributions', null, {});
   }
 };

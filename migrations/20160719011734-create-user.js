@@ -15,7 +15,7 @@ module.exports = {
         type: Sequelize.STRING,
         unique: true
       },
-      facebook_uuid: {
+      facebookUuid: {
         type: Sequelize.CHAR,
         defaultValue: null
       },
@@ -25,35 +25,38 @@ module.exports = {
       employer: {
         type: Sequelize.STRING
       },
-      street_address: {
+      streetAddress: {
         type: Sequelize.STRING
       },
-      city_state_zip: {
+      cityStateZip: {
         type: Sequelize.STRING
       },
-      pic_square: {
+      color: {
         type: Sequelize.STRING
       },
-      stripe_customer_uuid: {
+      picSquare: {
         type: Sequelize.STRING
       },
-      crypted_password: {
+      stripeCustomerUuid: {
+        type: Sequelize.STRING
+      },
+      cryptedPassword: {
         type: Sequelize.CHAR,
         allowNull: false
       },
-      password_salt: {
+      passwordSalt: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      persistence_token: {
+      persistenceToken: {
         type: Sequelize.CHAR,
         allowNull: false
       },
-      single_access_token: {
+      singleAccessToken: {
         type: Sequelize.CHAR,
         allowNull: false
       },
-      perishable_token: {
+      perishableToken: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -61,52 +64,56 @@ module.exports = {
         type: Sequelize.STRING,
         defaultValue: null
       },
-      email_verified: {
+      emailVerified: {
         type: 'BOOLEAN',
-        defaultValue: '0'
+        defaultValue: false
       },
-      change_password: {
+      changePassword: {
         type: 'BOOLEAN',
-        defaultValue: '0'
+        defaultValue: false
       },
-      time_zone: {
+      timeZone: {
         type: Sequelize.STRING
       },
-      login_count: {
+      loginCount: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: '0'
       },
-      failed_login_count: {
+      failedLoginCount: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: '0'
       },
-      current_login_ip: {
+      currentLoginIp: {
         type: Sequelize.STRING,
         defaultValue: null
       },
-      last_login_ip: {
+      lastLoginIp: {
         type: Sequelize.STRING,
         defaultValue: null
       },
-      current_login_at: {
+      currentLoginAt: {
         type: Sequelize.DATE,
         defaultValue: null
       },
-      last_login_at: {
+      lastLoginAt: {
         type: Sequelize.DATE,
         defaultValue: null
       },
-      deleted_at: {
+      deletedAt: {
         type: Sequelize.DATE,
         defaultValue: null
       },
-      created_at: {
+      isDeleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      createdAt: {
         type: Sequelize.DATE,
         defaultValue: null
       },
-      updated_at: {
+      updatedAt: {
         type: Sequelize.DATE,
         defaultValue: null
       }
@@ -119,13 +126,13 @@ module.exports = {
     }).then(function(results) {
       return queryInterface.addIndex(
         'Users',
-        ['single_access_token'],
+        ['singleAccessToken'],
         {indexName: 'xi_single_access_token_user'}
       )
     }).then(function(results) {
       return queryInterface.addIndex(
         'Users',
-        ['persistence_token'],
+        ['persistenceToken'],
         {indexName: 'xi_persistence_token_user'}
       )
     });

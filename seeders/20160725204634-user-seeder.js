@@ -14,17 +14,17 @@ module.exports = {
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
         instances.push({
-          id: instanceObject.iden,
+          id: parseInt(instanceObject.iden, 10),
           name: instanceObject.name,
-          facebook_uuid: instanceObject.facebookId,
+          facebookUuid: instanceObject.facebookId,
           email: instanceObject.email,
-          created_at:  new Date(),
-          updated_at: new Date(),
-          crypted_password: '',
-          password_salt: '',
-          persistence_token: '',
-          single_access_token: '',
-          perishable_token: ''
+          createdAt:  new Date(),
+          updatedAt: new Date(),
+          cryptedPassword: '',
+          passwordSalt: '',
+          persistenceToken: '',
+          singleAccessToken: '',
+          perishableToken: ''
         });
       }
     }
@@ -33,6 +33,6 @@ module.exports = {
   },
 
   down: function (queryInterface, Sequelize) {
-    // return queryInterface.bulkDelete('Users', null, {});
+    return queryInterface.bulkDelete('Users', null, {});
   }
 };

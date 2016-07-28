@@ -8,6 +8,7 @@ module.exports = {
     // console.log('seedModel', seedModel);
     var instances = [];
     var instanceObject;
+    var thumbs;
     var firstLast;
 
     for (var k in seedModel){
@@ -17,27 +18,26 @@ module.exports = {
         instanceObject = seedModel[k];
         firstLast = instanceObject.name.split(' ');
 
-        // console.log('firstLast', firstLast);
         // console.log('instanceObject', instanceObject);
+        thumbs = instanceObject['thumbnails'];
 
-        instances.push({
-          id: instanceObject.iden,
-          thumbnail: instanceObject.thumbnails[0],
-          firstName: firstLast[0],
-          lastName: firstLast[firstLast.length-1],
-          fullName: instanceObject.name,
-          jobTitle: instanceObject.jobTitle,
-          twitterUsername: instanceObject.twitterUsername,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
+        for (var i = 0; i < thumbs.length; i++) {
+          instances.push({
+            politicianId: parseInt(instanceObject.iden, 10),
+            url: thumbs[i],
+            main: false,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+        // console.log('thumbs', thumbs);
       }
     }
     // console.log('instances', instances);
-    return queryInterface.bulkInsert('Politicians', instances, {});
+    return queryInterface.bulkInsert('PoliticianPhotos', instances, {});
   },
 
   down: function (queryInterface, Sequelize) {
-    return queryInterface.bulkDelete('Politicians', null, {});
+    return queryInterface.bulkDelete('PoliticianPhotos', null, {});
   }
 };

@@ -1,41 +1,41 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Sequelize = require('sequelize');
-  var PacEvent = sequelize.define('PacEvent', {
+  var PoliticianPhoto = sequelize.define('PoliticianPhoto', {
     id: {
       type: DataTypes.INTEGER,
       field: 'id',
       primaryKey: true
     },
-    eventId: {
+    politicianId: {
       type: DataTypes.INTEGER
     },
-    pacId: {
-      type: DataTypes.INTEGER
+    url: {
+      type: DataTypes.STRING
     },
-    support: {
+    main: {
       type: DataTypes.BOOLEAN
     },
     isDeleted: {
-      type: Sequelize.BOOLEAN
+      type: DataTypes.BOOLEAN
     },
     deletedAt: {
-      type: Sequelize.DATE
+      type: DataTypes.DATE
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: DataTypes.DATE
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: DataTypes.DATE
     }
+
   }, {
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        PacEvent.belongsTo(models.Pac);
-        PacEvent.belongsTo(models.Event);
+        PoliticianPhoto.belongsTo(models.Politician);
       }
-    },defaultScope: {
+    },
+    defaultScope: {
       where: {
         isDeleted: false
       }
@@ -45,18 +45,8 @@ module.exports = function(sequelize, DataTypes) {
         where: {
           isDeleted: true
         }
-      },
-      support: {
-        where: {
-          support: true
-        }
-      },
-      oppose: {
-        where: {
-          support: false
-        }
       }
     }
   });
-  return PacEvent;
+  return PoliticianPhoto;
 };

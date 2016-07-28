@@ -8,47 +8,61 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     isPinned: {
-      type: DataTypes.BOOLEAN,
-      field: 'is_pinned'
+      type: DataTypes.BOOLEAN
     },
     imageUrl: {
-      type: DataTypes.STRING,
-      field: 'image_url'
+      type: DataTypes.STRING
     },
     imageAttribution: {
-      type: DataTypes.STRING,
-      field: 'image_attribution'
+      type: DataTypes.STRING
     },
     politicianId: {
-      type: DataTypes.INTEGER,
-      field: 'politician_id'
+      type: DataTypes.INTEGER
     },
     headline: {
-      type: DataTypes.STRING,
-      field: 'headline'
+      type: DataTypes.STRING
     },
     summary: {
-      type: DataTypes.TEXT,
-      field: 'summary'
+      type: DataTypes.TEXT
+    },
+    isDeleted: {
+      type: Sequelize.BOOLEAN
+    },
+    deletedAt: {
+      type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE,
-      field: 'created_at'
+      type: Sequelize.DATE
     },
     updatedAt: {
-      type: Sequelize.DATE,
-      field: 'updated_at'
+      type: Sequelize.DATE
     }
   }, {
-    underscored: true,
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        Event.hasMany(models.Contribution)
         Event.belongsTo(models.Politician);
-        Event.hasMany(models.EventTweet)
+        Event.hasMany(models.Contribution);
+        Event.hasMany(models.EventTweet);
       }
-    }
+    },
+    defaultScope: {
+      where: {
+        isDeleted: false
+      }
+    },
+    scopes: {
+      deleted: {
+        where: {
+          isDeleted: true
+        }
+      },
+      pinned: {
+        where: {
+          isPinned: true
+        }
+      }
+  }
   });
   return Event;
 };

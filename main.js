@@ -90,7 +90,7 @@ var start = function() {
 
   var models = fs.readdirSync('./models');
 
-  require(__dirname + '/models/index.js')
+  require(__dirname + '/models/index.js');
 
   // var Sequelize = require("sequelize");
   // String.prototype.capitalize = function() {
@@ -128,7 +128,7 @@ var start = function() {
   //{force: true}
   // models.sequelize.sync().then(function () {
     app.listen(port, function() {
-      console.log('tally-api listening on port ' + port)
+      console.log('SUCCESS: tally-api listening on port ' + port)
     })
   // });
 }

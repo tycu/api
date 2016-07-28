@@ -16,21 +16,21 @@ module.exports = {
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
         instances.push({
-          id: instanceObject.iden,
+          id: parseInt(instanceObject.iden, 10),
           name: instanceObject.name,
           description: instanceObject.description,
           color: instanceObject.color,
-          twitter_username: instanceObject.twitterUsername,
-          created_at:  new Date(),
-          updated_at: new Date()
+          twitterUsername: instanceObject.twitterUsername,
+          createdAt:  new Date(),
+          updatedAt: new Date()
         });
       }
     }
-    console.log('instances', instances);
+    // console.log('instances', instances);
     return queryInterface.bulkInsert('Pacs', instances, {});
   },
 
   down: function (queryInterface, Sequelize) {
-  //   return queryInterface.bulkDelete('Pacs', null, {});
+    return queryInterface.bulkDelete('Pacs', null, {});
   }
 };

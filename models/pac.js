@@ -8,35 +8,56 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     name: {
-      type: DataTypes.STRING,
-      field: 'name'
+      type: DataTypes.STRING
     },
     description: {
-      type: DataTypes.STRING,
-      field: 'description'
+      type: DataTypes.STRING
     },
     color: {
-      type: DataTypes.STRING,
-      field: 'color'
+      type: DataTypes.STRING
     },
     twitterUsername: {
-      type: DataTypes.STRING,
-      field: 'twitter_username'
+      type: DataTypes.STRING
+    },
+    isDeleted: {
+      type: Sequelize.BOOLEAN
+    },
+    deletedAt: {
+      type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE,
-      field: 'created_at'
+      type: Sequelize.DATE
     },
     updatedAt: {
-      type: Sequelize.DATE,
-      field: 'updated_at'
+      type: Sequelize.DATE
     }
 }, {
-    underscored: true,
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        Pac.hasMany(models.PacEvent)
+        Pac.hasMany(models.PacEvent);
+        Pac.hasMany(models.EventTweet);
+      }
+    },
+    defaultScope: {
+      where: {
+        isDeleted: false
+      }
+    },scopes: {
+      deleted: {
+        where: {
+          isDeleted: true
+        }
+      },
+      red: {
+        where: {
+          color: "red"
+        }
+      },
+      blue: {
+        where: {
+          color: "blue"
+        }
       }
     }
   });

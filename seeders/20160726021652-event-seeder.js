@@ -17,18 +17,18 @@ module.exports = {
         // console.log('instanceObject', instanceObject);
 
         instances.push({
-          id: instanceObject.iden,
-          image_attribution: instanceObject.imageAttribution,
-          image_url: instanceObject.imageUrl,
-          politician_id: instanceObject.politician,
+          id: parseInt(instanceObject.iden, 10),
+          imageAttribution: instanceObject.imageAttribution,
+          imageUrl: instanceObject.imageUrl,
+          politicianId: instanceObject.politician,
           headline: instanceObject.headline,
           summary: instanceObject.summary,
-          is_pinned: false,
+          isPinned: false,
           // instanceObject.tweets,
           // instanceObject.supportPacs,
           // instanceObject.opposePacs,
-          created_at: new Date(),
-          updated_at: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
       }
     }
@@ -38,6 +38,6 @@ module.exports = {
   },
 
   down: function (queryInterface, Sequelize) {
-  //   return queryInterface.bulkDelete('Events', null, {});
+    return queryInterface.bulkDelete('Events', null, {});
   }
 };

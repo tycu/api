@@ -11,26 +11,46 @@ module.exports = {
       thumbnail: {
         type: Sequelize.STRING
       },
-      first_name: {
+      firstName: {
         type: Sequelize.STRING
       },
-      last_name: {
+      lastName: {
         type: Sequelize.STRING
       },
-      job_title: {
+      fullName: {
         type: Sequelize.STRING
       },
-      twitter_username: {
+      jobTitle: {
         type: Sequelize.STRING
       },
-      created_at: {
+      color: {
+        type: Sequelize.STRING
+      },
+      twitterUsername: {
+        type: Sequelize.STRING
+      },
+      isDeleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      deletedAt: {
+        type: Sequelize.DATE,
+        defaultValue: null
+      },
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'Politicians',
+        ['color'],
+        {indexName: 'xi_color_politician'}
+      )
     });
   },
   down: function(queryInterface, Sequelize) {

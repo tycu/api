@@ -14,10 +14,10 @@ module.exports = {
       support: {
         type: Sequelize.BOOLEAN
       },
-      charge_uuid: {
+      chargeUuid: {
         type: Sequelize.STRING
       },
-      user_id: {
+      userId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',
@@ -26,7 +26,7 @@ module.exports = {
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
-      event_id: {
+      eventId: {
         type: Sequelize.INTEGER,
         references: {
             model: 'Events',
@@ -34,7 +34,7 @@ module.exports = {
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
-      pac_id: {
+      pacId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Pacs',
@@ -42,30 +42,38 @@ module.exports = {
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
-      created_at: {
+      isDeleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      deletedAt: {
+        type: Sequelize.DATE,
+        defaultValue: null
+      },
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
     }).then(function(results) {
       return queryInterface.addIndex(
         'Contributions',
-        ['user_id'],
+        ['userId'],
         {indexName: 'xi_user_contribution'}
       )
     }).then(function(results) {
       return queryInterface.addIndex(
         'Contributions',
-        ['event_id'],
+        ['eventId'],
         {indexName: 'xi_event_contribution'}
       )
     }).then(function(results) {
       return queryInterface.addIndex(
         'Contributions',
-        ['pac_id'],
+        ['pacId'],
         {indexName: 'xi_pac_contribution'}
       )
     });

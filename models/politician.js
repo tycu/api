@@ -9,40 +9,43 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     thumbnail: {
-      type: DataTypes.STRING,
-      field: 'thumbnail'
+      type: DataTypes.STRING
     },
     firstName: {
-      type: DataTypes.STRING,
-      field: 'first_name'
+      type: DataTypes.STRING
     },
     lastName: {
-      type: DataTypes.STRING,
-      field: 'last_name'
+      type: DataTypes.STRING
     },
     jobTitle: {
-      type: DataTypes.STRING,
-      field: 'job_title'
+      type: DataTypes.STRING
     },
     twitterUsername: {
-      type: DataTypes.STRING,
-      field: 'twitter_username'
+      type: DataTypes.STRING
+    },
+    isDeleted: {
+      type: Sequelize.BOOLEAN
+    },
+    deletedAt: {
+      type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE,
-      field: 'created_at'
+      type: Sequelize.DATE
     },
     updatedAt: {
-      type: Sequelize.DATE,
-      field: 'updated_at'
+      type: Sequelize.DATE
     }
   }, {
-    underscored: true,
     paranoid: true,
     classMethods: {
       associate: function(models) {
         Politician.hasMany(models.Event);
+        Politician.hasMany(models.PoliticianPhoto);
 
+        // belongsToMany instead?
+        // Politician.hasMany(models.Contribution, {
+        //   through: models.Event
+        // });
 
       // EXAMPLE Associations
       // User.belongsToMany (User, {
@@ -53,7 +56,27 @@ module.exports = function(sequelize, DataTypes) {
       //   through: UserFollowers
       // })
 
-      // Politician.hasMany(models.Contribution, {through: models.Event})
+      }
+    },
+    defaultScope: {
+      where: {
+        isDeleted: false
+      }
+    },scopes: {
+      deleted: {
+        where: {
+          isDeleted: true
+        }
+      },
+      red: {
+        where: {
+          color: "red"
+        }
+      },
+      blue: {
+        where: {
+          color: "blue"
+        }
       }
     }
   });

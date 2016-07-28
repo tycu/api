@@ -7,28 +7,46 @@ module.exports = function(sequelize, DataTypes) {
       field: 'id',
       primaryKey: true
     },
+    pacId: {
+      type: DataTypes.INTEGER
+    },
     eventId: {
-      type: DataTypes.INTEGER,
-      field: 'event_id'
+      type: DataTypes.INTEGER
     },
     userId: {
-      type: DataTypes.INTEGER,
-      field: 'user_id'
+      type: DataTypes.INTEGER
+    },
+    isDeleted: {
+      type: Sequelize.BOOLEAN
+    },
+    deletedAt: {
+      type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE,
-      field: 'created_at'
+      type: Sequelize.DATE
     },
     updatedAt: {
-      type: Sequelize.DATE,
-      field: 'updated_at'
+      type: Sequelize.DATE
     }
   }, {
-    underscored: true,
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        EventTweet.belongsTo(models.Event)
+        EventTweet.belongsTo(models.Pac);
+        EventTweet.belongsTo(models.Event);
+        EventTweet.belongsTo(models.User);
+      }
+    },
+    defaultScope: {
+      where: {
+        isDeleted: false
+      }
+    },
+    scopes: {
+      deleted: {
+        where: {
+          isDeleted: true
+        }
       }
     }
   });

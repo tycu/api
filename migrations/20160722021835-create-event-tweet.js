@@ -11,7 +11,7 @@ module.exports = {
       tweetContent: {
         type: Sequelize.STRING
       },
-      event_id: {
+      eventId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Events',
@@ -20,7 +20,16 @@ module.exports = {
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
-      user_id: {
+      pacId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Pacs',
+          key: 'id'
+        },
+        onUpdate: 'cascade',
+        onDelete: 'cascade'
+      },
+      userId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Users',
@@ -29,24 +38,38 @@ module.exports = {
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
-      created_at: {
+      isDeleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      deletedAt: {
+        type: Sequelize.DATE,
+        defaultValue: null
+      },
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
     }).then(function(results) {
       return queryInterface.addIndex(
         'EventTweets',
-        ['event_id'],
+        ['pacId'],
+        {indexName: 'xi_pac_event_tweet'}
+      )
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'EventTweets',
+        ['eventId'],
         {indexName: 'xi_event_event_tweet'}
       )
     }).then(function(results) {
       return queryInterface.addIndex(
         'EventTweets',
-        ['user_id'],
+        ['userId'],
         {indexName: 'xi_user_event_tweet'}
       )
     });

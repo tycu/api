@@ -8,17 +8,17 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      is_pinned: {
+      isPinned: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
-      image_url: {
+      imageUrl: {
         type: Sequelize.STRING
       },
-      image_attribution: {
+      imageAttribution: {
         type: Sequelize.STRING
       },
-      politician_id: {
+      politicianId: {
         type: Sequelize.INTEGER,
         references: {
           model: 'Politicians',
@@ -33,24 +33,32 @@ module.exports = {
       summary: {
         type: Sequelize.TEXT
       },
-      created_at: {
+      isDeleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      deletedAt: {
+        type: Sequelize.DATE,
+        defaultValue: null
+      },
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
     }).then(function(results) {
       return queryInterface.addIndex(
         'Events',
-        ['is_pinned'],
+        ['isPinned'],
         {indexName: 'xi_pinned_event'}
       )
     }).then(function(results) {
       return queryInterface.addIndex(
         'Events',
-        ['politician_id'],
+        ['politicianId'],
         {indexName: 'xi_politician_event'}
       )
     });

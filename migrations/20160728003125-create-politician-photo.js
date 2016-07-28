@@ -1,33 +1,31 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('PacEvents', {
+    return queryInterface.createTable('PoliticianPhotos', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      support: {
-        type: Sequelize.BOOLEAN
+      id: {
+        type: Sequelize.INTEGER
       },
-      eventId: {
+      politicianId: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'Events',
+          model: 'Politicians',
           key: 'id'
         },
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
-      pacId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Pacs',
-          key: 'id'
-        },
-        onUpdate: 'cascade',
-        onDelete: 'cascade'
+      url: {
+        type: Sequelize.STRING
+      },
+      main: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       isDeleted: {
         type: Sequelize.BOOLEAN,
@@ -47,19 +45,13 @@ module.exports = {
       }
     }).then(function(results) {
       return queryInterface.addIndex(
-        'PacEvents',
-        ['eventId'],
-        {indexName: 'xi_event_pac_event'}
-      )
-    }).then(function(results) {
-      return queryInterface.addIndex(
-        'PacEvents',
-        ['pacId'],
-        {indexName: 'xi_pac_pac_event'}
+        'PoliticianPhotos',
+        ['politicianId'],
+        {indexName: 'xi_politician_photos'}
       )
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('PacEvents');
+    return queryInterface.dropTable('PoliticianPhotos');
   }
 };
