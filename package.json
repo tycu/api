@@ -10,10 +10,15 @@
   "devDependencies": {},
   "dependencies": {
     "async": "^1.5.2",
-    "body-parser": "^1.15.0",
+    "bcrypt": "^0.8.7",
+    "body-parser": "^1.15.2",
+    "connect-redis": "^3.1.0",
+    "cookie-parser": "^1.4.3",
     "cors": "^2.7.1",
     "express": "^4.13.4",
+    "express-session": "^1.14.0",
     "graceful-fs": "^4.1.4",
+    "morgan": "^1.7.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "pg": "^6.0.2",
@@ -24,7 +29,8 @@
     "sequelize": "^3.23.4",
     "sequelize-cli": "^2.4.0",
     "stripe": "^4.4.0",
-    "throng": "^2.0.1"
+    "throng": "^2.0.1",
+    "uuid": "^2.0.2"
   },
   "optionalDependencies": {},
   "engines": {
@@ -34,7 +40,8 @@
     "dev": "webpack-dev-server --content-base src --inline --hot",
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "createDb": "node config/database.js"
+    "createDb": "node config/database.js",
+    "migrate": "sequelize db:migrate && sequelize db:seed:all"
   },
   "bugs": {
     "url": "https://github.com/tallyus/api/issues"

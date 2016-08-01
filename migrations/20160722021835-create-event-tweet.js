@@ -3,10 +3,9 @@ module.exports = {
   up: function(queryInterface, Sequelize) {
     return queryInterface.createTable('EventTweets', {
       id: {
-        allowNull: false,
-        autoIncrement: true,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        autoIncrement: true
       },
       tweetContent: {
         type: Sequelize.STRING

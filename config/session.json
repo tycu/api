@@ -1,0 +1,32 @@
+{
+  "development": {
+    "secret": "devSecret",
+    "name":   "tally.dev.cookie.sid",
+    "resave": false,
+    "saveUninitialized": false,
+    "secure": false,
+    "path": "/",
+    "maxAge": 3600000000,
+    "httpOnly": true
+  },
+  "test": {
+    "secret": "testSecret",
+    "name":   "tally.test.cookie.sid",
+    "resave": false,
+    "saveUninitialized": false,
+    "secure": false,
+    "path": "/",
+    "maxAge": 3600000000,
+    "httpOnly": true
+  },
+  "production": {
+    "secret": "edf769a4-6284-4b40-8c1d-d07cdb3c5741",
+    "name":   "tally.cookie.sid",
+    "resave": false,
+    "saveUninitialized": false,
+    "secure": true,
+    "path": "/",
+    "maxAge": 3600000000,
+    "httpOnly": false
+  }
+}

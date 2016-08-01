@@ -3,10 +3,9 @@ module.exports = {
   up: function(queryInterface, Sequelize) {
     return queryInterface.createTable('Politicians', {
       id: {
-        allowNull: false,
-        autoIncrement: true,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        autoIncrement: true
       },
       thumbnail: {
         type: Sequelize.STRING
@@ -54,6 +53,11 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
+    queryInterface.removeIndex('Events', 'xi_politician_event');
+    queryInterface.removeColumn('Events', 'politicianId');
+
+    // NOTE this isn't great but was having trouble with it
+    queryInterface.dropTable('Events');
     return queryInterface.dropTable('Politicians');
   }
 };

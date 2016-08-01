@@ -3,10 +3,9 @@ module.exports = {
   up: function(queryInterface, Sequelize) {
     return queryInterface.createTable('PacEvents', {
       id: {
-        allowNull: false,
-        autoIncrement: true,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        autoIncrement: true
       },
       support: {
         type: Sequelize.BOOLEAN

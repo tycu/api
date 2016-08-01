@@ -8,7 +8,7 @@ var createDB = function(callback) {
   var client    = new pg.Client();
   var path      = require("path");
   var env       = process.env.NODE_ENV || "development";
-  var config    = require(path.join(__dirname, '.', 'config.json'))[env];
+  var config    = require(path.join(__dirname, '.', 'database.json'))[env];
   var dbName = config.database;
   // var host = config.host;
 

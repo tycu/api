@@ -2,10 +2,10 @@
 
 module.exports = function(sequelize, DataTypes) {
   var Sequelize = require('sequelize');
+  var bcrypt = require('bcrypt');
   var User = sequelize.define('User', {
     id: {
       type: Sequelize.INTEGER,
-      field: 'id',
       primaryKey: true
     },
     name: {
@@ -26,7 +26,13 @@ module.exports = function(sequelize, DataTypes) {
     streetAddress: {
       type: Sequelize.STRING
     },
-    cityStateZip: {
+    city: {
+      type: Sequelize.STRING
+    },
+    residenceState: {
+      type: Sequelize.STRING
+    },
+    zip: {
       type: Sequelize.STRING
     },
     color: {
@@ -39,18 +45,6 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING
     },
     cryptedPassword: {
-      type: Sequelize.STRING
-    },
-    passwordSalt: {
-      type: Sequelize.STRING
-    },
-    persistenceToken: {
-      type: Sequelize.STRING
-    },
-    singleAccessToken: {
-      type: Sequelize.STRING
-    },
-    perishableToken: {
       type: Sequelize.STRING
     },
     state: {
@@ -101,20 +95,42 @@ module.exports = function(sequelize, DataTypes) {
       associate: function(models) {
         User.hasMany(models.Contribution);
         User.hasMany(models.EventTweet);
+      },
+      findById: function(id, done) {
+        process.nextTick(function() {
+          var idx = id - 1;
+          if (records[idx]) {
+            done(null, records[idx]);
+          } else {
+            done(new Error('User ' + id + ' does not exist'));
+          }
+        });
+      },
+      findByUsername: function(username, done) {
+        process.nextTick(function() {
+          for (var i = 0, len = records.length; i < len; i++) {
+            var record = records[i];
+            if (record.username === username) {
+              return done(null, record);
+            }
+          }
+          return done(null, null);
+        });
       }
     },
     instanceMethods: {
-      // createSalt: function() {
-      //   return crypto.randomBytes(128).toString('base64');
-      // },
-      // hashPassword: function(salt, pwd) {
-      //   var hmac = crypto.createHmac('sha1', salt);
+       setPassword: function(passwordPlainText, done) {
+        var that = this;
+        const saltRounds = 10;
 
-      //   return hmac.update(pwd).digest('hex');
-      // },
-      // authenticate: function(passwordToMatch) {
-      //   return this.hashPassword(this.salt, passwordToMatch) === this.hashed_pwd;
-      // }
+        bcrypt.hash(passwordPlainText, saltRounds, function(err, hash) {
+            that.cryptedPassword = hash;
+            done(that);
+        });
+      },
+      verifyPassword: function(password, cb) {
+        bcrypt.compare(password, this.password, cb);
+      }
     },
     defaultScope: {
       where: {
@@ -131,12 +147,3 @@ module.exports = function(sequelize, DataTypes) {
   });
   return User;
 };
-
-
-// User.sync({force: true}).then(function () {
-//   // Table created
-//   return User.create({
-//     firstName: 'John',
-//     lastName: 'Hancock'
-//   });
-// });

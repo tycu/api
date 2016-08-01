@@ -9,9 +9,7 @@ var start = function() {
   var express = require('express');
   var app = express();
   var redisKeys = require('./redis-keys');
-  // var db = {};
   var redis;
-  // var models = require("../models");
 
   if (process.env.REDISCLOUD_URL) {
     redis = require("redis").createClient(process.env.REDISCLOUD_URL, { 'no_ready_check': true })
@@ -48,7 +46,7 @@ var start = function() {
   // If the authorization header is present, verify the token and set req.user
   app.use(function(req, res, next) {
     if (!req.headers.authorization) {
-      if (req.url == '/' || req.url == '/v1/authenticate') {
+      if (req.url == '/' || req.url == '/v1/authenticate' || req.url == '/v1/login' || req.url == '/v1/signup') {
         next()
       } else {
         res.sendStatus(401)
@@ -56,26 +54,25 @@ var start = function() {
         return
       }
 
-      var parts = req.headers.authorization.split(' ')
-        if (parts.length == 2 && parts[0] == 'Bearer') {
-          var token = parts[1]
-          redis.hget(redisKeys.accessTokenToUserIden, token, function(err, reply) {
-            if (err) {
-              res.sendStatus(500)
-              console.error(err)
-            } else if (reply) {
-              redis.hget(redisKeys.users, reply, function(err, reply) {
-                if (err) {
-                  res.sendStatus(500)
-                  console.error(err)
-                } else if (reply) {
-                  req.user = JSON.parse(reply)
-                  next()
-              } else {
+      var parts = req.headers.authorization.split(' ');
+      if (parts.length == 2 && parts[0] == 'Bearer') {
+        var token = parts[1];
+        redis.hget(redisKeys.accessTokenToUserIden, token, function(err, reply) {
+          if (err) {
+            res.sendStatus(500)
+            console.error(err)
+          } else if (reply) {
+            redis.hget(redisKeys.users, reply, function(err, reply) {
+              if (err) {
                 res.sendStatus(500)
-                console.error('entry for ' + userIden + ' missing in ' + redisKeys.users)
-              }
-            })
+                console.error(err)
+              } else if (reply) {
+                req.user = JSON.parse(reply)
+                next()
+            } else {
+              res.sendStatus(500)
+              console.error('entry for ' + userIden + ' missing in ' + redisKeys.users)
+            }})
           } else {
           res.sendStatus(401)
         }
@@ -84,53 +81,14 @@ var start = function() {
       res.sendStatus(401)
     }
   });
-  require('./endpoints')(app, redis);
+  require('./controllers/authentications_controller')(app, redis);
+  require('./controllers/contributions_controller')(app, redis);
+  require('./controllers/ping')(app);
+  require('./controllers/users_controller')(app);
 
-
-
-  var models = fs.readdirSync('./models');
-
-  require(__dirname + '/models/index.js');
-
-  // var Sequelize = require("sequelize");
-  // String.prototype.capitalize = function() {
-  //   return this.charAt(0).toUpperCase() + this.slice(1);
-  // }
-
-  // // NOTE load models for postgres database
-  // fs.readdirSync('./models').filter(function(file) {
-  //   return (file.indexOf("./models") !== 0) && (file !== "index.js");
-  // }).forEach(function(file) {
-  //   require('./config/database.js').init(function(sequelize) {
-
-  //     // console.log(path.join(__dirname, '/models', file));
-  //     // var model = sequelize.import(path.join(__dirname, '/models', file));
-  //     var model = file.split('.')[0].capitalize();
-  //     var whereId = path.join(__dirname, '/models', file)
-
-  //     require(model)(whereId, sequelize);
-  //     db[model.name] = sequelize.import(whereId);
-  //     Object.keys(db).forEach(function(modelName) {
-  //       if (db[modelName].associate) {
-  //         db[modelName].associate(db);
-  //       }
-  //     });
-
-  //     // db.sequelize = sequelize;
-  //     db.Sequelize = Sequelize;
-
-  //   });
-  // });
-
-  // module.exports = db;
-
-
-  //{force: true}
-  // models.sequelize.sync().then(function () {
-    app.listen(port, function() {
-      console.log('SUCCESS: tally-api listening on port ' + port)
-    })
-  // });
+  app.listen(port, function() {
+    console.log('SUCCESS: tally-api listening on port ' + port)
+  })
 }
 
 require('throng')(start, {

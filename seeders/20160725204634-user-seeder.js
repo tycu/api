@@ -14,17 +14,15 @@ module.exports = {
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
         instances.push({
-          id: parseInt(instanceObject.iden, 10),
+          // NOTE don't seed user so we can init postgres sequence
+          // see stuff about sequelize issues with PG sequence
+          // id: parseInt(instanceObject.iden, 10),
           name: instanceObject.name,
           facebookUuid: instanceObject.facebookId,
           email: instanceObject.email,
           createdAt:  new Date(),
           updatedAt: new Date(),
-          cryptedPassword: '',
-          passwordSalt: '',
-          persistenceToken: '',
-          singleAccessToken: '',
-          perishableToken: ''
+          cryptedPassword: ''
         });
       }
     }

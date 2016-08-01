@@ -3,10 +3,9 @@ module.exports = {
   up: function(queryInterface, Sequelize) {
     return queryInterface.createTable('Users', {
       id: {
-        allowNull: false,
-        autoIncrement: true,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        autoIncrement: true
       },
       name: {
         type: Sequelize.STRING
@@ -28,7 +27,13 @@ module.exports = {
       streetAddress: {
         type: Sequelize.STRING
       },
-      cityStateZip: {
+      city: {
+        type: Sequelize.STRING
+      },
+      residenceState: {
+        type: Sequelize.STRING
+      },
+      zip: {
         type: Sequelize.STRING
       },
       color: {
@@ -42,22 +47,6 @@ module.exports = {
       },
       cryptedPassword: {
         type: Sequelize.CHAR,
-        allowNull: false
-      },
-      passwordSalt: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      persistenceToken: {
-        type: Sequelize.CHAR,
-        allowNull: false
-      },
-      singleAccessToken: {
-        type: Sequelize.CHAR,
-        allowNull: false
-      },
-      perishableToken: {
-        type: Sequelize.STRING,
         allowNull: false
       },
       state: {
@@ -121,21 +110,9 @@ module.exports = {
       return queryInterface.addIndex(
         'Users',
         ['email'],
-        {indexName: 'xi'}
+        {indexName: 'xi_email_users'}
       )
-    }).then(function(results) {
-      return queryInterface.addIndex(
-        'Users',
-        ['singleAccessToken'],
-        {indexName: 'xi_single_access_token_user'}
-      )
-    }).then(function(results) {
-      return queryInterface.addIndex(
-        'Users',
-        ['persistenceToken'],
-        {indexName: 'xi_persistence_token_user'}
-      )
-    });
+    })
   },
   down: function(queryInterface, Sequelize) {
     return queryInterface.dropTable('Users');
