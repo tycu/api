@@ -46,7 +46,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       cryptedPassword: {
-        type: Sequelize.CHAR,
+        type: Sequelize.STRING,
         allowNull: false
       },
       state: {

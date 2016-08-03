@@ -7,8 +7,6 @@ var sendgrid  = require('sendgrid')('SG.VCbNC9XZSv6EKDRSesooqQ.rMWu9YJdKjA8kohOC
 var stripeTestSecretKey = 'sk_test_rtBOxo0prIIbfVocTi4l1gPC'
 var stripeLiveSecretKey = 'sk_live_ENFmtxmEkWjtk9E7a53VF8Kf'
 
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
 
 module.exports = function(app, redis) {
   var entities = require('../entities')(redis)

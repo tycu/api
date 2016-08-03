@@ -3,6 +3,8 @@
 module.exports = function(sequelize, DataTypes) {
   var Sequelize = require('sequelize');
   var bcrypt = require('bcrypt');
+  var env = process.env.NODE_ENV || "development";
+  var jwtConfig = require('../config/jwtOptions.json')[env];
   var User = sequelize.define('User', {
     id: {
       type: Sequelize.INTEGER,
@@ -95,41 +97,31 @@ module.exports = function(sequelize, DataTypes) {
       associate: function(models) {
         User.hasMany(models.Contribution);
         User.hasMany(models.EventTweet);
-      },
-      findById: function(id, done) {
-        process.nextTick(function() {
-          var idx = id - 1;
-          if (records[idx]) {
-            done(null, records[idx]);
-          } else {
-            done(new Error('User ' + id + ' does not exist'));
-          }
-        });
-      },
-      findByUsername: function(username, done) {
-        process.nextTick(function() {
-          for (var i = 0, len = records.length; i < len; i++) {
-            var record = records[i];
-            if (record.username === username) {
-              return done(null, record);
-            }
-          }
-          return done(null, null);
-        });
       }
     },
     instanceMethods: {
-       setPassword: function(passwordPlainText, done) {
+      setPassword: function(passwordPlainText, cb) {
         var that = this;
         const saltRounds = 10;
 
         bcrypt.hash(passwordPlainText, saltRounds, function(err, hash) {
-            that.cryptedPassword = hash;
-            done(that);
+          if (err) {
+            return cb(err);
+          }
+          that.cryptedPassword = hash;
+          cb(that);
         });
       },
-      verifyPassword: function(password, cb) {
-        bcrypt.compare(password, this.password, cb);
+      comparePassword: function(password, cb) {
+        var that = this;
+        var hash = that.cryptedPassword;
+
+        bcrypt.compare(password, hash, function(err, isMatch) {
+          if (err) {
+            return cb(err);
+          }
+          cb(null, isMatch);
+        });
       }
     },
     defaultScope: {
