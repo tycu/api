@@ -5,6 +5,8 @@ module.exports = function(sequelize, DataTypes) {
   var bcrypt = require('bcrypt');
   var env = process.env.NODE_ENV || "development";
   var jwtConfig = require('../config/jwtOptions.json')[env];
+  var uuid = require('uuid');
+
   var User = sequelize.define('User', {
     id: {
       type: Sequelize.INTEGER,
@@ -47,6 +49,9 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING
     },
     cryptedPassword: {
+      type: Sequelize.STRING
+    },
+    refreshToken: {
       type: Sequelize.STRING
     },
     state: {
@@ -97,6 +102,11 @@ module.exports = function(sequelize, DataTypes) {
       associate: function(models) {
         User.hasMany(models.Contribution);
         User.hasMany(models.EventTweet);
+      }
+    },
+    hooks: {
+      beforeCreate: function(user, options) {
+        user.refreshToken = uuid.v4()
       }
     },
     instanceMethods: {

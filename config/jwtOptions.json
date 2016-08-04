@@ -11,6 +11,7 @@
     "session": false
   },
   "test": {
+    "secret": "test_secret",
     "expiresInMinutes": 3600,
     "issuer":      "api.tally.us",
     "audience":    "tally.us",

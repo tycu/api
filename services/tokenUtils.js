@@ -1,13 +1,6 @@
 "use strict";
 
-// NOTE this is still vulnerable to XSS attacks (as local storage is accessible)
-// if someone can get bad js on the page
-// should use cookie to store JWT bearer
-// to do this, need to add CSRF protection
-// see https://github.com/senchalabs/connect
-// or maybe https://github.com/expressjs/csurf
-
-var debug = require('debug')('app:utils:' + process.pid),
+var debug = require('debug')('app:tokenUtils:' + process.pid),
     path = require('path'),
     util = require('util'),
     redis = require("redis"),
@@ -21,7 +14,7 @@ var debug = require('debug')('app:utils:' + process.pid),
     UnauthorizedAccessError = require(path.join(__dirname, '../', 'errors', 'UnauthorizedAccessError.js'));
 
 client.on('error', function (err) {
-  debug(err);
+  debug("error from tokenUtils %s", err);
 });
 
 client.on('connect', function () {
@@ -53,7 +46,8 @@ module.exports.create = function (user, req, res, next) {
   var data = {
     id: user.id,
     email: user.email,
-    token: jsonwebtoken.sign({ id: user.id, email: user.email }, config.secret, {
+    refreshToken: user.refreshToken,
+    token: jsonwebtoken.sign({ id: user.id, email: user.email, refreshToken: user.refreshToken }, config.secret, {
       expiresIn: TOKEN_EXPIRATION
     })
   };
@@ -108,7 +102,7 @@ module.exports.retrieve = function (id, done) {
 
       if (_.isNull(reply)) {
         return done(new Error("token_invalid"), {
-          "message": "Token doesn't exists, are you sure it hasn't expired or been revoked?"
+          "message": "Token doesn't exist, are you sure it hasn't expired or been revoked?"
         });
       } else {
         var data = JSON.parse(reply);
@@ -118,7 +112,7 @@ module.exports.retrieve = function (id, done) {
           return done(null, data);
         } else {
           return done(new Error("token_doesnt_exist"), {
-            "message": "Token doesn't exists, login into the system so it can generate new token."
+            "message": "Token doesn't exist, login into the system so it can generate new token."
           });
         }
       }
@@ -130,20 +124,18 @@ module.exports.verify = function (req, res, next) {
   var token = exports.fetch(req.headers);
 
   jsonwebtoken.verify(token, config.secret, function (err, decode) {
-
-  if (err) {
-    req.user = undefined;
-    return next(new UnauthorizedAccessError("invalid_token"));
-  }
-
-  exports.retrieve(token, function (err, data) {
     if (err) {
       req.user = undefined;
-      return next(new UnauthorizedAccessError("invalid_token", data));
+      return next(new UnauthorizedAccessError("invalid_token"));
     }
-    req.user = data;
-    next();
-  });
+
+    exports.retrieve(token, function (err, data) {
+      if (err) {
+        req.user = undefined;
+        return next(new UnauthorizedAccessError("invalid_token", data));
+      }
+      req.user = data;
+    });
   });
 };
 
@@ -179,4 +171,4 @@ module.exports.middleware = function () {
 module.exports.TOKEN_EXPIRATION = TOKEN_EXPIRATION;
 module.exports.TOKEN_EXPIRATION_SEC = TOKEN_EXPIRATION_SEC;
 
-debug("Loaded");
+debug("Loaded tokenUtils");

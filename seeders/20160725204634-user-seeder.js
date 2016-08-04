@@ -1,6 +1,7 @@
 'use strict';
 var fs   = require("fs");
 var path = require("path");
+var uuid = require('uuid');
 
 module.exports = {
   up: function (queryInterface, Sequelize) {
@@ -12,17 +13,20 @@ module.exports = {
       if (seedModel.hasOwnProperty(k)) {
         // console.log('key', k);
         // console.log('val', seedModel[k]);
+
         instanceObject = seedModel[k];
         instances.push({
           // NOTE don't seed user so we can init postgres sequence
           // see stuff about sequelize issues with PG sequence
           // id: parseInt(instanceObject.iden, 10),
+
           name: instanceObject.name,
           facebookUuid: instanceObject.facebookId,
           email: instanceObject.email,
           createdAt:  new Date(),
           updatedAt: new Date(),
-          cryptedPassword: ''
+          cryptedPassword: '',
+          refreshToken: uuid.v4()
         });
       }
     }

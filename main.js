@@ -54,7 +54,7 @@ var start = function() {
   app.use(jwtCheck.unless({path: ['/', '/api/v1/signin', '/api/v1/signup'] }));
   app.use(tokenUtils.middleware().unless({path: ['/', '/api/v1/signin', '/api/v1/signup'] }));
 
-  app.use("/api/v1", require(path.join(__dirname, "routes", "authentication.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "authentication_controller.js"))());
 
   // all other requests redirect to 404
   app.all("*", function (req, res, next) {
@@ -66,7 +66,7 @@ var start = function() {
 
 
     if (env == 'development') {
-      console.log('err', err);
+      debug("err from main.js %s", err);
     }
 
     var errorType = typeof err,

@@ -49,6 +49,9 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      refreshToken: {
+        type: Sequelize.STRING
+      },
       state: {
         type: Sequelize.STRING,
         defaultValue: null

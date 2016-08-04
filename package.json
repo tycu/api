@@ -41,7 +41,7 @@
     "node": "^5.7.0"
   },
   "scripts": {
-    "start": "DEBUG=express:* node main.js",
+    "start": "DEBUG=* node main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "createDb": "node config/database.js",
     "migrate": "sequelize db:migrate && sequelize db:seed:all"

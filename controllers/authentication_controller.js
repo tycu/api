@@ -1,6 +1,6 @@
 "use strict";
 
-var debug = require('debug')('app:routes:default' + process.pid),
+var debug = require('debug')('app:controllers:authentication' + process.pid),
     _ = require("lodash"),
     util = require('util'),
     path = require('path'),
@@ -26,7 +26,6 @@ var authenticate = function(req, res, next) {
 
   process.nextTick(function () {
     models.User.findOne({where: { email: email }}).then(function(existingUser, err) {
-
       if (err || !existingUser) {
         return next(new UnauthorizedAccessError("401", {
           message: 'Invalid email or password'
@@ -34,12 +33,24 @@ var authenticate = function(req, res, next) {
       }
       existingUser.comparePassword(password, function (err, isMatch) {
         if (isMatch && !err) {
-          debug("User authenticated, generating token");
-          utils.create(existingUser, req, res, next);
+
+          existingUser.loginCount += 1;
+          existingUser.save(function(err) {
+              if (err) { throw err; }
+            }).then(function(existingUser) {
+              debug("User authenticated, generating token");
+              utils.create(existingUser, req, res, next);
+            })
         } else {
-          return next(new UnauthorizedAccessError("401", {
-            message: 'Invalid email or password'
-          }));
+          existingUser.failedLoginCount += 1;
+          existingUser.save(function(err) {
+              if (err) { throw err; }
+            }).then(function(existingUser) {
+              return next(new UnauthorizedAccessError("401", {
+                message: 'Invalid email or password'
+              }));
+            })
+
         }
       });
     })
@@ -102,8 +113,13 @@ module.exports = function () {
     });
   });
 
-  router.route("/verify").get(function(req, res, next) {
-    return res.status(200).json(undefined);
+  // router.route("/verify").get(function(req, res, next) {
+  //   return res.status(200).json(undefined);
+  // });
+
+  router.route("/verify").get(function (req, res, next) {
+    utils.verify(req, res, next);
+    return res.status(200).json(req.user);
   });
 
   router.route("/signout").get(function(req, res, next) {
@@ -129,4 +145,4 @@ module.exports = function () {
   return router;
 };
 
-debug("Loaded authentication.js routes");
+debug("Loaded authentication_controller.js routes");
