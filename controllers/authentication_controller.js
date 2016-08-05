@@ -107,16 +107,6 @@ var createUser = function(req, res, next) {
 module.exports = function () {
   var router = new Router();
 
-  router.route("/").get(function(req, res, next){
-    return res.status(200).json({
-      'revitalizingDemocracy': true
-    });
-  });
-
-  // router.route("/verify").get(function(req, res, next) {
-  //   return res.status(200).json(undefined);
-  // });
-
   router.route("/verify").get(function (req, res, next) {
     utils.verify(req, res, next);
     return res.status(200).json(req.user);

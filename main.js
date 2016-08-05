@@ -45,16 +45,40 @@ var start = function() {
     });
   });
 
+  // TODO this is not good but prevents errors for now.
+  app.get('/favicon.ico', function(req, res) {
+    res.status(200)
+  });
 
   var jwtCheck = jwt({
     secret: config.secret
   });
   jwtCheck.unless = unless;
 
-  app.use(jwtCheck.unless({path: ['/', '/api/v1/signin', '/api/v1/signup'] }));
-  app.use(tokenUtils.middleware().unless({path: ['/', '/api/v1/signin', '/api/v1/signup'] }));
+  app.use(jwtCheck.unless({path: [
+    '/',
+    '/api/v1/signin',
+    '/api/v1/signup',
+    '/api/v1/events',
+    '/favicon.*'
+  ]}));
+
+  app.use(tokenUtils.middleware().unless({path: [
+    '/',
+    '/api/v1/signin',
+    '/api/v1/signup',
+    '/api/v1/events',
+    '/favicon.*'
+    ]}));
 
   app.use("/api/v1", require(path.join(__dirname, "controllers", "authentication_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "contributions_controller.js"))());
+
+
+  // require('./controllers/contributions_controller')(app, redis);
+  // require('./controllers/users_controller')(app);
+  // require('./controllers/events_controller')();
 
   // all other requests redirect to 404
   app.all("*", function (req, res, next) {
@@ -63,8 +87,6 @@ var start = function() {
 
   // error handler for all the applications
   app.use(function (err, req, res, next) {
-
-
     if (env == 'development') {
       debug("err from main.js %s", err);
     }
@@ -89,7 +111,6 @@ var start = function() {
     }
     return res.status(code).json(msg);
   });
-
 
   if (process.env.REDISCLOUD_URL) {
     redis = require("redis").createClient(process.env.REDISCLOUD_URL, { 'no_ready_check': true })
@@ -119,9 +140,6 @@ var start = function() {
     }
     next();
   })
-
-  // require('./controllers/contributions_controller')(app, redis);
-  // require('./controllers/users_controller')(app);
 
   app.listen(port, function() {
     console.log('SUCCESS: tally-api listening on port ' + port)
