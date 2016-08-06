@@ -21,7 +21,7 @@ function getAllEvents(req, res, next) {
     limit: 2, // NOTE make 10?
     order: '"id" DESC'
   }).then(function(events, err) {
-    debug(events);
+    // debug(events);
     req.events = events;
     next()
   });

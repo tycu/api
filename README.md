@@ -1,4 +1,39 @@
-### To run locally
+### Required
+[Homebrew](http://brew.sh/)
+xcode command line tools, install via app store
+
+### Suggested tools
+[iTerm 2](https://www.iterm2.com/)
+[sublime text 3](https://www.sublimetext.com/3)
+[postico postgresql db gui](https://eggerapps.at/ postico/)
+[postgres mac app](http://postgresapp.com/)
+
+
+#### NVM Setup
+make sure you have [Node version manager](https://github.com/creationix/nvm) installed (requires OSX command lines tools). make sure to do this from your base directory `$ cd ~`:
+
+`$ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.4/install.sh | bash`
+
+then load NVM
+`$ export NVM_DIR="$HOME/.nvm" [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"`
+
+if this doesn't work read the part about .bash_profle setup on the NVM github readme
+
+verify installation:
+`$ command -v nvm`
+this should output 'nvm' if the installation was successful
+
+use correct node version (5.7) there is an .nvmrc file specifying this
+
+`$ nvm use` should use 5.7
+if not found:
+`$ nvm install` will install 5.7
+
+then cd to the appropriate tally repo
+
+[to read more about setup/version installation if necessary](https://github.com/creationix/nvm#usage)
+
+### Within Tally API  Repo
 
 get latest packages:
 `$ npm install`
@@ -10,6 +45,9 @@ start redis:
 `$ redis-server`
 start redis monitoring if desired:
 `$ redis-cli monitor`
+
+if you do not have redis installed:
+`$ brew install redis`
 
 start api server with dev logging:
 `$ npm run start`
