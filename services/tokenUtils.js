@@ -121,26 +121,25 @@ module.exports.retrieve = function (id, done) {
 
 module.exports.verify = function (req, res, next) {
   debug("Verifying token");
-  var token = exports.fetch(req.headers);
+  var token = exports.fetch(req.query.token);
 
   jsonwebtoken.verify(token, config.secret, function (err, decode) {
     if (err) {
       req.user = undefined;
-      return next(new UnauthorizedAccessError("invalid_token"));
+      return next(new UnauthorizedAccessError("401", {message: ' jwt must be provided'}));
     }
 
     exports.retrieve(token, function (err, data) {
       if (err) {
         req.user = undefined;
-        return next(new UnauthorizedAccessError("invalid_token", data));
+        return next(new UnauthorizedAccessError("401", {message: 'invalid_token or ?'}));
       }
       req.user = data;
     });
   });
 };
 
-module.exports.expire = function (headers) {
-  var token = exports.fetch(headers);
+module.exports.expire = function (token) {
   debug("Expiring token: %s", token);
 
   if (token !== null) {

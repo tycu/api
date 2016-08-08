@@ -60,6 +60,7 @@ var start = function() {
     '/api/v1/signin',
     '/api/v1/signup',
     '/api/v1/events',
+    '/api/v1/signout',
     '/favicon.*'
   ]}));
 
@@ -68,8 +69,9 @@ var start = function() {
     '/api/v1/signin',
     '/api/v1/signup',
     '/api/v1/events',
+    '/api/v1/signout',
     '/favicon.*'
-    ]}));
+  ]}));
 
   app.use("/api/v1", require(path.join(__dirname, "controllers", "authentication_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());

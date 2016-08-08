@@ -108,18 +108,20 @@ module.exports = function () {
   var router = new Router();
 
   router.route("/verify").get(function (req, res, next) {
-    utils.verify(req, res, next);
+    // NOTE verify not needed because token is already pulled/verified automatically
+    // utils.verify(req, res, next);
     return res.status(200).json(req.user);
   });
 
   router.route("/signout").get(function(req, res, next) {
-    if (utils.expire(req.headers)) {
+    utils.verify(req, res, next);
+    if (utils.expire(req.query.token)) {
       // delete req.user;
       return res.status(200).json({
         "message": "User has been successfully logged out"
       });
     } else {
-      return next(new UnauthorizedAccessError("401"));
+      return next(new UnauthorizedAccessError("401", {message: 'cannot expire token'}));
     }
   });
 
