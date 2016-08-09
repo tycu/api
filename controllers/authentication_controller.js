@@ -8,6 +8,7 @@ var debug = require('debug')('app:controllers:authentication' + process.pid),
     utils = require("../services/tokenUtils.js"),
     Router = require("express").Router,
     UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js")),
+    SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
     jwt = require("express-jwt"),
     models = require('../models/index.js');
 

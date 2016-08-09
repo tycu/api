@@ -105,6 +105,7 @@ var start = function() {
       case "BadRequestError":
       case "UnauthorizedAccessError":
       case "NotFoundError":
+      case "SequelizeError":
         code = err.status;
         msg = err.inner;
         break;
