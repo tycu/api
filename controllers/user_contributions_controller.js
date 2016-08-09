@@ -248,3 +248,35 @@ var handleStripeError = function(err, res) {
     console.error(err)
   }
 }
+
+
+
+
+
+// cut from users controller, old endpoint code:
+  app.post('/v1/get-user-data', function(req, res) {
+    var tasks = []
+    tasks.push(function(callback) {
+      redis.hget(redisKeys.userIdenToStripeCustomerId, req.user.iden, function(err, reply) {
+        callback(err, reply)
+      })
+    })
+    tasks.push(function(callback) {
+      entities.listUserContributions(req.user.iden, function(err, contributions) {
+        callback(err, contributions)
+      })
+    })
+
+    async.parallel(tasks, function(err, results) {
+      if (err) {
+        res.sendStatus(500)
+        console.error(err)
+      } else {
+        res.json({
+          'profile': req.user,
+          'chargeable': !!results[0],
+          'contributions': results[1]
+        })
+      }
+    })
+  })

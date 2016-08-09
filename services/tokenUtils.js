@@ -21,7 +21,8 @@ client.on('connect', function () {
   debug("Redis successfully connected");
 });
 
-module.exports.fetch = function (headers) {
+module.exports.fetch = function(headers) {
+  debug("in exports.fetch");
   if (headers && headers.authorization) {
     var authorization = headers.authorization;
     var part = authorization.split(' ');
@@ -150,6 +151,7 @@ module.exports.expire = function (token) {
 
 module.exports.middleware = function () {
   var func = function (req, res, next) {
+    debug('in token middleware');
     var token = exports.fetch(req.headers);
 
     exports.retrieve(token, function (err, data) {

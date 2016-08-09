@@ -55,14 +55,14 @@ var start = function() {
   });
   jwtCheck.unless = unless;
 
-  app.use(jwtCheck.unless({path: [
-    '/',
-    '/api/v1/signin',
-    '/api/v1/signup',
-    '/api/v1/events',
-    '/api/v1/signout',
-    '/favicon.*'
-  ]}));
+  // app.use(jwtCheck.unless({path: [
+  //   '/',
+  //   '/api/v1/signin',
+  //   '/api/v1/signup',
+  //   '/api/v1/events',
+  //   '/api/v1/signout',
+  //   '/favicon.*'
+  // ]}));
 
   app.use(tokenUtils.middleware().unless({path: [
     '/',
@@ -75,7 +75,8 @@ var start = function() {
 
   app.use("/api/v1", require(path.join(__dirname, "controllers", "authentication_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());
-  app.use("/api/v1", require(path.join(__dirname, "controllers", "contributions_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "users_controller.js"))());
+  // app.use("/api/v1", require(path.join(__dirname, "controllers", "contributions_controller.js"))());
 
 
   // require('./controllers/contributions_controller')(app, redis);
