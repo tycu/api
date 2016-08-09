@@ -89,13 +89,24 @@ var createUser = function(req, res, next) {
             currentLoginAt: new Date()
           })
           .setPassword(password, function(newUser, err) {
-            newUser.save(function(err) {
-              if (err) { throw err; }
-            }).then(function(newUser) {
-            debug("New user created, generating token");
-            utils.create(newUser, req, res, next);
-          })
-        })
+            newUser.save(function(newUser, err) {
+              if (newUser) {
+                throw newUser;
+              }
+              if (err) {
+                throw err;
+              }
+            })
+            .catch(function(err, newUser){
+              return next(new SequelizeError("422", {message: err}));
+            })
+            .then(function(newUser, err) {
+              debug("New user created, generating token");
+              debug("from then");
+              debug(err)
+              utils.create(newUser, req, res, next)
+          });
+        });
 
         }
       }
