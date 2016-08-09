@@ -1,5 +1,8 @@
 'use strict';
 
+// NOTE Validations
+// http://docs.sequelizejs.com/en/latest/docs/models-definition/#validations
+
 module.exports = function(sequelize, DataTypes) {
   var Sequelize = require('sequelize');
   var bcrypt = require('bcrypt');
@@ -16,28 +19,47 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING
     },
     email: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        isEmail: true,
+      }
     },
     facebookUuid: {
       type: Sequelize.STRING
     },
     occupation: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      validate: {
+        len: [0,100]
+      }
     },
     employer: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      validate: {
+        len: [0,100]
+      }
     },
     streetAddress: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      validate: {
+        len: [0,100]
+      }
     },
     city: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      validate: {
+        len: [0,100]
+      }
     },
     residenceState: {
       type: Sequelize.STRING
     },
     zip: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      validate: {
+        len: [5,12]
+      }
     },
     color: {
       type: Sequelize.STRING
