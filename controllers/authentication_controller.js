@@ -125,8 +125,8 @@ module.exports = function () {
     return res.status(200).json(req.user);
   });
 
-  router.route("/signout").get(function(req, res, next) {
-    utils.verify(req, res, next);
+  router.route("/signout").put(function(req, res, next) {
+    // utils.verify(req, res, next);
     if (utils.expire(req.query.token)) {
       // delete req.user;
       return res.status(200).json({

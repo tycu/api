@@ -50,26 +50,21 @@ var start = function() {
     res.status(200)
   });
 
-  var jwtCheck = jwt({
+  app.use(jwt({
     secret: config.secret
-  });
-  jwtCheck.unless = unless;
-
-  // app.use(jwtCheck.unless({path: [
-  //   '/',
-  //   '/api/v1/signin',
-  //   '/api/v1/signup',
-  //   '/api/v1/events',
-  //   '/api/v1/signout',
-  //   '/favicon.*'
-  // ]}));
+  }).unless({path: [
+    '/',
+    '/api/v1/signin',
+    '/api/v1/signup',
+    '/api/v1/events',
+    '/favicon.*'
+  ]}));
 
   app.use(tokenUtils.middleware().unless({path: [
     '/',
     '/api/v1/signin',
     '/api/v1/signup',
     '/api/v1/events',
-    '/api/v1/signout',
     '/favicon.*'
   ]}));
 
