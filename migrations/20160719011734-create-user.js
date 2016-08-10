@@ -52,6 +52,9 @@ module.exports = {
       refreshToken: {
         type: Sequelize.STRING
       },
+      singleUseToken: {
+        type: Sequelize.STRING
+      },
       state: {
         type: Sequelize.STRING,
         defaultValue: null
@@ -114,6 +117,13 @@ module.exports = {
         'Users',
         ['email'],
         {indexName: 'xi_email_users'}
+      )
+    })
+    .then(function(results) {
+      return queryInterface.addIndex(
+        'Users',
+        ['singleUseToken'],
+        {indexName: 'xi_single_use_token_users'}
       )
     })
   },

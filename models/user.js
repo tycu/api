@@ -76,6 +76,9 @@ module.exports = function(sequelize, DataTypes) {
     refreshToken: {
       type: Sequelize.STRING
     },
+    singleUseToken: {
+      type: Sequelize.STRING
+    },
     state: {
       type: Sequelize.STRING
     },
