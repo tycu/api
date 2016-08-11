@@ -77,7 +77,7 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING
     },
     singleUseToken: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
     },
     state: {
       type: Sequelize.STRING

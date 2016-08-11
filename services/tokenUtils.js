@@ -11,7 +11,10 @@ var debug = require('debug')('app:tokenUtils:' + process.pid),
     jsonwebtoken = require("jsonwebtoken"),
     TOKEN_EXPIRATION = '5h',
     TOKEN_EXPIRATION_SEC = (5 * 3600),
-    UnauthorizedAccessError = require(path.join(__dirname, '../', 'errors', 'UnauthorizedAccessError.js'));
+    UnauthorizedAccessError = require(path.join(__dirname, '../', 'errors', 'UnauthorizedAccessError.js')),
+    env = process.env.NODE_ENV || "development",
+    resetConfig = require('../config/resetConfig.json')[env],
+    crypto = require('crypto');
 
 client.on('error', function (err) {
   debug("error from tokenUtils %s", err);
@@ -39,7 +42,7 @@ module.exports.fetch = function(headers) {
   }
 };
 
-module.exports.create = function (user, req, res, next) {
+module.exports.create = function(user, req, res, next) {
   debug("Create token");
 
   if (_.isEmpty(user)) {
@@ -87,7 +90,6 @@ module.exports.create = function (user, req, res, next) {
 };
 
 module.exports.retrieve = function (id, done) {
-
   debug("Calling retrieve for token: %s", id);
 
     if (_.isNull(id)) {
@@ -102,7 +104,6 @@ module.exports.retrieve = function (id, done) {
           "message": err
         });
       }
-
       if (_.isNull(reply)) {
         return done(new Error("token_invalid"), {
           "message": "Token doesn't exist, are you sure it hasn't expired or been revoked?"
@@ -122,7 +123,26 @@ module.exports.retrieve = function (id, done) {
   });
 };
 
-module.exports.verify = function (req, res, next) {
+module.exports.verifyEmail = function(existingUser, req, res, next) {
+  debug("Verifying email address/single use emailConfirmToken");
+
+  var emailConfirmToken = req.query.email_confirm_token;
+  const decipher = crypto.createDecipher('aes256', resetConfig.verifyReset);
+  var decrypted = decipher.update(emailConfirmToken, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  var isDecrypted = decrypted === existingUser.email;
+  debug("isDecrypted: %s", isDecrypted)
+
+  if (isDecrypted) {
+    return next(existingUser, null);
+  } else {
+    return next(existingUser, new Error("token_doesnt_exist"), {
+      "message": "Cannot validate user email."
+    });
+  }
+};
+
+module.exports.verify_auth = function(req, res, next) {
   debug("Verifying token");
   var token = exports.fetch(req.query.token);
 

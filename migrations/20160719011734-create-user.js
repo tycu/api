@@ -53,7 +53,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       singleUseToken: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       state: {
         type: Sequelize.STRING,

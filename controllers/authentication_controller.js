@@ -5,12 +5,17 @@ var debug = require('debug')('app:controllers:authentication' + process.pid),
     util = require('util'),
     path = require('path'),
     // bcrypt = require('bcrypt'),
-    utils = require("../services/tokenUtils.js"),
+    tokenUtils = require("../services/tokenUtils.js"),
+    userMailer = require("../mailers/user_mailer.js"),
     Router = require("express").Router,
     UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js")),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
     jwt = require("express-jwt"),
-    models = require('../models/index.js');
+    models = require('../models/index.js'),
+    uuid = require('uuid'),
+    crypto = require('crypto'),
+    env = process.env.NODE_ENV || "development",
+    resetConfig = require('../config/resetConfig.json')[env];
 
 
 var authenticate = function(req, res, next) {
@@ -26,7 +31,8 @@ var authenticate = function(req, res, next) {
   }
 
   process.nextTick(function () {
-    models.User.findOne({where: { email: email }}).then(function(existingUser, err) {
+    models.User.findOne({where: { email: email }})
+    .then(function(existingUser, err) {
       if (err || !existingUser) {
         return next(new UnauthorizedAccessError("401", {
           message: 'Invalid email or password'
@@ -36,11 +42,14 @@ var authenticate = function(req, res, next) {
         if (isMatch && !err) {
 
           existingUser.loginCount += 1;
+          existingUser.lastLoginIp = existingUser.currentLoginIp
+          existingUser.currentLoginIp = req.connection.remoteAddress
           existingUser.save(function(err) {
               if (err) { throw err; }
-            }).then(function(existingUser) {
+            })
+            .then(function(existingUser) {
               debug("User authenticated, generating token");
-              utils.create(existingUser, req, res, next);
+              tokenUtils.create(existingUser, req, res, next);
             })
         } else {
           existingUser.failedLoginCount += 1;
@@ -81,12 +90,17 @@ var createUser = function(req, res, next) {
         if (existingUser) {
           return next(new UnauthorizedAccessError("401", {message: 'User already exists'}));
         } else {
+          const cipher = crypto.createCipher('aes256', resetConfig.verifyReset);
+          const encrypted = cipher.update(email, 'utf8', 'hex') + cipher.final('hex');
+
           var newUser = models.User.build({
             email: email,
             loginCount: 1,
             failedLoginCount: 0,
             lastLoginAt: new Date(),
-            currentLoginAt: new Date()
+            currentLoginAt: new Date(),
+            currentLoginIp: req.connection.remoteAddress,
+            singleUseToken: encrypted
           })
           .setPassword(password, function(newUser, err) {
             newUser.save(function(newUser, err) {
@@ -102,9 +116,14 @@ var createUser = function(req, res, next) {
             })
             .then(function(newUser, err) {
               debug("New user created, generating token");
-              debug("from then");
-              debug(err)
-              utils.create(newUser, req, res, next)
+              debug(err);
+              tokenUtils.create(newUser, req, res, next);
+              userMailer.sendConfirmMail(newUser, function(error, response){
+                // TODO handle errors
+                // debug(error);
+                debug("confirm email response");
+                debug(response);
+              });
           });
         });
 
@@ -114,21 +133,74 @@ var createUser = function(req, res, next) {
   })
 }
 
+var verifyEmail = function(req, res, next) {
+ debug("Processing verifyEmail middleware");
+
+  var emailConfirmToken = req.query.email_confirm_token;
+  // debug("emailConfirmToken %s", emailConfirmToken)
+  process.nextTick(function () {
+
+    models.User.findOne({where: { singleUseToken: emailConfirmToken }})
+    .then(function(existingUser, err) {
+      if (err || !existingUser) {
+        return next(new UnauthorizedAccessError("401", {
+          message: 'Something went wrong verifying your email. Please Contact us or try signing up again.' // user doesn't exist
+        }));
+      }
+      tokenUtils.verifyEmail(existingUser, req, res, function(existingUser, err) {
+        if (err) {
+          return next(new UnauthorizedAccessError("401", {
+          message: 'Something went wrong verifying your email. Please Contact us or try signing up again.' // user doesn't exist
+          }));
+        } else {
+          debug("existingUser:::")
+          debug(existingUser)
+          debug("above userMailer.sendWelcomeMail");
+          userMailer.sendWelcomeMail(existingUser, function(error, response) {
+            debug("welcome email response:");
+            debug(response);
+            next(err, existingUser)
+          })
+
+          existingUser.emailVerified = true;
+          existingUser.lastLoginIp = existingUser.currentLoginIp;
+          existingUser.currentLoginIp = req.connection.remoteAddress;
+
+          existingUser.save(function(err, existingUser) {
+            if (err) {
+              throw err;
+            } else {
+              return true;
+            }
+          })
+        }
+      })
+    })
+  });
+}
+
+
 
 // NOTE '/api/v1' is trimmed from these routes
 module.exports = function () {
   var router = new Router();
 
-  router.route("/verify").get(function (req, res, next) {
-    // NOTE verify not needed because token is already pulled/verified automatically
-    // utils.verify(req, res, next);
+  // NOTE this route is not in use currently, but checks that a token is working, can use for refresh perhaps
+  router.route("/verify_auth").get(function (req, res, next) {
+    tokenUtils.verify_auth(req, res, next);
     return res.status(200).json(req.user);
   });
 
+  router.route("/email_verification").get(verifyEmail, function (req, res, next) {
+    debug("in email_verification route")
+
+    return res.status(200).json({
+      "message": "User verified."
+    });
+  });
+
   router.route("/signout").put(function(req, res, next) {
-    // utils.verify(req, res, next);
-    if (utils.expire(req.query.token)) {
-      // delete req.user;
+    if (tokenUtils.expire(req.query.token)) {
       return res.status(200).json({
         "message": "User has been successfully logged out"
       });
