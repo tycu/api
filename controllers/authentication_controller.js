@@ -68,7 +68,7 @@ var authenticate = function(req, res, next) {
 };
 
 var createUser = function(req, res, next) {
-  debug("Processing createUser middleware");
+  debug("Processing createUser");
 
   var email = req.body.email,
     password = req.body.password;
@@ -134,7 +134,7 @@ var createUser = function(req, res, next) {
 }
 
 var verifyEmail = function(req, res, next) {
- debug("Processing verifyEmail middleware");
+ debug("Processing verifyEmail");
 
   var emailConfirmToken = req.query.email_confirm_token;
   // debug("emailConfirmToken %s", emailConfirmToken)
@@ -179,6 +179,9 @@ var verifyEmail = function(req, res, next) {
   });
 }
 
+var changePassword = function(req, res, next) {
+  debug("Processing changePassword");
+}
 
 
 // NOTE '/api/v1' is trimmed from these routes
@@ -191,7 +194,7 @@ module.exports = function () {
     return res.status(200).json(req.user);
   });
 
-  router.route("/email_verification").get(verifyEmail, function (req, res, next) {
+  router.route("/email_verification").get(verifyEmail, function(req, res, next) {
     debug("in email_verification route")
 
     return res.status(200).json({
@@ -199,6 +202,9 @@ module.exports = function () {
     });
   });
 
+  router.route("/change_password").put(authenticate, function(req, res, next) {
+    debug("in change_password route")
+  });
   router.route("/signout").put(function(req, res, next) {
     if (tokenUtils.expire(req.query.token)) {
       return res.status(200).json({
@@ -209,11 +215,11 @@ module.exports = function () {
     }
   });
 
-  router.route("/signin").post(authenticate, function (req, res, next) {
+  router.route("/signin").post(authenticate, function(req, res, next) {
     return res.status(200).json(req.user);
   });
 
-  router.route("/signup").post(createUser, function (req, res, next) {
+  router.route("/signup").post(createUser, function(req, res, next) {
     return res.status(200).json(req.user);
   });
 

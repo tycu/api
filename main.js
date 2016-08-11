@@ -58,6 +58,7 @@ var start = function() {
     '/api/v1/signup',
     '/api/v1/events',
     '/api/v1/email_verification',
+    'api/v1/email_reset',
     '/favicon.*'
   ]}));
 
@@ -67,6 +68,7 @@ var start = function() {
     '/api/v1/signup',
     '/api/v1/events',
     '/api/v1/email_verification',
+    'api/v1/email_reset',
     '/favicon.*'
   ]}));
 
