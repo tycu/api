@@ -79,12 +79,12 @@ var authenticate = function(req, res, next) {
   });
 };
 
-var changePassword = function(existingUser, newPassword, next) {
+var changePassword = function(user, newPassword, next) {
   debug("Processing changePassword");
 
-  existingUser
-  .setPassword(newPassword, function(existingUser, err) {
-    existingUser.save(function(newUser, err) {
+  user
+  .setPassword(newPassword, function(user, err) {
+    user.save(function(newUser, err) {
       if (newUser) {
         throw newUser;
       }
@@ -92,11 +92,19 @@ var changePassword = function(existingUser, newPassword, next) {
         throw err;
       }
     })
-    .catch(function(err, newUser){
+    .catch(function(err, user){
       return next(new SequelizeError("422", {message: err}));
     })
-    .then(function(newUser, err) {
+    .then(function(user, err) {
       debug("Password changed successfully");
+      userMailer.sendPasswordChangeAlert(user, function(error, response){
+        // TODO handle errors
+        // debug(error);
+        debug("confirm sendPasswordChangeAlert response:");
+        debug(response);
+      });
+
+
       debug(err);
       next();
       // tokenUtils.create(newUser, req, res, next);
@@ -162,7 +170,7 @@ var createUser = function(req, res, next) {
                 userMailer.sendConfirmMail(newUser, function(error, response){
                   // TODO handle errors
                   // debug(error);
-                  debug("confirm email response");
+                  debug("confirm sendConfirmMail response:");
                   debug(response);
                 });
             });
@@ -207,7 +215,7 @@ var resetPassword = function(req, res, next) {
             userMailer.sendPasswordResetEmail(existingUser, function(error, response){
               // TODO handle errors
               // debug(error);
-              debug("confirm email response");
+              debug("confirm sendPasswordResetEmail response:");
               debug(response);
             });
           })
@@ -259,7 +267,7 @@ var verifyEmail = function(req, res, next) {
           } else {
             // debug("above userMailer.sendWelcomeMail");
             userMailer.sendWelcomeMail(existingUser, function(error, response) {
-              debug("welcome email response:");
+              debug("confirm sendWelcomeMail response:");
               debug(response);
               next(err, existingUser)
             })

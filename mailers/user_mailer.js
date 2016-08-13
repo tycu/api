@@ -1,6 +1,8 @@
 // Live handlebars template/editing engine
 // http://tryhandlebarsjs.com/
 
+// https://github.com/sendgrid/sendgrid-nodejs/blob/master/examples/mail/mail.js
+
 var debug = require('debug')('controllers:user_mailer:' + process.pid),
     env = process.env.NODE_ENV || "development",
     resetConfig = require('../config/resetConfig.json')[env],
@@ -35,7 +37,6 @@ var send = function(request, next) {
 
 
 module.exports.sendWelcomeMail = function(user, next) {
-  // https://github.com/sendgrid/sendgrid-nodejs/blob/master/examples/mail/mail.js
   debug("calling sendWelcomeMail");
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
 
@@ -91,7 +92,6 @@ module.exports.sendWelcomeMail = function(user, next) {
 
 
 module.exports.sendConfirmMail = function(user, next) {
-  // https://github.com/sendgrid/sendgrid-nodejs/blob/master/examples/mail/mail.js
   debug("calling sendConfirmMail");
 
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
@@ -143,7 +143,6 @@ module.exports.sendConfirmMail = function(user, next) {
 
 
 module.exports.sendPasswordResetEmail = function(user, next) {
-  // https://github.com/sendgrid/sendgrid-nodejs/blob/master/examples/mail/mail.js
   debug("calling sendPasswordResetEmail");
 
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
@@ -193,3 +192,54 @@ module.exports.sendPasswordResetEmail = function(user, next) {
     }
   });
 };
+
+module.exports.sendPasswordChangeAlert = function(user, next) {
+  debug("calling sendPasswordChangeAlert");
+
+  // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
+
+  var templateData = {
+    "user": user,
+    "domain": resetConfig.domain
+  },
+  filePath = path.join(__dirname, '/templates/password_change_notification.handlebars'),
+  compiledEmail,
+  user,
+  email;
+  var email = user.email;
+
+  fs.readFile(filePath, function(err, data){
+    if (!err) {
+      var source = data.toString();
+
+      compiledEmail = renderToString(source, templateData);
+      var request = sg.emptyRequest({
+        method: 'POST',
+        path: '/v3/mail/send',
+        body: {
+          personalizations: [
+            {
+              to: [
+                { email: user.email }
+              ],
+              subject: 'Tally.us - Password Change Notification'
+            }
+          ],
+          from: { email: 'passwordChange@tally.us' },
+          content: [
+            {
+              type: 'text/html',
+              value: compiledEmail
+            }
+          ]
+        }
+      });
+      send(request, function(err, response) {
+        return next(err, response);
+      });
+    } else {
+      debug("handlebar template load error:");
+      debug(err);
+    }
+  });
+}
