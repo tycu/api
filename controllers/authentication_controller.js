@@ -22,11 +22,18 @@ var authenticate = function(req, res, next) {
   debug("Processing authenticate middleware");
 
   var email = req.body.email,
-    password = req.body.password;
+      password = req.body.password,
+      newPassword = req.body.newPassword,
+      isPasswordChange = req.url === '/change_password',
+      that = this;
 
   if (_.isEmpty(email) || _.isEmpty(password)) {
     return next(new UnauthorizedAccessError("401", {
       message: 'Invalid email or password'
+    }));
+  } else if (isPasswordChange && _.isEmpty(newPassword)) {
+    return next(new UnauthorizedAccessError("401", {
+      message: 'You did not provide a new password'
     }));
   }
 
@@ -48,8 +55,14 @@ var authenticate = function(req, res, next) {
               if (err) { throw err; }
             })
             .then(function(existingUser) {
-              debug("User authenticated, generating token");
-              tokenUtils.create(existingUser, req, res, next);
+              if (isPasswordChange) {
+                debug("password change path::")
+                changePassword(existingUser, newPassword, next);
+              } else {
+                debug("User authenticated, generating token");
+                tokenUtils.create(existingUser, req, res, next);
+              }
+
             })
         } else {
           existingUser.failedLoginCount += 1;
@@ -67,11 +80,36 @@ var authenticate = function(req, res, next) {
   });
 };
 
+var changePassword = function(existingUser, newPassword, next) {
+  debug("Processing changePassword");
+
+  existingUser
+  .setPassword(newPassword, function(existingUser, err) {
+    existingUser.save(function(newUser, err) {
+      if (newUser) {
+        throw newUser;
+      }
+      if (err) {
+        throw err;
+      }
+    })
+    .catch(function(err, newUser){
+      return next(new SequelizeError("422", {message: err}));
+    })
+    .then(function(newUser, err) {
+      debug("Password changed successfully");
+      debug(err);
+      next();
+      // tokenUtils.create(newUser, req, res, next);
+    });
+  });
+}
+
 var createUser = function(req, res, next) {
   debug("Processing createUser");
 
   var email = req.body.email,
-    password = req.body.password;
+      password = req.body.password;
 
   if (_.isEmpty(email) || _.isEmpty(password)) {
     return next(new UnauthorizedAccessError("401", {
@@ -153,9 +191,7 @@ var verifyEmail = function(req, res, next) {
           message: 'Something went wrong verifying your email. Please Contact us or try signing up again.' // user doesn't exist
           }));
         } else {
-          debug("existingUser:::")
-          debug(existingUser)
-          debug("above userMailer.sendWelcomeMail");
+          // debug("above userMailer.sendWelcomeMail");
           userMailer.sendWelcomeMail(existingUser, function(error, response) {
             debug("welcome email response:");
             debug(response);
@@ -179,10 +215,6 @@ var verifyEmail = function(req, res, next) {
   });
 }
 
-var changePassword = function(req, res, next) {
-  debug("Processing changePassword");
-}
-
 
 // NOTE '/api/v1' is trimmed from these routes
 module.exports = function () {
@@ -204,7 +236,31 @@ module.exports = function () {
 
   router.route("/change_password").put(authenticate, function(req, res, next) {
     debug("in change_password route")
+    return res.status(200).json({
+      "message": "Password updated successfully."
+    });
   });
+
+  router.route("/email_reset").put(function(req, res, next) {
+    debug("in email_reset route")
+
+
+    // find user
+    // add SingleUseToken
+    // add reset password true flag
+    // send user password reset email with hash
+    // when click reset password link take to react app
+    // this screen should have 2 password fields
+
+    // should submit to api /change_password
+    // should verify hash has email
+    // should verify that token is correct and reset password is true
+    // should update password on user object if inputs match
+
+
+    return res.status(200).json(req.user);
+  });
+
   router.route("/signout").put(function(req, res, next) {
     if (tokenUtils.expire(req.query.token)) {
       return res.status(200).json({
