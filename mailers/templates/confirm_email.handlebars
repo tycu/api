@@ -113,7 +113,8 @@
     <tr>
       <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;" valign="top">&nbsp;</td>
       <td class="container" style="font-family: sans-serif; font-size: 14px; vertical-align: top; display: block; Margin: 0 auto !important; max-width: 580px; padding: 10px; width: 580px;" valign="top" width="580">
-      <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 580px; padding: 10px;"><!-- START CENTERED WHITE CONTAINER --><span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">This is preheader text. Some clients will show this text as a preview.</span>
+      <div class="content" style="box-sizing: border-box; display: block; Margin: 0 auto; max-width: 580px; padding: 10px;"><!-- START CENTERED WHITE CONTAINER -->
+      <!--<span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">This is preheader text. Some clients will show this text as a preview.</span>-->
       <table class="main" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: #fff; border-radius: 3px;" width="100%"><!-- START MAIN CONTENT AREA -->
         <tbody>
           <tr>
@@ -126,9 +127,9 @@
 
                   <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Help us keep Tally a secure and productive place by verifying your email address ({{user.email}}). Doing so will enable you to take full advantage of Tally's features.</p>
 
-                  <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;"><a href="{{domain}}/email_verification?email_confirm_token={{user.singleUseToken}}">Verify Email Address</a></p>
+                  <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;"><a href="{{domain}}/email_verification?single_use_token={{user.singleUseToken}}">Verify Email Address</a></p>
 
-                  <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Link not working? Paste the following into your browser: <a href="{{domain}}/email_verification?email_confirm_token={{user.singleUseToken}}">{{domain}}/email_verification?email_confirm_token={{user.singleUseToken}}</a></p>
+                  <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Link not working? Paste the following into your browser: <a href="{{domain}}/email_verification?single_use_token={{user.singleUseToken}}">{{domain}}/email_verification?single_use_token={{user.singleUseToken}}</a></p>
 
                   <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">You’re receiving this email because you recently created a new Tally account. If you didn't create a Tally account, ignore this email.</p>
                   </td>

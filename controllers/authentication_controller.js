@@ -26,6 +26,7 @@ var authenticate = function(req, res, next) {
       newPassword = req.body.newPassword,
       isPasswordChange = req.url === '/change_password',
       that = this;
+      // debug("isPasswordChange::: %s", isPasswordChange);
 
   if (_.isEmpty(email) || _.isEmpty(password)) {
     return next(new UnauthorizedAccessError("401", {
@@ -62,7 +63,6 @@ var authenticate = function(req, res, next) {
                 debug("User authenticated, generating token");
                 tokenUtils.create(existingUser, req, res, next);
               }
-
             })
         } else {
           existingUser.failedLoginCount += 1;
@@ -73,7 +73,6 @@ var authenticate = function(req, res, next) {
                 message: 'Invalid email or password'
               }));
             })
-
         }
       });
     })
@@ -105,6 +104,12 @@ var changePassword = function(existingUser, newPassword, next) {
   });
 }
 
+var generateSingleUseToken = function(email, next) {
+  var cipher = crypto.createCipher('aes256', resetConfig.verifyReset);
+  var encrypted = cipher.update(email, 'utf8', 'hex') + cipher.final('hex');
+  return next(encrypted);
+}
+
 var createUser = function(req, res, next) {
   debug("Processing createUser");
 
@@ -128,87 +133,150 @@ var createUser = function(req, res, next) {
         if (existingUser) {
           return next(new UnauthorizedAccessError("401", {message: 'User already exists'}));
         } else {
-          const cipher = crypto.createCipher('aes256', resetConfig.verifyReset);
-          const encrypted = cipher.update(email, 'utf8', 'hex') + cipher.final('hex');
-
-          var newUser = models.User.build({
-            email: email,
-            loginCount: 1,
-            failedLoginCount: 0,
-            lastLoginAt: new Date(),
-            currentLoginAt: new Date(),
-            currentLoginIp: req.connection.remoteAddress,
-            singleUseToken: encrypted
-          })
-          .setPassword(password, function(newUser, err) {
-            newUser.save(function(newUser, err) {
-              if (newUser) {
-                throw newUser;
-              }
-              if (err) {
-                throw err;
-              }
+          generateSingleUseToken(email, function(encrypted) {
+            var newUser = models.User.build({
+              email: email,
+              loginCount: 1,
+              failedLoginCount: 0,
+              lastLoginAt: new Date(),
+              currentLoginAt: new Date(),
+              currentLoginIp: req.connection.remoteAddress,
+              singleUseToken: encrypted
             })
-            .catch(function(err, newUser){
-              return next(new SequelizeError("422", {message: err}));
-            })
-            .then(function(newUser, err) {
-              debug("New user created, generating token");
-              debug(err);
-              tokenUtils.create(newUser, req, res, next);
-              userMailer.sendConfirmMail(newUser, function(error, response){
-                // TODO handle errors
-                // debug(error);
-                debug("confirm email response");
-                debug(response);
-              });
+            .setPassword(password, function(newUser, err) {
+              newUser.save(function(newUser, err) {
+                if (newUser) {
+                  throw newUser;
+                }
+                if (err) {
+                  throw err;
+                }
+              })
+              .catch(function(err, newUser){
+                return next(new SequelizeError("422", {message: err}));
+              })
+              .then(function(newUser, err) {
+                debug("New user created, generating token");
+                debug(err);
+                tokenUtils.create(newUser, req, res, next);
+                userMailer.sendConfirmMail(newUser, function(error, response){
+                  // TODO handle errors
+                  // debug(error);
+                  debug("confirm email response");
+                  debug(response);
+                });
+            });
           });
-        });
 
+          })
         }
       }
     )
   })
 }
 
+var resetPassword = function(req, res, next) {
+  debug("Processing resetPassword");
+  var email = req.body.email;
+
+  if (_.isEmpty(email)) {
+    return next(new UnauthorizedAccessError("401", {
+      message: 'You must provide an email address to reset your password.'
+    }));
+  }
+
+  process.nextTick(function () {
+    models.User.findOne({where: { email: email }})
+    .then(function(existingUser, err) {
+      if (err || !existingUser) {
+        debug('in err or no existing user found');
+        // don't alert user if email not found, swallow error
+        return next();
+      }
+
+      generateSingleUseToken(email, function(encrypted) {
+        existingUser.singleUseToken = encrypted;
+        existingUser.changePassword = true;
+        existingUser.lastLoginIp = existingUser.currentLoginIp
+        existingUser.currentLoginIp = req.connection.remoteAddress
+        existingUser.save(function(err) {
+          if (err) { throw err; }
+            throw err;
+          })
+          .then(function(existingUser) {
+            userMailer.sendPasswordResetEmail(existingUser, function(error, response){
+              // TODO handle errors
+              // debug(error);
+              debug("confirm email response");
+              debug(response);
+            });
+          })
+        })
+      })
+  });
+}
+
 var verifyEmail = function(req, res, next) {
  debug("Processing verifyEmail");
+ var updatePassword = (/\/update_password/).test(req.url),
+     newPassword = req.body.newPassword,
+     emailToken = req.query.single_use_token;
 
-  var emailConfirmToken = req.query.email_confirm_token;
-  // debug("emailConfirmToken %s", emailConfirmToken)
+   debug("updatePassword:: %s", updatePassword)
+   debug("req.url:::")
+   debug(req.url)
+
+  debug("emailToken %s", emailToken)
+
+  if (updatePassword && _.isEmpty(newPassword)) {
+    return next(new UnauthorizedAccessError("401", {
+      message: 'New Password Required'
+    }));
+  }
   process.nextTick(function () {
-
-    models.User.findOne({where: { singleUseToken: emailConfirmToken }})
+    models.User.findOne({where: { singleUseToken: emailToken }})
     .then(function(existingUser, err) {
       if (err || !existingUser) {
         return next(new UnauthorizedAccessError("401", {
-          message: 'Something went wrong verifying your email. Please Contact us or try signing up again.' // user doesn't exist
+          message: 'from top::: Something went wrong verifying your email. Please Contact us or try signing up again.' // user doesn't exist
         }));
       }
       tokenUtils.verifyEmail(existingUser, req, res, function(existingUser, err) {
         if (err) {
           return next(new UnauthorizedAccessError("401", {
-          message: 'Something went wrong verifying your email. Please Contact us or try signing up again.' // user doesn't exist
+          message: 'from bottom::: Something went wrong verifying your email. Please Contact us or try signing up again.' // user doesn't exist
           }));
         } else {
-          // debug("above userMailer.sendWelcomeMail");
-          userMailer.sendWelcomeMail(existingUser, function(error, response) {
-            debug("welcome email response:");
-            debug(response);
-            next(err, existingUser)
-          })
 
-          existingUser.emailVerified = true;
-          existingUser.lastLoginIp = existingUser.currentLoginIp;
-          existingUser.currentLoginIp = req.connection.remoteAddress;
 
-          existingUser.save(function(err, existingUser) {
-            if (err) {
-              throw err;
-            } else {
-              return true;
+          if (updatePassword) {
+            if (existingUser.changePassword === false) {
+              return next(new UnauthorizedAccessError("401", {
+                message: 'Cannot reset password'
+              }));
             }
-          })
+            changePassword(existingUser, newPassword, next);
+          } else {
+            // debug("above userMailer.sendWelcomeMail");
+            userMailer.sendWelcomeMail(existingUser, function(error, response) {
+              debug("welcome email response:");
+              debug(response);
+              next(err, existingUser)
+            })
+
+            existingUser.emailVerified = true;
+            existingUser.lastLoginIp = existingUser.currentLoginIp;
+            existingUser.currentLoginIp = req.connection.remoteAddress;
+
+            existingUser.save(function(err, existingUser) {
+              if (err) {
+                throw err;
+              } else {
+                return true;
+              }
+            })
+          }
+
         }
       })
     })
@@ -224,6 +292,14 @@ module.exports = function () {
   router.route("/verify_auth").get(function (req, res, next) {
     tokenUtils.verify_auth(req, res, next);
     return res.status(200).json(req.user);
+  });
+
+  router.route("/update_password").put(verifyEmail, function(req, res, next) {
+    debug("in email_verification route")
+
+    return res.status(200).json({
+      "message": "User verified."
+    });
   });
 
   router.route("/email_verification").get(verifyEmail, function(req, res, next) {
@@ -243,22 +319,8 @@ module.exports = function () {
 
   router.route("/email_reset").put(function(req, res, next) {
     debug("in email_reset route")
-
-
-    // find user
-    // add SingleUseToken
-    // add reset password true flag
-    // send user password reset email with hash
-    // when click reset password link take to react app
-    // this screen should have 2 password fields
-
-    // should submit to api /change_password
-    // should verify hash has email
-    // should verify that token is correct and reset password is true
-    // should update password on user object if inputs match
-
-
-    return res.status(200).json(req.user);
+    resetPassword(req, res, next)
+    return res.status(200).json({"message": "Password reset email sent."});
   });
 
   router.route("/signout").put(function(req, res, next) {

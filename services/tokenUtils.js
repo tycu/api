@@ -126,7 +126,7 @@ module.exports.retrieve = function (id, done) {
 module.exports.verifyEmail = function(existingUser, req, res, next) {
   debug("Verifying email address/single use emailConfirmToken");
 
-  var emailConfirmToken = req.query.email_confirm_token;
+  var emailConfirmToken = req.query.single_use_token;
   const decipher = crypto.createDecipher('aes256', resetConfig.verifyReset);
   var decrypted = decipher.update(emailConfirmToken, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
