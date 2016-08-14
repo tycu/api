@@ -85,7 +85,7 @@ module.exports = function(sequelize, DataTypes) {
     emailVerified: {
       type: DataTypes.BOOLEAN
     },
-    changePassword: {
+    resetPassword: {
       type: DataTypes.BOOLEAN
     },
     timeZone: {

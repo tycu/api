@@ -58,7 +58,7 @@ var authenticate = function(req, res, next) {
             .then(function(existingUser) {
               if (isPasswordChange) {
                 debug("password change path::")
-                changePassword(existingUser, newPassword, next);
+                resetPassword(existingUser, newPassword, next);
               } else {
                 debug("User authenticated, generating token");
                 tokenUtils.create(existingUser, req, res, next);
@@ -79,8 +79,8 @@ var authenticate = function(req, res, next) {
   });
 };
 
-var changePassword = function(user, newPassword, next) {
-  debug("Processing changePassword");
+var resetPassword = function(user, newPassword, next) {
+  debug("Processing resetPassword");
 
   user
   .setPassword(newPassword, function(user, err) {
@@ -204,7 +204,7 @@ var resetPassword = function(req, res, next) {
 
       generateSingleUseToken(email, function(encrypted) {
         existingUser.singleUseToken = encrypted;
-        existingUser.changePassword = true;
+        existingUser.resetPassword = true;
         existingUser.lastLoginIp = existingUser.currentLoginIp
         existingUser.currentLoginIp = req.connection.remoteAddress
         existingUser.save(function(err) {
@@ -258,12 +258,12 @@ var verifyEmail = function(req, res, next) {
 
 
           if (updatePassword) {
-            if (existingUser.changePassword === false) {
+            if (existingUser.resetPassword === false) {
               return next(new UnauthorizedAccessError("401", {
                 message: 'Cannot reset password'
               }));
             }
-            changePassword(existingUser, newPassword, next);
+            resetPassword(existingUser, newPassword, next);
           } else {
             // debug("above userMailer.sendWelcomeMail");
             userMailer.sendWelcomeMail(existingUser, function(error, response) {

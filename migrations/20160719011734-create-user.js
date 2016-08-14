@@ -63,7 +63,7 @@ module.exports = {
         type: 'BOOLEAN',
         defaultValue: false
       },
-      changePassword: {
+      resetPassword: {
         type: 'BOOLEAN',
         defaultValue: false
       },
@@ -112,7 +112,8 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: null
       }
-    }).then(function(results) {
+    })
+    .then(function(results) {
       return queryInterface.addIndex(
         'Users',
         ['email'],

@@ -1,6 +1,5 @@
 // Live handlebars template/editing engine
 // http://tryhandlebarsjs.com/
-
 // https://github.com/sendgrid/sendgrid-nodejs/blob/master/examples/mail/mail.js
 
 var debug = require('debug')('controllers:user_mailer:' + process.pid),
