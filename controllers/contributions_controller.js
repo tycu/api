@@ -108,6 +108,23 @@ function setCard(req, res, next) {
   })
 }
 
+var getCustomer = function(req, res, next) {
+  var email = req.query.email;
+  if (_.isEmpty(email)) {
+    return next(new UnauthorizedAccessError("401", {
+      message: 'Something went wrong retrieving user.'
+    }));
+  }
+  models.User.findOne({
+    attributes: ['stripeCustomerUuid'],
+    where: { email: email }
+  })
+  .then(function(existingUser, err) {
+    req.user = existingUser;
+    next();
+  })
+}
+
 var handleStripeError = function(err, res) {
   if (err.rawType == 'card_error' && err.message) {
     res.status(400).json({
@@ -124,20 +141,23 @@ var handleStripeError = function(err, res) {
 module.exports = function() {
   var router = new Router();
 
-
+  router.route('/get-customer').get(getCustomer, function(req, res, next) {
+    debug("in /get-customer route");
+    return res.status(200).json(req.user);
+  });
 
   // TODO make sure are passing user ID or email by which to look up user if not found by stripe ID
   router.route("/set-card").post(setCard, function(req, res, next) {
     debug("in set-card route")
 
     return res.status(200).json({
-      "message": "Card set successfully in Stripe."
+      "message": "Customer set successfully in Stripe."
     });
   });
 
 
   router.route("/contributions").get(getEventContributions, function(req, res, next) {
-    debug("in /events/:id/contributions");
+    debug("in /events/:id/contributions route");
     return res.status(200).json(req.events);
   });
 
