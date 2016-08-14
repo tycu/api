@@ -127,6 +127,13 @@ module.exports = {
         {indexName: 'xi_single_use_token_users'}
       )
     })
+    .then(function(results) {
+      return queryInterface.addIndex(
+        'Users',
+        ['stripeCustomerUuid'],
+        {indexName: 'xi_stripe_customer_uuid_users'}
+      )
+    })
   },
   down: function(queryInterface, Sequelize) {
     return queryInterface.dropTable('Users');

@@ -2,7 +2,6 @@ var async = require("async")
 var request = require('request')
 var crypto = require('crypto')
 var redisKeys = require('../redis-keys')
-var sendgrid  = require('sendgrid')('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')
 
 var stripeTestSecretKey = 'sk_test_rtBOxo0prIIbfVocTi4l1gPC'
 var stripeLiveSecretKey = 'sk_live_ENFmtxmEkWjtk9E7a53VF8Kf'
@@ -12,57 +11,8 @@ module.exports = function(app, redis) {
   var entities = require('../entities')(redis)
   var models = require('../models/index.js');
 
-  app.post('/v1/set-card', function(req, res) {
-    if (!req.body.cardToken) {
-      res.sendStatus(400)
-      return
-    }
 
-    var stripe
-    if (req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S') {
-        alert('using live!!!');
-      // stripe = require('stripe')(stripeLiveSecretKey)
-    } else {
-      stripe = require('stripe')(stripeTestSecretKey)
-    }
-
-    redis.hget(redisKeys.userIdenToStripeCustomerId, req.user.iden, function(err, reply) {
-      if (err) {
-        res.sendStatus(500)
-        console.error(err)
-      } else if (reply) {
-          stripe.customers.update(reply, {
-            'source': req.body.cardToken
-          }, function(err, customer) {
-          if (err) {
-            handleStripeError(err, res)
-          } else {
-            res.sendStatus(200)
-          }
-        })
-      } else {
-      stripe.customers.create({
-        'source': req.body.cardToken,
-        'metadata': {
-          'userIden': req.user.iden
-        }
-        }, function(err, customer) {
-          if (err) {
-            handleStripeError(err, res)
-          } else {
-          redis.hset(redisKeys.userIdenToStripeCustomerId, req.user.iden, customer.id, function(err, reply) {
-            if (err) {
-              res.sendStatus(400)
-              console.error(err)
-            } else {
-              res.sendStatus(200)
-            }
-            })
-          }
-        })
-      }
-    })
-  })
+}
 
 
     app.post('/v1/create-contribution', function(req, res) {
@@ -233,22 +183,6 @@ module.exports = function(app, redis) {
         })
     })
 }
-
-
-
-var handleStripeError = function(err, res) {
-  if (err.rawType == 'card_error' && err.message) {
-    res.status(400).json({
-      'error': {
-        'message': err.message
-      }
-    })
-  } else {
-    res.sendStatus(400)
-    console.error(err)
-  }
-}
-
 
 
 
