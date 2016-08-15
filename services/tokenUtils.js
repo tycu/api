@@ -142,7 +142,7 @@ module.exports.verifyEmail = function(existingUser, req, res, next) {
   }
 };
 
-module.exports.verify_auth = function(req, res, next) {
+module.exports.verifyAuth = function(req, res, next) {
   debug("Verifying token");
   var token = exports.fetch(req.query.token);
 

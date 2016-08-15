@@ -298,7 +298,7 @@ module.exports = function () {
 
   // NOTE this route is not in use currently, but checks that a token is working, can use for refresh perhaps
   router.route("/verify_auth").get(function (req, res, next) {
-    tokenUtils.verify_auth(req, res, next);
+    tokenUtils.verifyAuth(req, res, next);
     return res.status(200).json(req.user);
   });
 
