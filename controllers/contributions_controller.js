@@ -7,8 +7,8 @@ var debug = require('debug')('controllers:events_controller:' + process.pid),
     async = require("async"),
     Router = require("express").Router,
     models = require('../models/index.js'),
-    stripeTestSecretKey = 'sk_test_rtBOxo0prIIbfVocTi4l1gPC',
-    stripeLiveSecretKey = 'sk_live_ENFmtxmEkWjtk9E7a53VF8Kf',
+    stripeTestSecretKey = 'sk_test_EoKLhh6S0Kvb1MFWlr4PrNdi',
+    stripeLiveSecretKey = 'sk_live_0qmsxPOV8apIjioQGMjlRt0o',
     UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js")),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
     StripeError = require(path.join(__dirname, "..", "errors", "StripeError.js"));
@@ -19,7 +19,7 @@ var debug = require('debug')('controllers:events_controller:' + process.pid),
     // redisKeys = require('../redis-keys'),
 
 
-function getEventContributions(req, res, next) {
+var getEventContributions = function(req, res, next) {
   debug("getEventContributions");
   models.Event.findAll({
     where: {eventId: req.eventId },
@@ -35,66 +35,62 @@ function getEventContributions(req, res, next) {
 
 
 
+var setCard = function(req, res, next) {
+  debug("in setCard")
+  var cardToken = req.body.cardToken,
+      email = req.body.email,
+      stripe = getStripeSecretKey(req, res, next);
 
-
-function setCard(req, res, next) {
-  if (!req.body.cardToken) {
+  if (!cardToken) {
     res.sendStatus(400)
     return
   }
 
-  var email = req.body.email;
   if (_.isEmpty(email)) {
     return next(new UnauthorizedAccessError("401", {
       message: 'Something went wrong retrieving user.'
     }));
   }
 
-
-  var stripe;
-  if (req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S') {
-      alert('using live!!!');
-    // stripe = require('stripe')(stripeLiveSecretKey);
-  } else {
-    stripe = require('stripe')(stripeTestSecretKey);
-  }
-
-  // look for user based on stripe customer key
-
-
-  models.User.findOne({where: { stripeCustomerUuid: cardToken }})
+  debug("before looking up user by stripeCustomerUuid");
+  models.User.findOne({where: { email: email, stripeCustomerUuid: {ne: null} }})
   .then(function(existingUser, err) {
     if (err) {
       return next(new StripeError("500", {
-        message: 'error finding user by stripe id'
+        message: 'error finding user by email'
       }));
     }
     else if (existingUser) {
-        stripe.customers.update(reply, {
-          'source': req.body.cardToken
-        }, function(err, customer) {
+      // NOTE handles credit card update (allows just default card).
+      stripe.customers.update(existingUser.stripeCustomerUuid, {
+        'source': cardToken
+      }, function(err, customer) {
         if (err) {
-          handleStripeError(err, res)
+          handleStripeError(err, res);
         } else {
           next();
         }
-      })
+      });
     }
     else {
+      debug("before creating stripe customer");
       stripe.customers.create({
-        'source': req.body.cardToken,
-        'metadata': {
-          'userIden': req.user.iden
+        source: cardToken,
+        email: req.body.email,
+        metadata: {
+          userIden: req.body.userId,
         }
-      }, function(err, customer) {
+      },
+      function(err, customer) {
         if (err) {
           handleStripeError(err, res)
         } else {
-
+          debug("customer created!");
+          debug(customer);
 
           models.User.findOne({where: { email: email }})
           .then(function(existingUser, err) {
-            existingUser.stripeCustomerUuid = customer.cardToken;
+            existingUser.stripeCustomerUuid = customer.id;
             existingUser.save(function(err) {
               if (err) { throw err; }
             })
@@ -109,7 +105,9 @@ function setCard(req, res, next) {
 }
 
 var getCustomer = function(req, res, next) {
-  var email = req.query.email;
+  var email = req.query.email,
+      stripe = getStripeSecretKey();
+
   if (_.isEmpty(email)) {
     return next(new UnauthorizedAccessError("401", {
       message: 'Something went wrong retrieving user.'
@@ -121,8 +119,29 @@ var getCustomer = function(req, res, next) {
   })
   .then(function(existingUser, err) {
     req.user = existingUser;
+    var customerObj;
+    if (existingUser.stripeCustomerUuid) {
+      stripe.customers.retrieve(existingUser.stripeCustomerUuid, function(err, customer) {
+        debug("inside customer retrieve");
+        debug(err);
+        debug(customer);
+        customerObj = customer;
+      });
+    }
     next();
   })
+}
+
+var getStripeSecretKey = function(req, res, next) {
+  var stripe;
+
+  if (req.body.stripeKey == 'pk_live_xA1b8BrgpABNkeSdeCMvGYg8') { // old: pk_live_EvHoe9L6R3fKkOyA6WNe3r1S
+      alert('using stripe live!!!');
+    // stripe = require('stripe')(stripeLiveSecretKey);
+  } else {
+    stripe = require('stripe')(stripeTestSecretKey);
+  }
+  return stripe;
 }
 
 var handleStripeError = function(err, res) {
@@ -147,8 +166,8 @@ module.exports = function() {
   });
 
   // TODO make sure are passing user ID or email by which to look up user if not found by stripe ID
-  router.route("/set-card").post(setCard, function(req, res, next) {
-    debug("in set-card route")
+  router.route("/set-customer").put(setCard, function(req, res, next) {
+    debug("in /set-customer route")
 
     return res.status(200).json({
       "message": "Customer set successfully in Stripe."
