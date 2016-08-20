@@ -105,37 +105,42 @@ var setCard = function(req, res, next) {
 }
 
 var getCustomer = function(req, res, next) {
-  var email = req.query.email,
-      stripe = getStripeSecretKey();
+  var email = req.body.email,
+      stripe = getStripeSecretKey(req, res, next);
 
   if (_.isEmpty(email)) {
     return next(new UnauthorizedAccessError("401", {
       message: 'Something went wrong retrieving user.'
     }));
   }
+
   models.User.findOne({
     attributes: ['stripeCustomerUuid'],
     where: { email: email }
   })
   .then(function(existingUser, err) {
-    req.user = existingUser;
-    var customerObj;
-    if (existingUser.stripeCustomerUuid) {
-      stripe.customers.retrieve(existingUser.stripeCustomerUuid, function(err, customer) {
-        debug("inside customer retrieve");
-        debug(err);
-        debug(customer);
-        customerObj = customer;
-      });
+    var stripeCustomerUuid = existingUser.stripeCustomerUuid
+    if (stripeCustomerUuid) {
+      getStripeCustomer(stripeCustomerUuid, stripe, function(customer) {
+        res.customer = customer;
+        res.user = existingUser;
+        next();
+      })
     }
-    next();
   })
 }
 
+var getStripeCustomer = function(stripeCustomerUuid, stripe, next) {
+  stripe.customers.retrieve(stripeCustomerUuid, function(err, customer) {
+    return next(customer);
+  });
+}
+
 var getStripeSecretKey = function(req, res, next) {
+  debug("inside getStripeSecretKey");
   var stripe;
 
-  if (req.body.stripeKey == 'pk_live_xA1b8BrgpABNkeSdeCMvGYg8') { // old: pk_live_EvHoe9L6R3fKkOyA6WNe3r1S
+  if (req.body.stripePublicKey == 'pk_live_xA1b8BrgpABNkeSdeCMvGYg8') { // old: pk_live_EvHoe9L6R3fKkOyA6WNe3r1S
       alert('using stripe live!!!');
     // stripe = require('stripe')(stripeLiveSecretKey);
   } else {
@@ -160,9 +165,9 @@ var handleStripeError = function(err, res) {
 module.exports = function() {
   var router = new Router();
 
-  router.route('/get-customer').get(getCustomer, function(req, res, next) {
+  router.route('/get-customer').post(getCustomer, function(req, res, next) {
     debug("in /get-customer route");
-    return res.status(200).json(req.user);
+    return res.status(200).json({user: res.user, customer: res.customer});
   });
 
   // TODO make sure are passing user ID or email by which to look up user if not found by stripe ID
@@ -170,10 +175,11 @@ module.exports = function() {
     debug("in /set-customer route")
 
     return res.status(200).json({
-      "message": "Customer set successfully in Stripe."
+      "message": "Customer set successfully in Stripe.",
+      "customer": req.customer,
+      "user": req.user
     });
   });
-
 
   router.route("/contributions").get(getEventContributions, function(req, res, next) {
     debug("in /events/:id/contributions route");
