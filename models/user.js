@@ -82,6 +82,9 @@ module.exports = function(sequelize, DataTypes) {
     state: {
       type: Sequelize.STRING
     },
+    role: {
+      type: Sequelize.STRING
+    },
     emailVerified: {
       type: DataTypes.BOOLEAN
     },

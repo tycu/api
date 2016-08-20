@@ -59,6 +59,10 @@ module.exports = {
         type: Sequelize.STRING,
         defaultValue: null
       },
+      role: {
+        type: Sequelize.STRING,
+        defaultValue: 'user'
+      },
       emailVerified: {
         type: 'BOOLEAN',
         defaultValue: false

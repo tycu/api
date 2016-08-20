@@ -23,6 +23,7 @@ module.exports = {
           name: instanceObject.name,
           facebookUuid: instanceObject.facebookId,
           email: instanceObject.email,
+          role: instanceObject.role || 'user',
           createdAt:  new Date(),
           updatedAt: new Date(),
           cryptedPassword: '',
