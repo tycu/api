@@ -12,6 +12,7 @@
     "async": "^1.5.2",
     "bcrypt": "^0.8.7",
     "body-parser": "^1.15.2",
+    "cancan": "^2.1.0",
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.3",
     "cors": "^2.7.1",
