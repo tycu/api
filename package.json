@@ -9,6 +9,8 @@
   },
   "devDependencies": {},
   "dependencies": {
+    "acl": "^0.4.9",
+    "acl-sequelize": "^0.1.2",
     "async": "^1.5.2",
     "bcrypt": "^0.8.7",
     "body-parser": "^1.15.2",

@@ -1,17 +1,24 @@
 'use strict';
 
-var fs        = require('fs');
-var path      = require('path');
-var Sequelize = require('sequelize');
-var basename  = path.basename(module.filename);
-var env       = process.env.NODE_ENV || 'development';
-var config    = require('../config/database.json')[env];
-var db        = {};
+var fs        = require('fs'),
+    path      = require('path'),
+    Acl       = require('acl'),
+    Sequelize = require('sequelize'),
+    basename  = path.basename(module.filename),
+    env       = process.env.NODE_ENV || 'development',
+    config    = require('../config/database.json')[env],
+    db        = {},
+    AclSeq    = require('acl-sequelize'),
+    sequelize,
+    acl;
+
 
 if (config.use_env_variable) {
-  var sequelize = new Sequelize(process.env[config.use_env_variable]);
+  sequelize = new Sequelize(process.env[config.use_env_variable]);
+  acl = new Acl(new AclSeq(sequelize, { prefix: 'acl_' }));
 } else {
-  var sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelize = new Sequelize(config.database, config.username, config.password, config);
+   acl = new Acl(new AclSeq(sequelize, { prefix: 'acl_' }));
 }
 
 fs
