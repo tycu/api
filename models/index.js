@@ -2,7 +2,8 @@
 
 const fs        = require('fs'),
       path      = require('path'),
-      Sequelize = require('sequelize'),
+      Sequelize = require('sequelize');
+
 var basename  = path.basename(module.filename),
     env       = process.env.NODE_ENV || 'development',
     config    = require('../config/database.json')[env],

@@ -79,8 +79,8 @@ var authenticate = function(req, res, next) {
   });
 };
 
-var resetPassword = function(user, newPassword, next) {
-  debug("Processing resetPassword");
+var updatePasswordFromReset = function(user, newPassword, next) {
+  debug("Processing updatePasswordFromReset");
 
   user
   .setPassword(newPassword, function(user, err) {
@@ -263,7 +263,7 @@ var verifyEmail = function(req, res, next) {
                 message: 'Cannot reset password'
               }));
             }
-            resetPassword(existingUser, newPassword, next);
+            updatePasswordFromReset(existingUser, newPassword, next);
           } else {
             // debug("above userMailer.sendWelcomeMail");
             userMailer.sendWelcomeMail(existingUser, function(error, response) {

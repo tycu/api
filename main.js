@@ -1,27 +1,26 @@
 "use strict";
 
-var debug = require('debug')('app:' + process.pid),
-    path = require("path"),
-    fs = require("fs"),
-    bodyParser = require('body-parser'),
-    workers = process.env.WEB_CONCURRENCY || 1,
-    port = process.env.PORT || 5000,
-    jwt = require("express-jwt"),
-    env = process.env.NODE_ENV || "development",
-    config = require("./config/jwtOptions.json")[env],
-    onFinished = require('on-finished'),
-    NotFoundError = require(path.join(__dirname, "errors", "NotFoundError.js")),
-    tokenUtils = require(path.join(__dirname, "/services/tokenUtils.js")),
-    unless = require('express-unless');
-
+const path = require("path"),
+      fs = require("fs"),
+      bodyParser = require('body-parser'),
+      workers = process.env.WEB_CONCURRENCY || 1,
+      port = process.env.PORT || 5000,
+      jwt = require("express-jwt"),
+      env = process.env.NODE_ENV || "development",
+      config = require("./config/jwtOptions.json")[env],
+      onFinished = require('on-finished'),
+      debug = require('debug')('app:' + process.pid),
+      NotFoundError = require(path.join(__dirname, "errors", "NotFoundError.js")),
+      tokenUtils = require(path.join(__dirname, "/services/tokenUtils.js")),
+      unless = require('express-unless');
 
 var start = function() {
   debug("Starting application");
 
   debug("Initializing express");
-  var express = require('express'), app = express();
-  var redisKeys = require('./redis-keys');
-  var redis;
+  var express = require('express'), app = express(),
+      redisKeys = require('./redis-keys'),
+      redis;
 
   debug("Attaching plugins");
   app.use(require('morgan')("dev"));
