@@ -77,7 +77,7 @@ var start = function() {
   app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "users_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "contributions_controller.js"))());
-
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "pacs_controller.js"))());
 
   // require('./controllers/contributions_controller')(app, redis);
   // require('./controllers/users_controller')(app);
