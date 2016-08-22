@@ -8,9 +8,6 @@ var debug = require('debug')('controllers:events_controller:' + process.pid),
     Router = require("express").Router,
     models = require('../models/index.js')
 
-
-
-
 // will need to handle query param or way to get more events
 
 function getAllEvents(req, res, next) {

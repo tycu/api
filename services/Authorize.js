@@ -6,12 +6,12 @@ var debug = require('debug')('app:tokenUtils:' + process.pid),
     _ = require("lodash"),
     UnauthorizedAccessError = require(path.join(__dirname, '../', 'errors', 'UnauthorizedAccessError.js'));
 
-module.exports.requireUserRole = function(role) {
+module.exports.role = function(role) {
   return function(req, res, next) {
     debug("above check for match")
-    debug(parseInt(req.currentUser.id, 10) === parseInt(req.params['id'], 10));
-    debug((req.currentUser && req.currentUser.role == role && parseInt(req.currentUser.id, 10) === parseInt(req.params['id'], 10)))
-    debug(req.currentUser.role == role)
+    // debug(parseInt(req.currentUser.id, 10) === parseInt(req.params['id'], 10));
+    // debug((req.currentUser && req.currentUser.role == role && parseInt(req.currentUser.id, 10) === parseInt(req.params['id'], 10)))
+    // debug(req.currentUser.role == role)
     debug(req.currentUser.role)
     debug(role);
 
@@ -35,4 +35,4 @@ module.exports.requireUserRole = function(role) {
   }
 }
 
-debug("Loaded userAuthorization");
+debug("Loaded Authorize");

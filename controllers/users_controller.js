@@ -9,7 +9,7 @@ var debug = require('debug')('controllers:users_controller:' + process.pid),
     models = require('../models/index.js'),
     utils = require("../services/tokenUtils.js"),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
-    userAuthorization = require("../services/userAuthorization.js"),
+    Authorize = require("../services/Authorize.js"),
     UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js"));
 
 // NOTE example of get all users call
@@ -79,10 +79,10 @@ function updateUserInfo(req, res, next) {
     }
     user.updatedAt = Date.now() / 1000
     user.save(function(err) {
-        if (err) { throw err; }
-      }).then(function(existingUser) {
-        next();
-      })
+      if (err) { throw err; }
+    }).then(function(existingUser) {
+      next();
+    })
   })
   .catch(function(error, user) {
     return next(new SequelizeError("422", {message: err}));
@@ -93,7 +93,7 @@ module.exports = function() {
   var router = new Router();
 
   router.route("/users/:id")
-  .get(userAuthorization.requireUserRole("user"), fetchUserInfo, function(req, res, next) {
+  .get(Authorize.role("user"), fetchUserInfo, function(req, res, next) {
     // fetchUserInfo(req, res, next);
     debug('in GET /users/:id');
     debug("userId: %s", req.params['id']);
@@ -102,7 +102,7 @@ module.exports = function() {
     // debug(foundUser);
     return res.status(200).json(req.user);
   })
-  .put(userAuthorization.requireUserRole("user"), function(req, res, next) {
+  .put(Authorize.role("user"), function(req, res, next) {
     // used to be a POST to /v1/update-profile
     updateUserInfo(req, res, next);
     debug('in PUT /users/:id');

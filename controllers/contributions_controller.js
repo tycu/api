@@ -12,7 +12,7 @@ var debug = require('debug')('controllers:events_controller:' + process.pid),
     UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js")),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
     StripeError = require(path.join(__dirname, "..", "errors", "StripeError.js")),
-    userAuthorization = require("../services/userAuthorization.js");
+    Authorize = require("../services/Authorize.js");
 
 // var crypto = require('crypto')
 // var entities = require('../entities')(redis)
@@ -165,7 +165,7 @@ module.exports = function() {
   var router = new Router();
 
   router.route('/get-customer')
-  .post(userAuthorization.requireUserRole("user"), getCustomer, function(req, res, next) {
+  .post(Authorize.role("user"), getCustomer, function(req, res, next) {
     // getCustomer(req, res, next);
     debug("in /get-customer route");
     return res.status(200).json({user: res.user, customer: res.customer});
@@ -173,7 +173,7 @@ module.exports = function() {
 
   // TODO make sure are passing user ID or email by which to look up user if not found by stripe ID
   router.route("/set-customer")
-  .put(userAuthorization.requireUserRole("user"), setCard, function(req, res, next) {
+  .put(Authorize.role("user"), setCard, function(req, res, next) {
     // setCard(req, res, next);
     debug("in /set-customer route")
 
