@@ -55,14 +55,15 @@ module.exports.create = function(user, req, res, next) {
     refreshToken: user.refreshToken,
     token: jsonwebtoken.sign({ id: user.id, email: user.email, refreshToken: user.refreshToken }, config.secret, {
       expiresIn: TOKEN_EXPIRATION
-    })
+    }),
+    role: user.role
   };
 
   var decoded = jsonwebtoken.decode(data.token);
   data.token_exp = decoded.exp;
   data.token_iat = decoded.iat;
 
-  debug("Token generated for email: %s, token: %s", data.email, data.token);
+  debug("Token generated for email: %s, token: %s, role: %s", data.email, data.token, data.role);
 
   client.set(data.token, JSON.stringify(data), function (err, reply) {
     if (err) {
@@ -75,7 +76,7 @@ module.exports.create = function(user, req, res, next) {
           return next(new Error(err)); // "Can not set the expire value for the token key"
         }
         if (reply) {
-          req.user = data;
+          req.currentUser = data;
           next(); // we have succeeded
         } else {
           return next(new Error('Expiration not set on redis'));
@@ -131,7 +132,7 @@ module.exports.verifyEmail = function(existingUser, req, res, next) {
   var decrypted = decipher.update(emailConfirmToken, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
   var isDecrypted = decrypted === existingUser.email;
-  debug("isDecrypted: %s", isDecrypted)
+  debug("isDecrypted: %s", isDecrypted);
 
   if (isDecrypted) {
     return next(existingUser, null);
@@ -148,16 +149,15 @@ module.exports.verifyAuth = function(req, res, next) {
 
   jsonwebtoken.verify(token, config.secret, function (err, decode) {
     if (err) {
-      req.user = undefined;
-      return next(new UnauthorizedAccessError("401", {message: ' jwt must be provided'}));
+      req.currentUser = undefined;
+      return next(new UnauthorizedAccessError("401", {message: 'jwt must be provided'}));
     }
-
     exports.retrieve(token, function (err, data) {
       if (err) {
-        req.user = undefined;
+        req.currentUser = undefined;
         return next(new UnauthorizedAccessError("401", {message: 'invalid_token or ?'}));
       }
-      req.user = data;
+      req.currentUser = data;
     });
   });
 };
@@ -174,20 +174,19 @@ module.exports.expire = function (token) {
 module.exports.middleware = function () {
   var func = function (req, res, next) {
     debug('in token middleware');
-    // debug(req)
     var token = exports.fetch(req.headers);
 
     exports.retrieve(token, function (err, data) {
       if (err) {
-        req.user = undefined;
+        req.currentUser = undefined;
         return next(new UnauthorizedAccessError("invalid_token", data));
       } else {
-        req.user = _.merge(req.user, data);
+        req.currentUser = _.merge(req.currentUser, data);
+        debug(req.currentUser);
         next();
       }
     });
   };
-
   func.unless = require("express-unless");
   return func;
 };

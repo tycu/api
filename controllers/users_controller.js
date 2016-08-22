@@ -8,7 +8,8 @@ var debug = require('debug')('controllers:users_controller:' + process.pid),
     Router = require("express").Router,
     models = require('../models/index.js'),
     utils = require("../services/tokenUtils.js"),
-    SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js"));
+    SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
+    UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js"));
 
 // NOTE example of get all users call
 // app.get('/v1/users', function(req, res) {
@@ -52,8 +53,6 @@ function updateUserInfo(req, res, next) {
   loadUser(req)
   .then(function(user, err) {
     // debug("loaded user %s", user)
-    // debug("req.body")
-    // debug(req.body);
 
     user.id = user.id
     if (req.body.donorInfo.name) {
@@ -74,9 +73,6 @@ function updateUserInfo(req, res, next) {
     if (req.body.donorInfo.residenceState) {
       user.residenceState = req.body.donorInfo.residenceState
     }
-
-    // debug("req.body.donorInfo.zip")
-    // debug(req.body.donorInfo.zip)
     if (req.body.donorInfo.zip) {
       user.zip = req.body.donorInfo.zip
     }
@@ -92,17 +88,49 @@ function updateUserInfo(req, res, next) {
   });
 }
 
+var requireUserRole = function(role) {
+  return function(req, res, next) {
+    debug("above check for match")
+    // debug(parseInt(req.currentUser.id, 10) === parseInt(req.params['id'], 10));
+    // debug((req.currentUser && req.currentUser.role == role && parseInt(req.currentUser.id, 10) === parseInt(req.params['id'], 10)))
+    // debug(req.currentUser.role == role)
+    // debug(req.currentUser.role)
+    // debug(role)
+
+
+    if (!req.currentUser) {
+      return next(new UnauthorizedAccessError("403", {
+        message: 'Cannot access resource.'
+      }));
+    }
+    if (req.currentUser && req.currentUser.role === 'admin') {
+      return next();
+    }
+    else if (req.currentUser.role == role && parseInt(req.currentUser.id, 10) === parseInt(req.params['id'], 10)) {
+      return next();
+    }
+    else {
+      req.user = null;
+      return next(new UnauthorizedAccessError("403", {
+        message: 'Cannot access resource.'
+      }));
+    }
+  }
+}
+
 module.exports = function() {
   var router = new Router();
 
-  router.route("/users/:id").get(fetchUserInfo, function(req, res, next) {
+  router.route("/users/:id")
+  .get(requireUserRole("user"), function(req, res, next) {
+    fetchUserInfo(req, res, next);
     debug('in GET /users/:id');
-    debug("userId: %s",req.params['id'])
+    debug("userId: %s", req.params['id'])
     return res.status(200).json(req.user);
-  });
-
-  // used to be a POST to /v1/update-profile
-  router.route("/users/:id").put(updateUserInfo, function(req, res, next) {
+  })
+  .put(requireUserRole("user"), function(req, res, next) {
+    // used to be a POST to /v1/update-profile
+    updateUserInfo(req, res, next);
     debug('in PUT /users/:id');
     debug("userId: %s",req.params['id'])
     return res.status(200).json(req.user);

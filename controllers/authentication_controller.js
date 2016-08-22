@@ -4,7 +4,6 @@ var debug = require('debug')('app:controllers:authentication' + process.pid),
     _ = require("lodash"),
     util = require('util'),
     path = require('path'),
-    // bcrypt = require('bcrypt'),
     tokenUtils = require("../services/tokenUtils.js"),
     userMailer = require("../mailers/user_mailer.js"),
     Router = require("express").Router,
@@ -26,7 +25,6 @@ var authenticate = function(req, res, next) {
       newPassword = req.body.newPassword,
       isPasswordChange = req.url === '/change_password',
       that = this;
-      // debug("isPasswordChange::: %s", isPasswordChange);
 
   if (_.isEmpty(email) || _.isEmpty(password)) {
     return next(new UnauthorizedAccessError("401", {
@@ -53,34 +51,34 @@ var authenticate = function(req, res, next) {
           existingUser.lastLoginIp = existingUser.currentLoginIp
           existingUser.currentLoginIp = req.connection.remoteAddress
           existingUser.save(function(err) {
-              if (err) { throw err; }
-            })
-            .then(function(existingUser) {
-              if (isPasswordChange) {
-                debug("password change path::")
-                resetPassword(existingUser, newPassword, next);
-              } else {
-                debug("User authenticated, generating token");
-                tokenUtils.create(existingUser, req, res, next);
-              }
-            })
+            if (err) { throw err; }
+          })
+          .then(function(existingUser) {
+            if (isPasswordChange) {
+              debug("password change path::")
+              updatePassword(existingUser, newPassword, next);
+            } else {
+              debug("User authenticated, generating token");
+              tokenUtils.create(existingUser, req, res, next);
+            }
+          })
         } else {
           existingUser.failedLoginCount += 1;
           existingUser.save(function(err) {
-              if (err) { throw err; }
-            }).then(function(existingUser) {
-              return next(new UnauthorizedAccessError("401", {
-                message: 'Invalid email or password'
-              }));
-            })
+            if (err) { throw err; }
+          }).then(function(existingUser) {
+            return next(new UnauthorizedAccessError("401", {
+              message: 'Invalid email or password'
+            }));
+          })
         }
       });
     })
   });
 };
 
-var updatePasswordFromReset = function(user, newPassword, next) {
-  debug("Processing updatePasswordFromReset");
+var updatePassword = function(user, newPassword, next) {
+  debug("Processing updatePassword");
 
   user
   .setPassword(newPassword, function(user, err) {
@@ -103,8 +101,6 @@ var updatePasswordFromReset = function(user, newPassword, next) {
         debug("confirm sendPasswordChangeAlert response:");
         debug(response);
       });
-
-
       debug(err);
       next();
       // tokenUtils.create(newUser, req, res, next);
@@ -183,8 +179,8 @@ var createUser = function(req, res, next) {
   })
 }
 
-var resetPassword = function(req, res, next) {
-  debug("Processing resetPassword");
+var generatePasswordReset = function(req, res, next) {
+  debug("Processing generatePasswordReset");
   var email = req.body.email;
 
   if (_.isEmpty(email)) {
@@ -198,10 +194,9 @@ var resetPassword = function(req, res, next) {
     .then(function(existingUser, err) {
       if (err || !existingUser) {
         debug('in err or no existing user found');
-        // don't alert user if email not found, swallow error
+        // NOTE do not alert user if email not found, swallow error
         return next();
       }
-
       generateSingleUseToken(email, function(encrypted) {
         existingUser.singleUseToken = encrypted;
         existingUser.resetPassword = true;
@@ -226,17 +221,14 @@ var resetPassword = function(req, res, next) {
 
 var verifyEmail = function(req, res, next) {
  debug("Processing verifyEmail");
- var updatePassword = (/\/update_password/).test(req.url),
+ var isUpdatePassword = (/\/update_password/).test(req.url),
      newPassword = req.body.newPassword,
      emailToken = req.query.single_use_token;
 
-   debug("updatePassword:: %s", updatePassword)
-   debug("req.url:::")
-   debug(req.url)
-
+  debug("isUpdatePassword:: %s", isUpdatePassword)
   debug("emailToken %s", emailToken)
 
-  if (updatePassword && _.isEmpty(newPassword)) {
+  if (isUpdatePassword && _.isEmpty(newPassword)) {
     return next(new UnauthorizedAccessError("401", {
       message: 'New Password Required'
     }));
@@ -257,15 +249,14 @@ var verifyEmail = function(req, res, next) {
         } else {
 
 
-          if (updatePassword) {
+          if (isUpdatePassword) {
             if (existingUser.resetPassword === false) {
               return next(new UnauthorizedAccessError("401", {
                 message: 'Cannot reset password'
               }));
             }
-            updatePasswordFromReset(existingUser, newPassword, next);
+            updatePassword(existingUser, newPassword, next);
           } else {
-            // debug("above userMailer.sendWelcomeMail");
             userMailer.sendWelcomeMail(existingUser, function(error, response) {
               debug("confirm sendWelcomeMail response:");
               debug(response);
@@ -284,7 +275,6 @@ var verifyEmail = function(req, res, next) {
               }
             })
           }
-
         }
       })
     })
@@ -299,7 +289,7 @@ module.exports = function () {
   // NOTE this route is not in use currently, but checks that a token is working, can use for refresh perhaps
   router.route("/verify_auth").get(function (req, res, next) {
     tokenUtils.verifyAuth(req, res, next);
-    return res.status(200).json(req.user);
+    return res.status(200).json(req.currentUser);
   });
 
   router.route("/update_password").put(verifyEmail, function(req, res, next) {
@@ -312,7 +302,6 @@ module.exports = function () {
 
   router.route("/email_verification").get(verifyEmail, function(req, res, next) {
     debug("in email_verification route")
-
     return res.status(200).json({
       "message": "User verified."
     });
@@ -327,7 +316,7 @@ module.exports = function () {
 
   router.route("/email_reset").put(function(req, res, next) {
     debug("in email_reset route")
-    resetPassword(req, res, next)
+    generatePasswordReset(req, res, next)
     return res.status(200).json({"message": "Password reset email sent."});
   });
 
@@ -342,11 +331,11 @@ module.exports = function () {
   });
 
   router.route("/signin").post(authenticate, function(req, res, next) {
-    return res.status(200).json(req.user);
+    return res.status(200).json(req.currentUser);
   });
 
   router.route("/signup").post(createUser, function(req, res, next) {
-    return res.status(200).json(req.user);
+    return res.status(200).json(req.currentUser);
   });
 
   router.unless = require("express-unless");

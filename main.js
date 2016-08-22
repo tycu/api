@@ -37,7 +37,7 @@ var start = function() {
     next();
   });
 
-  // NOTE allow base route/ping
+  // NOTE allow base route/status ping
   app.get('/', function(req, res) {
     res.json({
       'revitalizingDemocracy': true
