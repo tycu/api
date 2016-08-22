@@ -301,7 +301,7 @@ module.exports = function () {
   });
 
   router.route("/email_verification").get(verifyEmail, function(req, res, next) {
-    debug("in email_verification route")
+    debug("in email_verification route");
     return res.status(200).json({
       "message": "User verified."
     });

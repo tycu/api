@@ -11,7 +11,8 @@ var debug = require('debug')('controllers:events_controller:' + process.pid),
     stripeLiveSecretKey = 'sk_live_0qmsxPOV8apIjioQGMjlRt0o',
     UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js")),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
-    StripeError = require(path.join(__dirname, "..", "errors", "StripeError.js"));
+    StripeError = require(path.join(__dirname, "..", "errors", "StripeError.js")),
+    userAuthorization = require("../services/userAuthorization.js");
 
 // var crypto = require('crypto')
 // var entities = require('../entities')(redis)
@@ -32,8 +33,6 @@ var getEventContributions = function(req, res, next) {
     next()
   });
 }
-
-
 
 var setCard = function(req, res, next) {
   debug("in setCard")
@@ -105,7 +104,7 @@ var setCard = function(req, res, next) {
 }
 
 var getCustomer = function(req, res, next) {
-  var email = req.body.email,
+  var email  = req.body.email,
       stripe = getStripeSecretKey(req, res, next);
 
   if (_.isEmpty(email)) {
@@ -165,13 +164,17 @@ var handleStripeError = function(err, res) {
 module.exports = function() {
   var router = new Router();
 
-  router.route('/get-customer').post(getCustomer, function(req, res, next) {
+  router.route('/get-customer')
+  .post(userAuthorization.requireUserRole("user"), getCustomer, function(req, res, next) {
+    // getCustomer(req, res, next);
     debug("in /get-customer route");
     return res.status(200).json({user: res.user, customer: res.customer});
   });
 
   // TODO make sure are passing user ID or email by which to look up user if not found by stripe ID
-  router.route("/set-customer").put(setCard, function(req, res, next) {
+  router.route("/set-customer")
+  .put(userAuthorization.requireUserRole("user"), setCard, function(req, res, next) {
+    // setCard(req, res, next);
     debug("in /set-customer route")
 
     return res.status(200).json({
@@ -181,10 +184,11 @@ module.exports = function() {
     });
   });
 
-  router.route("/contributions").get(getEventContributions, function(req, res, next) {
-    debug("in /events/:id/contributions route");
-    return res.status(200).json(req.events);
-  });
+  // router.route("/contributions")
+  // .get(getEventContributions, function(req, res, next) {
+  //   debug("in /events/:id/contributions route");
+  //   return res.status(200).json(req.events);
+  // });
 
   return router;
 }
