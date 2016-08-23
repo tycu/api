@@ -63,6 +63,22 @@ function updatePac(req, res, next) {
   });
 }
 
+function createPac(req, res, next) {
+  var newPac = models.Pac.build({
+    name: req.body.pac.name,
+    description: req.body.pac.description,
+    color: req.body.pac.color,
+    twitterUsername: req.body.pac.twitterUsername,
+    updatedAt: Date.now() / 1000
+  })
+  newPac.save(function(err) {
+    if (err) { throw err; }
+  }).then(function(newPac) {
+    req.pac = newPac;
+    next();
+  })
+}
+
 function getAllPacs(req, res, next) {
   debug("getAllPacs");
   models.Pac.findAll({
@@ -77,9 +93,9 @@ function getAllPacs(req, res, next) {
       'createdAt',
       'updatedAt'
     ],
-    offset: 1,
-    limit: 2, // NOTE make 10?
-    order: '"id" DESC'
+    offset: 0,
+    limit: 200, // NOTE will need to update if we get tons of pacs.
+    order: '"updatedAt" DESC'
   }).then(function(objects, err) {
     req.pacs = objects;
     next()
@@ -91,23 +107,23 @@ module.exports = function() {
 
   router.route("/pacs")
   .get(getAllPacs, function(req, res, next) {
-    debug("in /pacs");
+    debug("in GET-INDEX /pacs");
     return res.status(200).json(req.pacs);
   })
+  .post(Authorize.role("admin"), createPac, function(req, res, next) {
+    debug('in POST-CREATE /pacs');
+    return res.status(201);
+  });
 
-  // TODO add post stuff
-  // .post();
 
   router.route("/pacs/:id")
   .get(fetch, function(req, res, next) {
-    debug('in GET /pacs/:id');
+    debug('in GET-SHOW /pacs/:id');
     debug("pacId: %s", req.params['id']);
     return res.status(200).json(req.pac);
   })
-  .put(Authorize.role("admin"), function(req, res, next) {
-    // used to be a POST to /v1/update-profile
-    updatePac(req, res, next);
-    debug('in PUT /pacs/:id');
+  .put(Authorize.role("admin"), updatePac, function(req, res, next) {
+    debug('in PUT-UPDATE /pacs/:id');
     debug("pacId: %s",req.params['id'])
     return res.status(204);
   });

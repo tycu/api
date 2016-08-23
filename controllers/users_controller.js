@@ -97,9 +97,6 @@ module.exports = function() {
     // fetchUserInfo(req, res, next);
     debug('in GET /users/:id');
     debug("userId: %s", req.params['id']);
-
-    debug("req.foundUser");
-    // debug(foundUser);
     return res.status(200).json(req.user);
   })
   .put(Authorize.role("user"), function(req, res, next) {
