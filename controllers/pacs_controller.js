@@ -1,6 +1,6 @@
 "use strict";
 
-var debug = require('debug')('controllers:users_controller:' + process.pid),
+var debug = require('debug')('controllers:pacs_controller:' + process.pid),
     _ = require("lodash"),
     util = require('util'),
     path = require('path'),
@@ -24,8 +24,6 @@ function load(req) {
       'description',
       'color',
       'twitterUsername',
-      'isDeleted',
-      'deletedAt',
       'createdAt',
       'updatedAt'
     ],
@@ -88,8 +86,6 @@ function getAllPacs(req, res, next) {
       'description',
       'color',
       'twitterUsername',
-      'isDeleted',
-      'deletedAt',
       'createdAt',
       'updatedAt'
     ],
