@@ -17,7 +17,7 @@ module.exports = {
         // console.log('instanceObject', instanceObject);
 
         instances.push({
-          id: parseInt(instanceObject.iden, 10),
+          // id: parseInt(instanceObject.iden, 10),
           chargeUuid: instanceObject.chargeId,
           amount: parseInt(instanceObject.amount, 10),
           userId: parseInt(instanceObject.user, 10),

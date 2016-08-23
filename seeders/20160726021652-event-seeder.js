@@ -17,7 +17,7 @@ module.exports = {
         // console.log('instanceObject', instanceObject);
 
         instances.push({
-          id: parseInt(instanceObject.iden, 10),
+          // id: parseInt(instanceObject.iden, 10),
           imageAttribution: instanceObject.imageAttribution,
           imageUrl: instanceObject.imageUrl,
           politicianId: instanceObject.politician,

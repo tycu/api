@@ -21,7 +21,7 @@ module.exports = {
         // console.log('instanceObject', instanceObject);
 
         instances.push({
-          id: instanceObject.iden,
+          // id: instanceObject.iden,
           thumbnail: instanceObject.thumbnails[0],
           firstName: firstLast[0],
           lastName: firstLast[firstLast.length-1],
