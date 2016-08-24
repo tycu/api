@@ -14,7 +14,7 @@ var debug = require('debug')('controllers:events_controller:' + process.pid),
 
 
 function load(req) {
-  var id = req.params['id'];
+  var id = req.params['id'] || req.body.eventId;
   debug("id: %s", id);
 
   return models.Event.findOne({
@@ -33,11 +33,63 @@ function load(req) {
   })
 }
 
+function unPinEvent(req, res, next) {
+  // NOTE should only be one, but let's just safe
+  var pinnedEvents = models.Event.findOne({
+    attributes: [
+      'id',
+      'isPinned',
+      'imageUrl',
+      'imageAttribution',
+      'politicianId',
+      'headline',
+      'summary',
+      'createdAt',
+      'updatedAt'
+    ],
+    where: { isPinned: true }
+  })
+  .then(function(pinnedEvent, err) {
+    debug("in pinnedEvents");
+    if (pinnedEvent) {
+      pinnedEvent.isPinned = false;
+      pinnedEvent.save(function(err) {
+        if (err) {
+          throw err;
+        }
+      }).then(function(existingUser) {
+        next();
+      });
+    } else {
+      next();
+    }
+  })
+}
+
+function pinEvent(req, res, next) {
+  debug("pinEvent");
+  load(req)
+  .then(function(event, err) {
+    event.isPinned = true
+
+    event.updatedAt = Date.now() / 1000
+    event.save(function(err) {
+      if (err) { throw err; }
+    }).then(function(existingEvent) {
+      req.event = existingEvent;
+      return next();
+    })
+  })
+  .catch(function(error, event) {
+    return next(new SequelizeError("422", {message: err}));
+  });
+}
+
 function fetch(req, res, next) {
   debug("fetch");
   load(req)
   .then(function(obj, err) {
-    debug(obj);
+    // debug(obj);
     req.event = obj;
     next();
   });
@@ -99,7 +151,7 @@ function getAllEvents(req, res, next) {
       'updatedAt'
     ],
     offset: 0,
-    limit: 2, // NOTE make 10?
+    limit: 5, // NOTE make 10?
     order: '"id" DESC'
   }).then(function(objects, err) {
     req.events = objects;
@@ -126,12 +178,18 @@ module.exports = function() {
   .get(fetch, function(req, res, next) {
     debug('in GET-SHOW /events/:id');
     debug("eventId: %s", req.params['id']);
-    return res.status(200).json(req.event);
+    return res.status(200).send(req.event);
   })
   .put(Authorize.role("admin"), updateEvent, function(req, res, next) {
     debug('in PUT-UPDATE /events/:id');
     debug("eventId: %s",req.params['id'])
     return res.status(204);
+  });
+
+  router.route("/events/:id/pin")
+  .put(Authorize.role("admin"), unPinEvent, pinEvent, function(req, res, next) {
+    debug('in PUT-PIN /events/pin');
+    return res.status(204).send(req.event);
   });
 
   return router;

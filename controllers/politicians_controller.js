@@ -97,7 +97,7 @@ function getAllPoliticians(req, res, next) {
     ],
     offset: 0,
     limit: 200, // NOTE will need to update if we get tons of politicians.
-    order: '"updatedAt" DESC'
+    order: '"lastName" ASC'
   }).then(function(objects, err) {
     req.politicians = objects;
     next()
