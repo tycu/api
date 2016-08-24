@@ -24,6 +24,7 @@ module.exports = {
           headline: instanceObject.headline,
           summary: instanceObject.summary,
           isPinned: false,
+          isPublished: true,
           // instanceObject.tweets,
           // instanceObject.supportPacs,
           // instanceObject.opposePacs,

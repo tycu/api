@@ -10,6 +10,9 @@ module.exports = function(sequelize, DataTypes) {
     isPinned: {
       type: DataTypes.BOOLEAN
     },
+    isPublished: {
+      type: DataTypes.BOOLEAN
+    },
     imageUrl: {
       type: DataTypes.STRING
     },
@@ -54,7 +57,8 @@ module.exports = function(sequelize, DataTypes) {
     },
     defaultScope: {
       where: {
-        isDeleted: false
+        isDeleted: false,
+        isPublished: true
       }
     },
     scopes: {
@@ -66,6 +70,16 @@ module.exports = function(sequelize, DataTypes) {
       pinned: {
         where: {
           isPinned: true
+        }
+      },
+      published: {
+        where: {
+          isPublished: true
+        }
+      },
+      draft: {
+        where: {
+          isPublished: false
         }
       }
   }

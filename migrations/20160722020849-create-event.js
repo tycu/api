@@ -11,6 +11,10 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
+      isPublished: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       imageUrl: {
         type: Sequelize.STRING
       },
@@ -53,6 +57,12 @@ module.exports = {
         'Events',
         ['isPinned'],
         {indexName: 'xi_pinned_event'}
+      )
+    }).then(function(results) {
+      return queryInterface.addIndex(
+        'Events',
+        ['isPublished'],
+        {indexName: 'xi_is_published_event'}
       )
     }).then(function(results) {
       return queryInterface.addIndex(
