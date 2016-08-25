@@ -51,15 +51,15 @@ const uploadImage = function(req, res, next) {
       'contentType': req.query.fileType
     }
   })).on('error', function(e) {
-    debug('printing error::::');
+    debug('image upload error:');
     debug(e);
     res.sendStatus(500);
   }).on('finish', function() {
     res.status(200).json({
-      'imageUrl': baseImageUrl + '/images/' + fileName
-    })
+      'imageUrl': imageUrl
+    });
     next();
-  })
+  });
 };
 
 

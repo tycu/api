@@ -8,7 +8,7 @@
     "projectId": "tally-us"
   },
   "production": {
-    "bucket":    "tally.us",
+    "bucket":    "static.tally.us",
     "projectId": "tally-us"
   }
 }
