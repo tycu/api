@@ -1,31 +1,31 @@
-'use strict'
+'use strict';
 
-var fs = require("fs");
+const debug = require('debug')('controllers:datbase.js:' + process.pid);
 
-var createDB = function(callback) {
-  var Sequelize = require('sequelize');
-  var pg        = require('pg');
-  var client    = new pg.Client();
-  var path      = require("path");
-  var env       = process.env.NODE_ENV || "development";
-  var config    = require(path.join(__dirname, '.', 'database.json'))[env];
-  var dbName = config.database;
-  // var host = config.host;
+const createDB = function() { // NOTE could have (callback)
+  const pg     = require('pg'),
+        db     = new pg.Client(),
+        path   = require("path"),
+        env    = process.env.NODE_ENV || "development",
+        config = require(path.join(__dirname, '.', 'database.json'))[env],
+        dbName = config.database;
 
-  client.connect(function (err) {
-    console.log('using database:', dbName);
-    client.query('CREATE DATABASE ' + dbName, function(err) {
+      // Sequelize = require('sequelize'),
+
+  db.connect(function () { // NOTE could have arg (err)
+    debug('using database: %s', dbName);
+    db.query('CREATE DATABASE ' + dbName, function() { // NOTE could have arg (err)
       // var sequelize = new Sequelize(dbName, config.username, config.password, config);
       // callback(sequelize);
 
 
       // NOTE for clearing DB
-      // client.query('SET FOREIGN_KEY_CHECKS = 0')
+      // db.query('SET FOREIGN_KEY_CHECKS = 0')
       // .then(function(){
-      //     return client.sync({ force: true });
+      //     return db.sync({ force: true });
       // })
       // .then(function(){
-      //     return client.query('SET FOREIGN_KEY_CHECKS = 1')
+      //     return db.query('SET FOREIGN_KEY_CHECKS = 1')
       // })
       // .then(function(){
       //     console.log('Database synchronised.');
@@ -34,24 +34,27 @@ var createDB = function(callback) {
       // });
 
 
-      client.end(); // close the connection
+      db.end(); // NOTE close the connection
     });
   });
 };
 createDB();
 
-var unsetDB = function(callback) {
+const unsetDB = function() {
+  const pg = require('pg'),
+        db = new pg.Client();
+
   db.query('SET FOREIGN_KEY_CHECKS = 0')
   .then(function(){
-      return db.sync({ force: true });
+    return db.sync({ force: true });
   })
   .then(function(){
-      return db.query('SET FOREIGN_KEY_CHECKS = 1')
+    return db.query('SET FOREIGN_KEY_CHECKS = 1');
   })
   .then(function(){
-      console.log('Database synchronised.');
+    debug('Database synchronised.');
   }, function(err){
-      console.log(err);
+    debug(err);
   });
 };
 
