@@ -7,8 +7,8 @@ const debug = require('debug')('app:tokenUtils:' + process.pid),
 module.exports.role = function(role) {
   return function(req, res, next) {
     debug("above check for match");
-    // debug(parseInt(req.currentUser.id, 10) === parseInt(req.params['id'], 10));
-    // debug((req.currentUser && req.currentUser.role == role && parseInt(req.currentUser.id, 10) === parseInt(req.params['id'], 10)));
+    // debug(parseInt(req.currentUser.id, 10) === parseInt(req.params.id, 10));
+    // debug((req.currentUser && req.currentUser.role == role && parseInt(req.currentUser.id, 10) === parseInt(req.params.id, 10)));
     // debug(req.currentUser.role == role);
     debug(req.currentUser.role);
     debug(role);

@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 module.exports = {
     // Hashes, iden -> json blob
@@ -21,31 +21,31 @@ module.exports = {
     // Lists
     'reverseChronologicalEvents': 'reverse_chronological_events',
     'userReverseChronologicalContributions': function(userIden) {
-        return 'user_' + userIden + '_reverse_chronological_contributions'
+      return 'user_' + userIden + '_reverse_chronological_contributions';
     },
     'contributionsToday': function() {
-        var date = new Date()
-        date.setUTCHours(0, 0, 0, 0) // UTC Midnight
-        return date.getTime() / 1000 + '_contributions'
+      const date = new Date();
+      date.setUTCHours(0, 0, 0, 0); // UTC Midnight
+      return date.getTime() / 1000 + '_contributions';
     },
     'contributionsOnDay': function(utcTimestamp) {
-        return utcTimestamp + '_contributions'
+      return utcTimestamp + '_contributions';
     },
 
     // Sorted sets
     'eventsSortedByContributionSums': 'events_sorted_by_contribution_sums',
-    
+
     // Hashes with 2 fields, support & oppose
     'eventContributionTotals': function(eventIden) {
-        return 'event_' + eventIden + '_contribution_totals'
+      return 'event_' + eventIden + '_contribution_totals';
     },
     'politicianContributionTotals': function(politicianIden) {
-        return 'politician_' + politicianIden + '_contribution_totals'
+      return 'politician_' + politicianIden + '_contribution_totals';
     },
 
     // Sum of all contributions
     'contributionsSum': 'contributions_sum',
     'userContributionsSum': function(userIden) {
-        return 'user_' + userIden + '_contributions_sum'
+      return 'user_' + userIden + '_contributions_sum';
     }
-}
+};

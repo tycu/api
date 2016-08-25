@@ -1,39 +1,32 @@
 "use strict";
 
-var debug = require('debug')('controllers:events_controller:' + process.pid),
-    _ = require("lodash"),
-    util = require('util'),
+const debug = require('debug')('controllers:events_controller:' + process.pid),
     path = require('path'),
-    async = require("async"),
     Router = require("express").Router,
     models = require('../models/index.js'),
-    utils = require("../services/tokenUtils.js"),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
     Authorize = require("../services/Authorize.js"),
-    UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js"));
-
-const attributesToLoad = [ 'id', 'isPinned', 'isPublished', 'imageUrl', 'imageAttribution',
-      'politicianId', 'headline', 'summary', 'createdAt', 'updatedAt'];
+    attributesToLoad = [ 'id', 'isPinned', 'isPublished', 'imageUrl', 'imageAttribution', 'politicianId', 'headline', 'summary', 'createdAt', 'updatedAt'];
 
 
 function loadAdmin(req) {
-  var id = req.params['id'] || req.body.eventId;
+  const id = req.params.id || req.body.eventId;
   debug("id: %s", id);
 
   return models.Event.unscoped().findOne({
     attributes: attributesToLoad,
     where: { id: id, isDeleted: false }
-  })
+  });
 }
 
 function load(req) {
-  var id = req.params['id'] || req.body.eventId;
+  const id = req.params.id || req.body.eventId;
   debug("id: %s", id);
 
   return models.Event.findOne({
     attributes: attributesToLoad,
     where: { id: id }
-  })
+  });
 }
 
 function unPinEvent(req, res, next) {
@@ -56,25 +49,25 @@ function unPinEvent(req, res, next) {
     } else {
       next();
     }
-  })
+  });
 }
 
 function pinEvent(req, res, next) {
   debug("pinEvent");
   loadAdmin(req)
   .then(function(event, err) {
-    event.isPinned = true
+    event.isPinned = true;
 
-    event.updatedAt = Date.now() / 1000
+    event.updatedAt = Date.now() / 1000;
     event.save(function(err) {
       if (err) { throw err; }
     }).then(function(existingEvent) {
       req.event = existingEvent;
       return next();
-    })
+    });
   })
   .catch(function(error, event) {
-    return next(new SequelizeError("422", {message: err}));
+    return next(new SequelizeError("422", {message: error}));
   });
 }
 
@@ -83,15 +76,15 @@ function togglePublish(req, res, next) {
   loadAdmin(req)
   .then(function(event, err) {
     event.isPublished = !event.isPublished;
-    event.updatedAt = Date.now() / 1000
+    event.updatedAt = Date.now() / 1000;
     event.save(function(err) {
       if (err) { throw err; }
     }).then(function(existingEvent) {
       return next();
-    })
+    });
   })
   .catch(function(error, event) {
-    return next(new SequelizeError("422", {message: err}));
+    return next(new SequelizeError("422", {message: error}));
   });
 }
 
@@ -118,7 +111,7 @@ function updateEvent(req, res, next) {
   loadAdmin(req)
   .then(function(event, err) {
     event.isPinned = req.body.event.isPinned;
-    eventId.isPublished = req.body.event.isPublished;
+    // event.isPublished = req.body.event.isPublished;
     event.imageUrl = req.body.event.imageUrl;
     event.imageAttribution = req.body.event.imageAttribution;
     event.politicianId = req.body.event.politicianId;
@@ -129,16 +122,16 @@ function updateEvent(req, res, next) {
       if (err) { throw err; }
     }).then(function(existingEvent) {
       next();
-    })
+    });
   })
   .catch(function(error, event) {
-    return next(new SequelizeError("422", {message: err}));
+    return next(new SequelizeError("422", {message: error}));
   });
 }
 
 function createEvent(req, res, next) {
   debug("createEvent");
-  var newEvent = models.Event.build({
+  const newEvent = models.Event.build({
     isPinned: req.body.event.isPinned,
     isPublished: req.body.eventId.isPublished,
     imageUrl: req.body.event.imageUrl,
@@ -147,13 +140,13 @@ function createEvent(req, res, next) {
     headline: req.body.event.headline,
     summary: req.body.event.summary,
     updatedAt: Date.now() / 1000
-  })
+  });
   newEvent.save(function(err) {
     if (err) { throw err; }
   }).then(function(newEvent) {
     req.event = newEvent;
     next();
-  })
+  });
 }
 
 function getAllEvents(req, res, next) {
@@ -165,7 +158,7 @@ function getAllEvents(req, res, next) {
     order: '"id" DESC'
   }).then(function(objects, err) {
     req.events = objects;
-    next()
+    next();
   });
 }
 
@@ -180,60 +173,60 @@ function getAdminEvents(req, res, next) {
     order: '"id" DESC'
   }).then(function(objects, err) {
     req.events = objects;
-    next()
+    next();
   });
 }
 
 
 module.exports = function() {
-  var router = new Router();
+  const router = new Router();
 
   router.route("/events")
-  .get(getAllEvents, function(req, res, next) {
+  .get(getAllEvents, function(req, res) {
     debug("in GET-INDEX /events");
     return res.status(200).json(req.events);
   })
-  .post(Authorize.role("admin"), createEvent, function(req, res, next) {
+  .post(Authorize.role("admin"), createEvent, function(req, res) {
     debug('in POST-CREATE /events');
     return res.status(201);
   });
 
   // TO load draft events as well
   router.route("/admin_events")
-  .get(Authorize.role("admin"), getAdminEvents, function(req, res, next) {
+  .get(Authorize.role("admin"), getAdminEvents, function(req, res) {
     debug("in GET-INDEX /admin_events");
     return res.status(200).json(req.events);
-  })
+  });
   // TO load draft events as well
   router.route("/admin_events/:id")
-  .get(Authorize.role("admin"), fetchAdmin, function(req, res, next) {
+  .get(Authorize.role("admin"), fetchAdmin, function(req, res) {
     debug("in GET-INDEX /admin_events/:id");
     return res.status(200).json(req.event);
-  })
+  });
 
   router.route("/events/:id")
-  .get(fetch, function(req, res, next) {
+  .get(fetch, function(req, res) {
     debug('in GET-SHOW /events/:id');
-    debug("eventId: %s", req.params['id']);
+    debug("eventId: %s", req.params.id);
     return res.status(200).send(req.event);
   })
-  .put(Authorize.role("admin"), updateEvent, function(req, res, next) {
+  .put(Authorize.role("admin"), updateEvent, function(req, res) {
     debug('in PUT-UPDATE /events/:id');
-    debug("eventId: %s", req.params['id'])
+    debug("eventId: %s", req.params.id);
     return res.status(204);
   });
 
   router.route("/events/:id/pin")
-  .put(Authorize.role("admin"), unPinEvent, pinEvent, function(req, res, next) {
+  .put(Authorize.role("admin"), unPinEvent, pinEvent, function(req, res) {
     debug('in PUT-PIN /events/:id/pin');
     return res.status(204).send(req.event);
   });
 
   router.route("/events/:id/toggle_publish")
-  .put(Authorize.role("admin"), togglePublish, function(req, res, next) {
+  .put(Authorize.role("admin"), togglePublish, function(req, res) {
     debug('in PUT-PIN /events/:id/toggle_publish');
-    return res.status(204).send({toggledId: req.params['id']});
+    return res.status(204).send({toggledId: req.params.id});
   });
 
   return router;
-}
+};

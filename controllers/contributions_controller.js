@@ -1,10 +1,8 @@
 "use strict";
 
-var debug = require('debug')('controllers:events_controller:' + process.pid),
+const debug = require('debug')('controllers:events_controller:' + process.pid),
     _ = require("lodash"),
-    util = require('util'),
     path = require('path'),
-    async = require("async"),
     Router = require("express").Router,
     models = require('../models/index.js'),
     stripeTestSecretKey = 'sk_test_EoKLhh6S0Kvb1MFWlr4PrNdi',
@@ -13,6 +11,7 @@ var debug = require('debug')('controllers:events_controller:' + process.pid),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
     StripeError = require(path.join(__dirname, "..", "errors", "StripeError.js")),
     Authorize = require("../services/Authorize.js");
+    // attributesToLoad = ['id', 'isPinned', 'imageUrl', 'imageAttribution', 'politicianId', 'headline', 'summary', 'createdAt', 'updatedAt'];
 
 // var crypto = require('crypto')
 // var entities = require('../entities')(redis)
@@ -20,29 +19,29 @@ var debug = require('debug')('controllers:events_controller:' + process.pid),
     // redisKeys = require('../redis-keys'),
 
 
-var getEventContributions = function(req, res, next) {
-  debug("getEventContributions");
-  models.Event.findAll({
-    where: {eventId: req.eventId },
-    attributes: ['id', 'isPinned', 'imageUrl', 'imageAttribution', 'politicianId', 'headline', 'summary', 'createdAt', 'updatedAt'],
-    limit: 10,
-    order: '"id" DESC'
-  }).then(function(events, err) {
-    debug(events);
-    req.events = events;
-    next()
-  });
-}
+// const getEventContributions = function(req, res, next) {
+//   debug("getEventContributions");
+//   models.Event.findAll({
+//     where: {eventId: req.eventId },
+//     attributes: attributesToLoad,
+//     limit: 10,
+//     order: '"id" DESC'
+//   }).then(function(events, err) {
+//     debug(events);
+//     req.events = events;
+//     next();
+//   });
+// };
 
-var setCard = function(req, res, next) {
-  debug("in setCard")
-  var cardToken = req.body.cardToken,
-      email = req.body.email,
-      stripe = getStripeSecretKey(req, res, next);
+const setCard = function(req, res, next) {
+  debug("in setCard");
+  const cardToken = req.body.cardToken,
+        email = req.body.email,
+        stripe = getStripeSecretKey(req, res, next);
 
   if (!cardToken) {
-    res.sendStatus(400)
-    return
+    res.sendStatus(400);
+    return;
   }
 
   if (_.isEmpty(email)) {
@@ -77,12 +76,12 @@ var setCard = function(req, res, next) {
         source: cardToken,
         email: req.body.email,
         metadata: {
-          userIden: req.body.userId,
+          userIden: req.body.userId
         }
       },
       function(err, customer) {
         if (err) {
-          handleStripeError(err, res)
+          handleStripeError(err, res);
         } else {
           debug("customer created!");
           debug(customer);
@@ -95,17 +94,17 @@ var setCard = function(req, res, next) {
             })
             .then(function(existingUser) {
               next();
-            })
-          })
+            });
+          });
         }
-      })
+      });
     }
-  })
-}
+  });
+};
 
-var getCustomer = function(req, res, next) {
-  var email  = req.body.email,
-      stripe = getStripeSecretKey(req, res, next);
+const getCustomer = function(req, res, next) {
+  const email  = req.body.email,
+        stripe = getStripeSecretKey(req, res, next);
 
   if (_.isEmpty(email)) {
     return next(new UnauthorizedAccessError("401", {
@@ -118,64 +117,62 @@ var getCustomer = function(req, res, next) {
     where: { email: email }
   })
   .then(function(existingUser, err) {
-    var stripeCustomerUuid = existingUser.stripeCustomerUuid
+    const stripeCustomerUuid = existingUser.stripeCustomerUuid;
     if (stripeCustomerUuid) {
       getStripeCustomer(stripeCustomerUuid, stripe, function(customer) {
         res.customer = customer;
         res.user = existingUser;
         next();
-      })
+      });
     }
-  })
-}
+  });
+};
 
-var getStripeCustomer = function(stripeCustomerUuid, stripe, next) {
+const getStripeCustomer = function(stripeCustomerUuid, stripe, next) {
   stripe.customers.retrieve(stripeCustomerUuid, function(err, customer) {
     return next(customer);
   });
-}
+};
 
-var getStripeSecretKey = function(req, res, next) {
+const getStripeSecretKey = function(req, res, next) {
   debug("inside getStripeSecretKey");
-  var stripe;
+  let stripe;
 
-  if (req.body.stripePublicKey == 'pk_live_xA1b8BrgpABNkeSdeCMvGYg8') { // old: pk_live_EvHoe9L6R3fKkOyA6WNe3r1S
-      alert('using stripe live!!!');
+  if (req.body.stripePublicKey === 'pk_live_xA1b8BrgpABNkeSdeCMvGYg8') { // old: pk_live_EvHoe9L6R3fKkOyA6WNe3r1S
+      debug('*** using stripe live!!! ***');
     // stripe = require('stripe')(stripeLiveSecretKey);
   } else {
     stripe = require('stripe')(stripeTestSecretKey);
   }
   return stripe;
-}
+};
 
-var handleStripeError = function(err, res) {
-  if (err.rawType == 'card_error' && err.message) {
+const handleStripeError = function(err, res) {
+  if (err.rawType === 'card_error' && err.message) {
     res.status(400).json({
       'error': {
         'message': err.message
       }
-    })
+    });
   } else {
-    res.sendStatus(400)
-    console.error(err)
+    res.sendStatus(400);
+    debug(err);
   }
-}
+};
 
 module.exports = function() {
-  var router = new Router();
+  const router = new Router();
 
   router.route('/get-customer')
-  .post(Authorize.role("user"), getCustomer, function(req, res, next) {
-    // getCustomer(req, res, next);
+  .post(Authorize.role("user"), getCustomer, function(req, res) {
     debug("in /get-customer route");
     return res.status(200).json({user: res.user, customer: res.customer});
   });
 
   // TODO make sure are passing user ID or email by which to look up user if not found by stripe ID
   router.route("/set-customer")
-  .put(Authorize.role("user"), setCard, function(req, res, next) {
-    // setCard(req, res, next);
-    debug("in /set-customer route")
+  .put(Authorize.role("user"), setCard, function(req, res) {
+    debug("in /set-customer route");
 
     return res.status(200).json({
       "message": "Customer set successfully in Stripe.",
@@ -191,4 +188,4 @@ module.exports = function() {
   // });
 
   return router;
-}
+};

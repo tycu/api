@@ -1,30 +1,26 @@
 "use strict";
 
-var debug = require('debug')('app:controllers:authentication' + process.pid),
+const debug = require('debug')('app:controllers:authentication' + process.pid),
     _ = require("lodash"),
-    util = require('util'),
     path = require('path'),
     tokenUtils = require("../services/tokenUtils.js"),
     userMailer = require("../mailers/user_mailer.js"),
     Router = require("express").Router,
     UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js")),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
-    jwt = require("express-jwt"),
     models = require('../models/index.js'),
-    uuid = require('uuid'),
     crypto = require('crypto'),
     env = process.env.NODE_ENV || "development",
     resetConfig = require('../config/resetConfig.json')[env];
 
 
-var authenticate = function(req, res, next) {
+const authenticate = function(req, res, next) {
   debug("Processing authenticate middleware");
 
-  var email = req.body.email,
+  const email = req.body.email,
       password = req.body.password,
       newPassword = req.body.newPassword,
-      isPasswordChange = req.url === '/change_password',
-      that = this;
+      isPasswordChange = req.url === '/change_password';
 
   if (_.isEmpty(email) || _.isEmpty(password)) {
     return next(new UnauthorizedAccessError("401", {
@@ -48,20 +44,20 @@ var authenticate = function(req, res, next) {
         if (isMatch && !err) {
 
           existingUser.loginCount += 1;
-          existingUser.lastLoginIp = existingUser.currentLoginIp
-          existingUser.currentLoginIp = req.connection.remoteAddress
+          existingUser.lastLoginIp = existingUser.currentLoginIp;
+          existingUser.currentLoginIp = req.connection.remoteAddress;
           existingUser.save(function(err) {
             if (err) { throw err; }
           })
           .then(function(existingUser) {
             if (isPasswordChange) {
-              debug("password change path::")
+              debug("password change path::");
               updatePassword(existingUser, newPassword, next);
             } else {
               debug("User authenticated, generating token");
               tokenUtils.create(existingUser, req, res, next);
             }
-          })
+          });
         } else {
           existingUser.failedLoginCount += 1;
           existingUser.save(function(err) {
@@ -70,14 +66,14 @@ var authenticate = function(req, res, next) {
             return next(new UnauthorizedAccessError("401", {
               message: 'Invalid email or password'
             }));
-          })
+          });
         }
       });
-    })
+    });
   });
 };
 
-var updatePassword = function(user, newPassword, next) {
+const updatePassword = function(user, newPassword, next) {
   debug("Processing updatePassword");
 
   user
@@ -106,19 +102,18 @@ var updatePassword = function(user, newPassword, next) {
       // tokenUtils.create(newUser, req, res, next);
     });
   });
-}
+};
 
-var generateSingleUseToken = function(email, next) {
-  var cipher = crypto.createCipher('aes256', resetConfig.verifyReset);
-  var encrypted = cipher.update(email, 'utf8', 'hex') + cipher.final('hex');
+const generateSingleUseToken = function(email, next) {
+  const cipher = crypto.createCipher('aes256', resetConfig.verifyReset),
+        encrypted = cipher.update(email, 'utf8', 'hex') + cipher.final('hex');
   return next(encrypted);
-}
+};
 
-var createUser = function(req, res, next) {
+const createUser = function(req, res, next) {
   debug("Processing createUser");
-
-  var email = req.body.email,
-      password = req.body.password;
+  const email = req.body.email,
+        password = req.body.password;
 
   if (_.isEmpty(email) || _.isEmpty(password)) {
     return next(new UnauthorizedAccessError("401", {
@@ -138,7 +133,7 @@ var createUser = function(req, res, next) {
           return next(new UnauthorizedAccessError("401", {message: 'User already exists'}));
         } else {
           generateSingleUseToken(email, function(encrypted) {
-            var newUser = models.User.build({
+            const newUser = models.User.build({
               email: email,
               loginCount: 1,
               failedLoginCount: 0,
@@ -172,16 +167,15 @@ var createUser = function(req, res, next) {
             });
           });
 
-          })
-        }
+        });
       }
-    )
-  })
-}
+    });
+  });
+};
 
-var generatePasswordReset = function(req, res, next) {
+const generatePasswordReset = function(req, res, next) {
   debug("Processing generatePasswordReset");
-  var email = req.body.email;
+  const email = req.body.email;
 
   if (_.isEmpty(email)) {
     return next(new UnauthorizedAccessError("401", {
@@ -200,8 +194,8 @@ var generatePasswordReset = function(req, res, next) {
       generateSingleUseToken(email, function(encrypted) {
         existingUser.singleUseToken = encrypted;
         existingUser.resetPassword = true;
-        existingUser.lastLoginIp = existingUser.currentLoginIp
-        existingUser.currentLoginIp = req.connection.remoteAddress
+        existingUser.lastLoginIp = existingUser.currentLoginIp;
+        existingUser.currentLoginIp = req.connection.remoteAddress;
         existingUser.save(function(err) {
           if (err) { throw err; }
             throw err;
@@ -213,20 +207,20 @@ var generatePasswordReset = function(req, res, next) {
               debug("confirm sendPasswordResetEmail response:");
               debug(response);
             });
-          })
-        })
-      })
+          });
+        });
+      });
   });
-}
+};
 
-var verifyEmail = function(req, res, next) {
+const verifyEmail = function(req, res, next) {
  debug("Processing verifyEmail");
- var isUpdatePassword = (/\/update_password/).test(req.url),
-     newPassword = req.body.newPassword,
-     emailToken = req.query.single_use_token;
+ const isUpdatePassword = (/\/update_password/).test(req.url),
+       newPassword = req.body.newPassword,
+       emailToken = req.query.single_use_token;
 
-  debug("isUpdatePassword:: %s", isUpdatePassword)
-  debug("emailToken %s", emailToken)
+  debug("isUpdatePassword:: %s", isUpdatePassword);
+  debug("emailToken %s", emailToken);
 
   if (isUpdatePassword && _.isEmpty(newPassword)) {
     return next(new UnauthorizedAccessError("401", {
@@ -260,8 +254,8 @@ var verifyEmail = function(req, res, next) {
             userMailer.sendWelcomeMail(existingUser, function(error, response) {
               debug("confirm sendWelcomeMail response:");
               debug(response);
-              next(err, existingUser)
-            })
+              next(err, existingUser);
+            });
 
             existingUser.emailVerified = true;
             existingUser.lastLoginIp = existingUser.currentLoginIp;
@@ -273,18 +267,18 @@ var verifyEmail = function(req, res, next) {
               } else {
                 return true;
               }
-            })
+            });
           }
         }
-      })
-    })
+      });
+    });
   });
-}
+};
 
 
 // NOTE '/api/v1' is trimmed from these routes
 module.exports = function () {
-  var router = new Router();
+  const router = new Router();
 
   // NOTE this route is not in use currently, but checks that a token is working, can use for refresh perhaps
   router.route("/verify_auth").get(function (req, res, next) {
@@ -292,31 +286,31 @@ module.exports = function () {
     return res.status(200).json(req.currentUser);
   });
 
-  router.route("/update_password").put(verifyEmail, function(req, res, next) {
-    debug("in email_verification route")
+  router.route("/update_password").put(verifyEmail, function(req, res) {
+    debug("in email_verification route");
 
     return res.status(200).json({
       "message": "User verified."
     });
   });
 
-  router.route("/email_verification").get(verifyEmail, function(req, res, next) {
+  router.route("/email_verification").get(verifyEmail, function(req, res) {
     debug("in email_verification route");
     return res.status(200).json({
       "message": "User verified."
     });
   });
 
-  router.route("/change_password").put(authenticate, function(req, res, next) {
-    debug("in change_password route")
+  router.route("/change_password").put(authenticate, function(req, res) {
+    debug("in change_password route");
     return res.status(200).json({
       "message": "Password updated successfully."
     });
   });
 
   router.route("/email_reset").put(function(req, res, next) {
-    debug("in email_reset route")
-    generatePasswordReset(req, res, next)
+    debug("in email_reset route");
+    generatePasswordReset(req, res, next);
     return res.status(200).json({"message": "Password reset email sent."});
   });
 
@@ -330,11 +324,11 @@ module.exports = function () {
     }
   });
 
-  router.route("/signin").post(authenticate, function(req, res, next) {
+  router.route("/signin").post(authenticate, function(req, res) {
     return res.status(200).json(req.currentUser);
   });
 
-  router.route("/signup").post(createUser, function(req, res, next) {
+  router.route("/signup").post(createUser, function(req, res) {
     return res.status(200).json(req.currentUser);
   });
 
