@@ -1,20 +1,18 @@
 "use strict";
 
-var debug = require('debug')('app:tokenUtils:' + process.pid),
-    path = require('path'),
-    util = require('util'),
-    redis = require("redis"),
-    client = redis.createClient(),
-    _ = require("lodash"),
-    env = process.env.NODE_ENV || "development",
-    config = require("../config/jwtOptions.json")[env],
-    jsonwebtoken = require("jsonwebtoken"),
-    TOKEN_EXPIRATION = '5h',
-    TOKEN_EXPIRATION_SEC = (5 * 3600),
-    UnauthorizedAccessError = require(path.join(__dirname, '../', 'errors', 'UnauthorizedAccessError.js')),
-    env = process.env.NODE_ENV || "development",
-    resetConfig = require('../config/resetConfig.json')[env],
-    crypto = require('crypto');
+const debug = require('debug')('app:tokenUtils:' + process.pid),
+      path = require('path'),
+      redis = require("redis"),
+      client = redis.createClient(),
+      _ = require("lodash"),
+      env = process.env.NODE_ENV || "development",
+      config = require("../config/jwtOptions.json")[env],
+      jsonwebtoken = require("jsonwebtoken"),
+      TOKEN_EXPIRATION = '5h',
+      TOKEN_EXPIRATION_SEC = (5 * 3600),
+      UnauthorizedAccessError = require(path.join(__dirname, '../', 'errors', 'UnauthorizedAccessError.js')),
+      resetConfig = require('../config/resetConfig.json')[env],
+      crypto = require('crypto');
 
 client.on('error', function (err) {
   debug("error from tokenUtils %s", err);
@@ -27,12 +25,14 @@ client.on('connect', function () {
 module.exports.fetch = function(headers) {
   debug("in exports.fetch");
   // debug(headers.authorization)
+  let authorization,
+      part;
 
   if (headers && headers.authorization) {
-    var authorization = headers.authorization;
-    var part = authorization.split(' ');
+    authorization = headers.authorization;
+    part = authorization.split(' ');
     if (part.length === 2) {
-      var token = part[1];
+      part[1];
       return part[1];
     } else {
       return null;
@@ -49,7 +49,7 @@ module.exports.create = function(user, req, res, next) {
     return next(new Error('User data cannot be empty.'));
   }
 
-  var data = {
+  const data = {
     id: user.id,
     email: user.email,
     refreshToken: user.refreshToken,
@@ -59,7 +59,7 @@ module.exports.create = function(user, req, res, next) {
     role: user.role
   };
 
-  var decoded = jsonwebtoken.decode(data.token);
+  const decoded = jsonwebtoken.decode(data.token);
   data.token_exp = decoded.exp;
   data.token_iat = decoded.iat;
 
@@ -110,7 +110,7 @@ module.exports.retrieve = function (id, done) {
           "message": "Token doesn't exist, are you sure it hasn't expired or been revoked?"
         });
       } else {
-        var data = JSON.parse(reply);
+        const data = JSON.parse(reply);
         debug("User data fetched from redis store for email: %s", data.email);
 
         if (_.isEqual(data.token, id)) {
@@ -127,11 +127,11 @@ module.exports.retrieve = function (id, done) {
 module.exports.verifyEmail = function(existingUser, req, res, next) {
   debug("Verifying email address/single use emailConfirmToken");
 
-  var emailConfirmToken = req.query.single_use_token;
-  const decipher = crypto.createDecipher('aes256', resetConfig.verifyReset);
-  var decrypted = decipher.update(emailConfirmToken, 'hex', 'utf8');
+  const emailConfirmToken = req.query.single_use_token,
+        decipher = crypto.createDecipher('aes256', resetConfig.verifyReset);
+  let decrypted = decipher.update(emailConfirmToken, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
-  var isDecrypted = decrypted === existingUser.email;
+  const isDecrypted = decrypted === existingUser.email;
   debug("isDecrypted: %s", isDecrypted);
 
   if (isDecrypted) {
@@ -145,14 +145,14 @@ module.exports.verifyEmail = function(existingUser, req, res, next) {
 
 module.exports.verifyAuth = function(req, res, next) {
   debug("Verifying token");
-  var token = exports.fetch(req.query.token);
+  const verifyToken = exports.fetch(req.query.token);
 
-  jsonwebtoken.verify(token, config.secret, function (err, decode) {
+  jsonwebtoken.verify(verifyToken, config.secret, function (err) { // NOTE could be (err, decode)
     if (err) {
       req.currentUser = undefined;
       return next(new UnauthorizedAccessError("401", {message: 'jwt must be provided'}));
     }
-    exports.retrieve(token, function (err, data) {
+    exports.retrieve(verifyToken, function (err, data) {
       if (err) {
         req.currentUser = undefined;
         return next(new UnauthorizedAccessError("401", {message: 'invalid_token or ?'}));
@@ -172,9 +172,9 @@ module.exports.expire = function (token) {
 };
 
 module.exports.middleware = function () {
-  var func = function (req, res, next) {
+  const func = function (req, res, next) {
     debug('in token middleware');
-    var token = exports.fetch(req.headers);
+    const token = exports.fetch(req.headers);
 
     exports.retrieve(token, function (err, data) {
       if (err) {
