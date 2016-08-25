@@ -7,9 +7,6 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true
       },
-      id: {
-        type: Sequelize.INTEGER
-      },
       politicianId: {
         type: Sequelize.INTEGER,
         references: {
@@ -42,15 +39,15 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    }).then(function(results) {
+    }).then(function() { // NOTE could be (results)
       return queryInterface.addIndex(
         'PoliticianPhotos',
         ['politicianId'],
         {indexName: 'xi_politician_photos'}
-      )
+      );
     });
   },
-  down: function(queryInterface, Sequelize) {
+  down: function(queryInterface) { // NOTE could be (queryInterface, Sequelize)
     return queryInterface.dropTable('PoliticianPhotos');
   }
 };

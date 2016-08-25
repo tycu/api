@@ -53,7 +53,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       singleUseToken: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING
       },
       state: {
         type: Sequelize.STRING,
@@ -117,29 +117,29 @@ module.exports = {
         defaultValue: null
       }
     })
-    .then(function(results) {
+    .then(function() { // NOTE could be (results)
       return queryInterface.addIndex(
         'Users',
         ['email'],
         {indexName: 'xi_email_users'}
-      )
+      );
     })
-    .then(function(results) {
+    .then(function() {
       return queryInterface.addIndex(
         'Users',
         ['singleUseToken'],
         {indexName: 'xi_single_use_token_users'}
-      )
+      );
     })
-    .then(function(results) {
+    .then(function() {
       return queryInterface.addIndex(
         'Users',
         ['stripeCustomerUuid'],
         {indexName: 'xi_stripe_customer_uuid_users'}
-      )
-    })
+      );
+    });
   },
-  down: function(queryInterface, Sequelize) {
+  down: function(queryInterface) { // NOTE could be (queryInterface, Sequelize)
     return queryInterface.dropTable('Users');
   }
 };

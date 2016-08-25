@@ -35,21 +35,21 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    }).then(function(results) {
+    }).then(function() { // NOTE could be (results)
       return queryInterface.addIndex(
         'Pacs',
         ['name'],
         {indexName: 'xi_name_pac'}
-      )
-    }).then(function(results) {
+      );
+    }).then(function() {
       return queryInterface.addIndex(
         'Pacs',
         ['color'],
         {indexName: 'xi_color_pac'}
-      )
+      );
     });
   },
-  down: function(queryInterface, Sequelize) {
+  down: function(queryInterface) { // NOTE could be (queryInterface, Sequelize)
     return queryInterface.dropTable('Pacs');
   }
 };

@@ -44,15 +44,15 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    }).then(function(results) {
+    }).then(function() { // NOTE could be (results)
       return queryInterface.addIndex(
         'Politicians',
         ['color'],
         {indexName: 'xi_color_politician'}
-      )
+      );
     });
   },
-  down: function(queryInterface, Sequelize) {
+  down: function(queryInterface) { // NOTE could be (queryInterface, Sequelize)
     queryInterface.removeIndex('Events', 'xi_politician_event');
     queryInterface.removeColumn('Events', 'politicianId');
 

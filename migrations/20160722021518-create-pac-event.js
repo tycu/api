@@ -44,21 +44,21 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    }).then(function(results) {
+    }).then(function() { // NOTE could be (results)
       return queryInterface.addIndex(
         'PacEvents',
         ['eventId'],
         {indexName: 'xi_event_pac_event'}
-      )
-    }).then(function(results) {
+      );
+    }).then(function() {
       return queryInterface.addIndex(
         'PacEvents',
         ['pacId'],
         {indexName: 'xi_pac_pac_event'}
-      )
+      );
     });
   },
-  down: function(queryInterface, Sequelize) {
+  down: function(queryInterface) { // NOTE could be (queryInterface, Sequelize)
     return queryInterface.dropTable('PacEvents');
   }
 };

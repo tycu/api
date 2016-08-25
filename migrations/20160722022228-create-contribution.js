@@ -57,27 +57,27 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    }).then(function(results) {
+    }).then(function() { // NOTE could be (results)
       return queryInterface.addIndex(
         'Contributions',
         ['userId'],
         {indexName: 'xi_user_contribution'}
-      )
-    }).then(function(results) {
+      );
+    }).then(function() {
       return queryInterface.addIndex(
         'Contributions',
         ['eventId'],
         {indexName: 'xi_event_contribution'}
-      )
-    }).then(function(results) {
+      );
+    }).then(function() {
       return queryInterface.addIndex(
         'Contributions',
         ['pacId'],
         {indexName: 'xi_pac_contribution'}
-      )
+      );
     });
   },
-  down: function(queryInterface, Sequelize) {
+  down: function(queryInterface) { // NOTE could be (queryInterface, Sequelize)
     return queryInterface.dropTable('Contributions');
   }
 };

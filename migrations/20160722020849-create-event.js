@@ -52,27 +52,27 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       }
-    }).then(function(results) {
+    }).then(function() { // NOTE could be (results)
       return queryInterface.addIndex(
         'Events',
         ['isPinned'],
         {indexName: 'xi_pinned_event'}
-      )
-    }).then(function(results) {
+      );
+    }).then(function() {
       return queryInterface.addIndex(
         'Events',
         ['isPublished'],
         {indexName: 'xi_is_published_event'}
-      )
-    }).then(function(results) {
+      );
+    }).then(function() {
       return queryInterface.addIndex(
         'Events',
         ['politicianId'],
         {indexName: 'xi_politician_event'}
-      )
+      );
     });
   },
-  down: function(queryInterface, Sequelize) {
+  down: function(queryInterface) { // NOTE could be (queryInterface, Sequelize)
     return queryInterface.dropTable('Pacs');
   }
 };
