@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Sequelize = require('sequelize');
-  var Event = sequelize.define('Event', {
+  const Sequelize = require('sequelize');
+  const Event = sequelize.define('Event', {
     id: {
       type: DataTypes.INTEGER,
       field: 'id',
@@ -43,7 +43,7 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     paranoid: true,
     classMethods: {
-      associate: function(models) {
+      // associate: function(models) {
 
         // TODO set up proper association to pull contributions with fetch
         // Event.hasMany(models.Contribution);
@@ -53,7 +53,7 @@ module.exports = function(sequelize, DataTypes) {
         // this is breaking SQL statement, not sure why yet
         // Event.belongsTo(models.Politician);
         // Event.hasMany(models.EventTweet);
-      }
+      // }
     },
     defaultScope: {
       where: {

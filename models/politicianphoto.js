@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var PoliticianPhoto = sequelize.define('PoliticianPhoto', {
+  const PoliticianPhoto = sequelize.define('PoliticianPhoto', {
     id: {
       type: DataTypes.INTEGER,
       field: 'id',

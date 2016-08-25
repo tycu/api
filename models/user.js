@@ -4,13 +4,11 @@
 // http://docs.sequelizejs.com/en/latest/docs/models-definition/#validations
 
 module.exports = function(sequelize, DataTypes) {
-  var Sequelize = require('sequelize');
-  var bcrypt = require('bcrypt');
-  var env = process.env.NODE_ENV || "development";
-  var jwtConfig = require('../config/jwtOptions.json')[env];
-  var uuid = require('uuid');
+  const Sequelize = require('sequelize');
+  const bcrypt = require('bcrypt');
+  const uuid = require('uuid');
 
-  var User = sequelize.define('User', {
+  const User = sequelize.define('User', {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true
@@ -22,7 +20,7 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING,
       allowNull: false,
       validate: {
-        isEmail: true,
+        isEmail: true
       }
     },
     facebookUuid: {
@@ -77,7 +75,7 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING
     },
     singleUseToken: {
-      type: Sequelize.STRING,
+      type: Sequelize.STRING
     },
     state: {
       type: Sequelize.STRING
@@ -133,14 +131,14 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     hooks: {
-      beforeCreate: function(user, options) {
-        user.refreshToken = uuid.v4()
+      beforeCreate: function(user) { // NOTE can be (user, options)
+        user.refreshToken = uuid.v4();
       }
     },
     instanceMethods: {
       setPassword: function(passwordPlainText, cb) {
-        var that = this;
-        const saltRounds = 10;
+        const that = this,
+              saltRounds = 10;
 
         bcrypt.hash(passwordPlainText, saltRounds, function(err, hash) {
           if (err) {
@@ -151,8 +149,8 @@ module.exports = function(sequelize, DataTypes) {
         });
       },
       comparePassword: function(password, cb) {
-        var that = this;
-        var hash = that.cryptedPassword;
+        const that = this;
+        const hash = that.cryptedPassword;
 
         bcrypt.compare(password, hash, function(err, isMatch) {
           if (err) {

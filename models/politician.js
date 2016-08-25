@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Sequelize = require('sequelize');
-  var Politician = sequelize.define('Politician',
+  const Sequelize = require('sequelize');
+  const Politician = sequelize.define('Politician',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -38,7 +38,7 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     paranoid: true,
     classMethods: {
-      associate: function(models) {
+      // associate: function(models) {
 
         // this is breaking SQL statement, not sure why yet
 
@@ -59,7 +59,7 @@ module.exports = function(sequelize, DataTypes) {
       //   through: UserFollowers
       // })
 
-      }
+      // }
     },
     defaultScope: {
       where: {

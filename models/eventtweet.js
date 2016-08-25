@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Sequelize = require('sequelize');
-  var EventTweet = sequelize.define('EventTweet', {
+  const Sequelize = require('sequelize');
+  const EventTweet = sequelize.define('EventTweet', {
     id: {
       type: DataTypes.INTEGER,
       field: 'id',

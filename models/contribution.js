@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Sequelize = require('sequelize');
-  var Contribution = sequelize.define('Contribution', {
+  const Sequelize = require('sequelize');
+  const Contribution = sequelize.define('Contribution', {
     id: {
       type: DataTypes.INTEGER,
       field: 'id',

@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var Sequelize = require('sequelize');
-  var PacEvent = sequelize.define('PacEvent', {
+  const Sequelize = require('sequelize');
+  const PacEvent = sequelize.define('PacEvent', {
     id: {
       type: DataTypes.INTEGER,
       field: 'id',
