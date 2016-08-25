@@ -2,56 +2,59 @@
 // http://tryhandlebarsjs.com/
 // https://github.com/sendgrid/sendgrid-nodejs/blob/master/examples/mail/mail.js
 
-var debug = require('debug')('controllers:user_mailer:' + process.pid),
-    env = process.env.NODE_ENV || "development",
-    resetConfig = require('../config/resetConfig.json')[env],
-    Handlebars = require('handlebars'),
-    path = require("path"),
-    fs = require("fs"),
-    util = require('util'),
-    sg = require('sendgrid')('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'); // TODO get from process.env.SENDGRID_API_KEY
+const debug = require('debug')('controllers:user_mailer:' + process.pid),
+      env = process.env.NODE_ENV || "development",
+      resetConfig = require('../config/resetConfig.json')[env],
+      Handlebars = require('handlebars'),
+      path = require("path"),
+      fs = require("fs"),
+      sg = require('sendgrid')('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'); // TODO get from process.env.SENDGRID_API_KEY
 
 
-var renderToString = function(source, templateData) {
-  var template = Handlebars.compile(source);
-  var compiledEmail = template(templateData);
+const renderToString = function(source, templateData) {
+  const template = Handlebars.compile(source);
+  const compiledEmail = template(templateData);
   return compiledEmail;
-}
+};
 
-var send = function(request, next) {
+const send = function(request, next) {
   sg.API(request)
   .then(response => {
       debug("email status code: %s", response.statusCode);
       next(null, response);
   })
   .catch(error => {
-    debug("sendgrid error");
-    debug(error);
-    console.log(util.inspect(error, {showHidden: false, depth: null}));
+
+    // TODO throw error from sendgrid.
+
+    // debug("sendgrid error");
+    // debug(error);
+    // console.log(util.inspect(error, {showHidden: false, depth: null}));
     // The Error is an instance of SendGridError
     // The full response is attached to error.response
     next(error, response);
   });
-}
+};
 
 
 module.exports.sendWelcomeMail = function(user, next) {
   debug("calling sendWelcomeMail");
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
 
-  var templateData = {
-    "user": user,
-    "domain": resetConfig.domain
-  },
-  filePath = path.join(__dirname, '/templates/welcome_email.handlebars'),
-  compiledEmail,
-  user,
-  email;
-  var email = user.email;
+  const templateData = {
+          "user": user,
+          "domain": resetConfig.domain
+        },
+        filePath = path.join(__dirname, '/templates/welcome_email.handlebars'),
+        email = user.email;
 
-  fs.readFile(filePath, function(err, data){
+  var compiledEmail,
+      source,
+      request;
+
+  fs.readFile(filePath, function(err, data) {
     if (!err) {
-      var source = data.toString();
+      source = data.toString();
       compiledEmail = renderToString(source, templateData);
 
       var request = sg.emptyRequest({
@@ -95,29 +98,30 @@ module.exports.sendConfirmMail = function(user, next) {
 
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
 
-  var templateData = {
-    "user": user,
-    "domain": resetConfig.domain
-  },
-  filePath = path.join(__dirname, '/templates/confirm_email.handlebars'),
-  compiledEmail,
-  user,
-  email;
-  var email = user.email;
+  const templateData = {
+          "user": user,
+          "domain": resetConfig.domain
+        },
+        filePath = path.join(__dirname, '/templates/confirm_email.handlebars'),
+        email = user.email;
 
-  fs.readFile(filePath, function(err, data){
+  var compiledEmail,
+      source,
+      request;
+
+  fs.readFile(filePath, function(err, data) {
     if (!err) {
-      var source = data.toString();
+      source = data.toString();
 
       compiledEmail = renderToString(source, templateData);
-      var request = sg.emptyRequest({
+      request = sg.emptyRequest({
         method: 'POST',
         path: '/v3/mail/send',
         body: {
           personalizations: [
             {
               to: [
-                { email: user.email }
+                { email: email }
               ],
               subject: 'Tally.us - Please verify your email address.'
             }
@@ -146,22 +150,23 @@ module.exports.sendPasswordResetEmail = function(user, next) {
 
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
 
-  var templateData = {
-    "user": user,
-    "domain": resetConfig.domain
-  },
-  filePath = path.join(__dirname, '/templates/reset_password.handlebars'),
-  compiledEmail,
-  user,
-  email;
-  var email = user.email;
+  const templateData = {
+          "user": user,
+          "domain": resetConfig.domain
+        },
+        filePath = path.join(__dirname, '/templates/reset_password.handlebars'),
+        email = user.email;
 
-  fs.readFile(filePath, function(err, data){
+  var compiledEmail,
+      source,
+      request;
+
+  fs.readFile(filePath, function(err, data) {
     if (!err) {
-      var source = data.toString();
+      source = data.toString();
 
       compiledEmail = renderToString(source, templateData);
-      var request = sg.emptyRequest({
+      request = sg.emptyRequest({
         method: 'POST',
         path: '/v3/mail/send',
         body: {
@@ -197,29 +202,30 @@ module.exports.sendPasswordChangeAlert = function(user, next) {
 
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
 
-  var templateData = {
-    "user": user,
-    "domain": resetConfig.domain
-  },
-  filePath = path.join(__dirname, '/templates/password_change_notification.handlebars'),
-  compiledEmail,
-  user,
-  email;
-  var email = user.email;
+  const templateData = {
+          "user": user,
+          "domain": resetConfig.domain
+        },
+        filePath = path.join(__dirname, '/templates/password_change_notification.handlebars'),
+        email = user.email;
 
-  fs.readFile(filePath, function(err, data){
+  var compiledEmail,
+      source,
+      request;
+
+  fs.readFile(filePath, function(err, data) {
     if (!err) {
-      var source = data.toString();
+      source = data.toString();
 
       compiledEmail = renderToString(source, templateData);
-      var request = sg.emptyRequest({
+      request = sg.emptyRequest({
         method: 'POST',
         path: '/v3/mail/send',
         body: {
           personalizations: [
             {
               to: [
-                { email: user.email }
+                { email: email }
               ],
               subject: 'Tally.us - Password Change Notification'
             }
@@ -241,4 +247,4 @@ module.exports.sendPasswordChangeAlert = function(user, next) {
       debug(err);
     }
   });
-}
+};
