@@ -1,7 +1,6 @@
 "use strict";
 
 const path = require("path"),
-      fs = require("fs"),
       bodyParser = require('body-parser'),
       workers = process.env.WEB_CONCURRENCY || 1,
       port = process.env.PORT || 5000,
@@ -11,16 +10,16 @@ const path = require("path"),
       onFinished = require('on-finished'),
       debug = require('debug')('app:' + process.pid),
       NotFoundError = require(path.join(__dirname, "errors", "NotFoundError.js")),
-      tokenUtils = require(path.join(__dirname, "/services/tokenUtils.js")),
-      unless = require('express-unless');
+      tokenUtils = require(path.join(__dirname, "/services/tokenUtils.js"));
 
-var start = function() {
+const start = function() {
   debug("Starting application");
 
   debug("Initializing express");
-  var express = require('express'), app = express(),
-      redisKeys = require('./redis-keys'),
-      redis;
+  const express = require('express'),
+        app = express();
+
+  let redis;
 
   debug("Attaching plugins");
   app.use(require('morgan')("dev"));
@@ -31,7 +30,7 @@ var start = function() {
   app.use(require('response-time')());
 
   app.use(function (req, res, next) {
-    onFinished(res, function (err) {
+    onFinished(res, function () { // NOTE could be (err)
       debug("[%s] finished request", req.connection.remoteAddress);
     });
     next();
@@ -46,7 +45,7 @@ var start = function() {
 
   // TODO this is not good but prevents errors for now.
   app.get('/favicon.ico', function(req, res) {
-    res.status(200)
+    res.status(200);
   });
 
   app.use(jwt({
@@ -91,14 +90,15 @@ var start = function() {
   });
 
   // error handler for all the applications
-  app.use(function (err, req, res, next) {
-    if (env == 'development') {
+  app.use(function (err, req, res) {
+    if (env === 'development') {
       debug("err from main.js %s", err);
     }
 
-    var errorType = typeof err,
-      code = 500,
-      msg = { message: "Internal Server Error" };
+    const errorType = typeof err;
+
+    let   code = 500,
+          msg = { message: "Internal Server Error" };
 
     switch (err.name) {
       case "UnauthorizedError":
@@ -115,17 +115,17 @@ var start = function() {
       default:
         break;
     }
-    return res.status(code).json(msg);
+    return res.status(code).json({msg: msg, errorType: errorType});
   });
 
   if (process.env.REDISCLOUD_URL) {
-    redis = require("redis").createClient(process.env.REDISCLOUD_URL, { 'no_ready_check': true })
+    redis = require("redis").createClient(process.env.REDISCLOUD_URL, { 'no_ready_check': true });
   } else {
-    redis = require("redis").createClient()
+    redis = require("redis").createClient();
   }
 
   // Require HTTPS in production
-  if (process.env.NODE_ENV == 'production') {
+  if (process.env.NODE_ENV === 'production') {
     app.use(function(req, res, next) {
       if (req.headers['x-forwarded-proto'] !== 'https') {
         res.status(403).json({
@@ -134,23 +134,23 @@ var start = function() {
           }
         });
       } else {
-        next()
-      };
+        next();
+      }
     });
-  };
+  }
 
   // Patch sendStatus to always send json
   app.use(function(req, res, next) {
     res.sendStatus = function(statusCode) {
-      res.status(statusCode).json({})
-    }
+      res.status(statusCode).json({});
+    };
     next();
-  })
+  });
 
   app.listen(port, function() {
-    console.log('SUCCESS: tally-api listening on port ' + port)
-  })
-}
+    debug('SUCCESS: tally-api listening on port ' + port);
+  });
+};
 
 debug("Starting throng on port: %s, with workers: %s", port, workers);
 require('throng')(start, {
