@@ -7,7 +7,10 @@
     "type": "git",
     "url": "https://github.com/tallyus/api.git"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^3.3.1",
+    "eslint-config-bestpractices": "^1.0.2"
+  },
   "dependencies": {
     "async": "^1.5.2",
     "bcrypt": "^0.8.7",
