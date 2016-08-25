@@ -1,0 +1,14 @@
+{
+  "development": {
+    "bucket":    "static.tally.us",
+    "projectId": "tally-us"
+  },
+  "test": {
+    "bucket":    "static.tally.us",
+    "projectId": "tally-us"
+  },
+  "production": {
+    "bucket":    "tally.us",
+    "projectId": "tally-us"
+  }
+}
