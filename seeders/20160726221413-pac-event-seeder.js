@@ -1,25 +1,24 @@
 'use strict';
 
 module.exports = {
-  up: function (queryInterface, Sequelize) {
-    var seedModel = require('../seed_data/events_seed.js');
-    // console.log('seedModel', seedModel);
-    var instances = [];
-    var instanceObject;
-    var supports;
-    var opposes;
+  up: function (queryInterface) { // NOTE can receive(, Sequelize)
+    const seedModel = require('../seed_data/events_seed.js'),
+          instances = [];
+    let instanceObject,
+        supports,
+        opposes;
 
-    for (var k in seedModel){
+    for (const k in seedModel){
       if (seedModel.hasOwnProperty(k)) {
         // console.log('key', k);
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
 
         // console.log('instanceObject', instanceObject);
-        supports = instanceObject['supportPacs'];
-        opposes = instanceObject['opposePacs'];
+        supports = instanceObject.supportPacs;
+        opposes = instanceObject.opposePacs;
 
-        for (var i = 0; i < supports.length; i++) {
+        for (let i = 0; i < supports.length; i++) {
           instances.push({
           support: true,
           eventId: parseInt(instanceObject.iden, 10),
@@ -29,7 +28,7 @@ module.exports = {
           });
         }
         // console.log('supports', supports);
-        for (var i = 0; i < opposes.length; i++) {
+        for (let i = 0; i < opposes.length; i++) {
           instances.push({
           support: false,
           eventId: parseInt(instanceObject.iden, 10),
@@ -45,7 +44,7 @@ module.exports = {
     return queryInterface.bulkInsert('PacEvents', instances, {});
   },
 
-  down: function (queryInterface, Sequelize) {
+  down: function (queryInterface) { // NOTE can receive(, Sequelize)
     return queryInterface.bulkDelete('PacEvents', null, {});
   }
 };

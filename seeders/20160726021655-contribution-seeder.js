@@ -1,15 +1,13 @@
 'use strict';
-var fs   = require("fs");
-var path = require("path");
 
 module.exports = {
-  up: function (queryInterface, Sequelize) {
-    var seedModel = require('../seed_data/contributions_seed.js');
-    // console.log('seedModel', seedModel);
-    var instances = [];
-    var instanceObject;
+  up: function (queryInterface) { // NOTE can receive(, Sequelize)
+    const seedModel = require('../seed_data/contributions_seed.js'),
+          instances = [];
 
-    for (var k in seedModel){
+    let instanceObject;
+
+    for (const k in seedModel){
       if (seedModel.hasOwnProperty(k)) {
         // console.log('key', k);
         // console.log('val', seedModel[k]);
@@ -33,7 +31,7 @@ module.exports = {
     return queryInterface.bulkInsert('Contributions', instances, {} );
   },
 
-  down: function (queryInterface, Sequelize) {
+  down: function (queryInterface) { // NOTE can receive(, Sequelize)
     return queryInterface.bulkDelete('Contributions', null, {});
   }
 };
