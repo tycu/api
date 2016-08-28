@@ -88,23 +88,23 @@ module.exports = function() {
   const router = new Router();
 
   router.route("/pacs")
-  .get(getAllPacs, function(req, res) {
+  .get(Authorize.role("admin"), getAllPacs, function(req, res, next) {
     debug("in GET-INDEX /pacs");
     return res.status(200).json(req.pacs);
   })
-  .post(Authorize.role("admin"), createPac, function(req, res) {
+  .post(Authorize.role("admin"), createPac, function(req, res, next) {
     debug('in POST-CREATE /pacs');
     return res.status(201);
   });
 
 
   router.route("/pacs/:id")
-  .get(fetch, function(req, res) {
+  .get(Authorize.role("admin"), fetch, function(req, res, next) {
     debug('in GET-SHOW /pacs/:id');
     debug("pacId: %s", req.params.id);
     return res.status(200).json(req.pac);
   })
-  .put(Authorize.role("admin"), updatePac, function(req, res) {
+  .put(Authorize.role("admin"), updatePac, function(req, res, next) {
     debug('in PUT-UPDATE /pacs/:id');
     debug("pacId: %s",req.params.id);
     return res.status(204);

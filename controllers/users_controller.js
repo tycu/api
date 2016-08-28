@@ -89,7 +89,7 @@ module.exports = function() {
   const router = new Router();
 
   router.route("/users/:id")
-  .get(Authorize.role("user"), fetchUserInfo, function(req, res) {
+  .get(Authorize.role("user"), fetchUserInfo, function(req, res, next) {
     debug('in GET /users/:id');
     debug("userId: %s", req.params.id);
     return res.status(200).json(req.user);

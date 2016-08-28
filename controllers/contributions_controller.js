@@ -1,6 +1,6 @@
 "use strict";
 
-const debug = require('debug')('controllers:events_controller:' + process.pid),
+const debug = require('debug')('controllers:contributions_controller:' + process.pid),
     _ = require("lodash"),
     path = require('path'),
     Router = require("express").Router,
@@ -164,14 +164,14 @@ module.exports = function() {
   const router = new Router();
 
   router.route('/get-customer')
-  .post(Authorize.role("user"), getCustomer, function(req, res) {
+  .post(Authorize.role("user"), getCustomer, function(req, res, next) {
     debug("in /get-customer route");
     return res.status(200).json({user: res.user, customer: res.customer});
   });
 
   // TODO make sure are passing user ID or email by which to look up user if not found by stripe ID
   router.route("/set-customer")
-  .put(Authorize.role("user"), setCard, function(req, res) {
+  .put(Authorize.role("user"), setCard, function(req, res, next) {
     debug("in /set-customer route");
 
     return res.status(200).json({

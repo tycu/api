@@ -94,22 +94,22 @@ module.exports = function() {
   const router = new Router();
 
   router.route("/politicians")
-  .get(getAllPoliticians, function(req, res) {
+  .get(Authorize.role("admin"), getAllPoliticians, function(req, res, next) {
     debug("in GET-INDEX /politicians");
     return res.status(200).json(req.politicians);
   })
-  .post(Authorize.role("admin"), createPolitician, function(req, res) {
+  .post(Authorize.role("admin"), createPolitician, function(req, res, next) {
     debug('in POST-CREATE /politicians');
     return res.status(201);
   });
 
   router.route("/politicians/:id")
-  .get(fetch, function(req, res) {
+  .get(Authorize.role("admin"), fetch, function(req, res, next) {
     debug('in GET-SHOW /politicians/:id');
     debug("politicianId: %s", req.params.id);
     return res.status(200).json(req.politician);
   })
-  .put(Authorize.role("admin"), updatePolitician, function(req, res) {
+  .put(Authorize.role("admin"), updatePolitician, function(req, res, next) {
     debug('in PUT-UPDATE /politicians/:id');
     debug("politicianId: %s",req.params.id);
     return res.status(204);

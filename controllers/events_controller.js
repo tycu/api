@@ -132,8 +132,8 @@ function updateEvent(req, res, next) {
 function createEvent(req, res, next) {
   debug("createEvent");
   const newEvent = models.Event.build({
-    isPinned: req.body.event.isPinned,
-    isPublished: req.body.eventId.isPublished,
+    isPinned: false,
+    isPublished: false,
     imageUrl: req.body.event.imageUrl,
     imageAttribution: req.body.event.imageAttribution,
     politicianId: req.body.event.politicianId,
@@ -182,48 +182,48 @@ module.exports = function() {
   const router = new Router();
 
   router.route("/events")
-  .get(getAllEvents, function(req, res) {
+  .get(getAllEvents, function(req, res, next) {
     debug("in GET-INDEX /events");
     return res.status(200).json(req.events);
   })
-  .post(Authorize.role("admin"), createEvent, function(req, res) {
+  .post(Authorize.role("admin"), createEvent, function(req, res, next) {
     debug('in POST-CREATE /events');
-    return res.status(201);
+    return res.status(201).json(req.events);
   });
 
   // TO load draft events as well
   router.route("/admin_events")
-  .get(Authorize.role("admin"), getAdminEvents, function(req, res) {
+  .get(Authorize.role("admin"), getAdminEvents, function(req, res, next) {
     debug("in GET-INDEX /admin_events");
     return res.status(200).json(req.events);
   });
   // TO load draft events as well
   router.route("/admin_events/:id")
-  .get(Authorize.role("admin"), fetchAdmin, function(req, res) {
+  .get(Authorize.role("admin"), fetchAdmin, function(req, res, next) {
     debug("in GET-INDEX /admin_events/:id");
     return res.status(200).json(req.event);
   });
 
   router.route("/events/:id")
-  .get(fetch, function(req, res) {
+  .get(fetch, function(req, res, next) {
     debug('in GET-SHOW /events/:id');
     debug("eventId: %s", req.params.id);
     return res.status(200).send(req.event);
   })
-  .put(Authorize.role("admin"), updateEvent, function(req, res) {
+  .put(Authorize.role("admin"), updateEvent, function(req, res, next) {
     debug('in PUT-UPDATE /events/:id');
     debug("eventId: %s", req.params.id);
     return res.status(204);
   });
 
   router.route("/events/:id/pin")
-  .put(Authorize.role("admin"), unPinEvent, pinEvent, function(req, res) {
+  .put(Authorize.role("admin"), unPinEvent, pinEvent, function(req, res, next) {
     debug('in PUT-PIN /events/:id/pin');
     return res.status(204).send(req.event);
   });
 
   router.route("/events/:id/toggle_publish")
-  .put(Authorize.role("admin"), togglePublish, function(req, res) {
+  .put(Authorize.role("admin"), togglePublish, function(req, res, next) {
     debug('in PUT-PIN /events/:id/toggle_publish');
     return res.status(204).send({toggledId: req.params.id});
   });

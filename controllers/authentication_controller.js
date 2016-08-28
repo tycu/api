@@ -286,7 +286,7 @@ module.exports = function () {
     return res.status(200).json(req.currentUser);
   });
 
-  router.route("/update_password").put(verifyEmail, function(req, res) {
+  router.route("/update_password").put(verifyEmail, function(req, res, next) {
     debug("in email_verification route");
 
     return res.status(200).json({
@@ -294,14 +294,14 @@ module.exports = function () {
     });
   });
 
-  router.route("/email_verification").get(verifyEmail, function(req, res) {
+  router.route("/email_verification").get(verifyEmail, function(req, res, next) {
     debug("in email_verification route");
     return res.status(200).json({
       "message": "User verified."
     });
   });
 
-  router.route("/change_password").put(authenticate, function(req, res) {
+  router.route("/change_password").put(authenticate, function(req, res, next) {
     debug("in change_password route");
     return res.status(200).json({
       "message": "Password updated successfully."
@@ -324,11 +324,11 @@ module.exports = function () {
     }
   });
 
-  router.route("/signin").post(authenticate, function(req, res) {
+  router.route("/signin").post(authenticate, function(req, res, next) {
     return res.status(200).json(req.currentUser);
   });
 
-  router.route("/signup").post(createUser, function(req, res) {
+  router.route("/signup").post(createUser, function(req, res, next) {
     return res.status(200).json(req.currentUser);
   });
 
