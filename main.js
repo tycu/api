@@ -54,7 +54,7 @@ const start = function() {
     '/',
     '/api/v1/signin',
     '/api/v1/signup',
-    '/api/v1/events',
+    // '/api/v1/events', // breaking other event routes as not auth'd
     '/api/v1/email_verification',
     '/api/v1/email_reset',
     '/api/v1/update_password',
@@ -65,7 +65,7 @@ const start = function() {
     '/',
     '/api/v1/signin',
     '/api/v1/signup',
-    '/api/v1/events',
+    // '/api/v1/events',  // breaking other event routes as not auth'd
     '/api/v1/email_verification',
     '/api/v1/email_reset',
     '/api/v1/update_password',
@@ -76,6 +76,7 @@ const start = function() {
   app.use("/api/v1", require(path.join(__dirname, "controllers", "users_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "contributions_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "pacs_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "pac_events_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "politicians_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());
