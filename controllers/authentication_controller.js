@@ -11,7 +11,8 @@ const debug = require('debug')('app:controllers:authentication' + process.pid),
     models = require('../models/index.js'),
     crypto = require('crypto'),
     env = process.env.NODE_ENV || "development",
-    resetConfig = require('../config/resetConfig.json')[env];
+    resetConfig = require('../config/resetConfig.json')[env],
+    Authorize = require("../services/Authorize.js");
 
 
 const authenticate = function(req, res, next) {
@@ -132,6 +133,7 @@ const createUser = function(req, res, next) {
         if (existingUser) {
           return next(new UnauthorizedAccessError("401", {message: 'User already exists'}));
         } else {
+          // Initial single use Token before account verified
           generateSingleUseToken(email, function(encrypted) {
             const newUser = models.User.build({
               email: email,
@@ -301,7 +303,7 @@ module.exports = function () {
     });
   });
 
-  router.route("/change_password").put(authenticate, function(req, res, next) {
+  router.route("/change_password").put(Authorize.role("user"), authenticate, function(req, res, next) {
     debug("in change_password route");
     return res.status(200).json({
       "message": "Password updated successfully."

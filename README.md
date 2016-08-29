@@ -62,7 +62,7 @@ If there are errors, make note of them, troubleshoot, need to fix.
 We are using Sequelize as an ORM to talk to postgres. Need to have postgres running locally.
 
 If it is your first time starting or you've dropped the 'tally_development' database, you will need to run:
-`$ npm run createDb`
+`$ npm run createDb` this also works `$ npm run createDb development`
 
 to run ALL (currently unrun) migrations alone:
 `$ sequelize db:migrate`
@@ -107,3 +107,18 @@ sign out with this request:
 sign in with this request:
 `curl -v -d "email=rmf34@cornell.edu&password=demo"  http://127.0.0.1:5000/api/v1/sigin`
 
+### Tests / Test DB
+
+to setup the test db (first time only):
+`$ npm run createDb test`
+
+to migrate the test db (only when there is a new migration to run):
+`$ NODE_ENV=test sequelize db:migrate`
+
+start the server in the TEST env (always):
+`$ NODE_ENV=test npm start`
+
+to run the full test suite (always):
+`$ NODE_ENV=test npm run test`
+
+tests should pass

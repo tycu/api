@@ -93,7 +93,7 @@ const start = function() {
 
   // error handler for all the applications
   app.use(function (err, req, res) {
-    if (env === 'development') {
+    if (env === 'development' || env === 'test') {
       debug("err from main.js %s", err);
     }
 

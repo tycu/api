@@ -9,7 +9,11 @@
   },
   "devDependencies": {
     "eslint": "^3.3.1",
-    "eslint-config-bestpractices": "^1.0.2"
+    "eslint-config-bestpractices": "^1.0.2",
+    "mocha": "^3.0.2",
+    "should": "^11.1.0",
+    "sinon": "^1.17.5",
+    "supertest": "^2.0.0"
   },
   "dependencies": {
     "async": "^1.5.2",
@@ -47,7 +51,7 @@
   },
   "scripts": {
     "start": "DEBUG=* node main.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha tests/test_helper.js --timeout 5000 --reporter nyan",
     "createDb": "node config/database.js",
     "migrate": "sequelize db:migrate && sequelize db:seed:all"
   },

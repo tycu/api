@@ -2,11 +2,16 @@
 
 const debug = require('debug')('controllers:datbase.js:' + process.pid);
 
+
+var envParam = process.argv[2];
+
+console.log('process.argv', process.argv);
+
 const createDB = function() { // NOTE could have (callback)
   const pg     = require('pg'),
         db     = new pg.Client(),
         path   = require("path"),
-        env    = process.env.NODE_ENV || "development",
+        env    = process.env.NODE_ENV || envParam,
         config = require(path.join(__dirname, '.', 'database.json'))[env],
         dbName = config.database;
 
@@ -19,43 +24,8 @@ const createDB = function() { // NOTE could have (callback)
       // callback(sequelize);
 
 
-      // NOTE for clearing DB
-      // db.query('SET FOREIGN_KEY_CHECKS = 0')
-      // .then(function(){
-      //     return db.sync({ force: true });
-      // })
-      // .then(function(){
-      //     return db.query('SET FOREIGN_KEY_CHECKS = 1')
-      // })
-      // .then(function(){
-      //     console.log('Database synchronised.');
-      // }, function(err){
-      //     console.log(err);
-      // });
-
-
       db.end(); // NOTE close the connection
     });
   });
 };
 createDB();
-
-const unsetDB = function() {
-  const pg = require('pg'),
-        db = new pg.Client();
-
-  db.query('SET FOREIGN_KEY_CHECKS = 0')
-  .then(function(){
-    return db.sync({ force: true });
-  })
-  .then(function(){
-    return db.query('SET FOREIGN_KEY_CHECKS = 1');
-  })
-  .then(function(){
-    debug('Database synchronised.');
-  }, function(err){
-    debug(err);
-  });
-};
-
-// unsetDB();

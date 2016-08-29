@@ -5,7 +5,7 @@
   },
   "test": {
     "verifyReset": "bfd95fd5-bc8f-448b-b2da-6c7d8a860000",
-    "domain": ""
+    "domain": "http://localhost:8080"
   },
   "production": {
     "verifyReset": "441d5354-807d-4a78-ba97-2896decd6005"
