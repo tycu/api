@@ -34,12 +34,12 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     paranoid: true,
     classMethods: {
-      // associate: function(models) {
+      associate: function(models) {
+        Politician.hasMany(models.PoliticianPhoto);
 
         // this is breaking SQL statement, not sure why yet
 
         // Politician.hasMany(models.Event);
-        // Politician.hasMany(models.PoliticianPhoto);
 
         // belongsToMany instead?
         // Politician.hasMany(models.Contribution, {

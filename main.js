@@ -81,6 +81,7 @@ const start = function() {
   app.use("/api/v1", require(path.join(__dirname, "controllers", "politicians_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "images_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "politician_photos_controller.js"))());
 
   // require('./controllers/contributions_controller')(app, redis);
   // require('./controllers/users_controller')(app);
