@@ -18,6 +18,11 @@ const renderToString = function(source, templateData) {
 };
 
 const send = function(request, next) {
+
+  if (env === 'test') {
+    return false;
+  }
+
   sg.API(request)
   .then(response => {
       debug("email status code: %s", response.statusCode);
