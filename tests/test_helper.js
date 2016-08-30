@@ -6,8 +6,7 @@ const should    = require('should'),
 
 var seq_test = function(next) {
   return function () {
-
-  next();
+    next();
   };
 }
 

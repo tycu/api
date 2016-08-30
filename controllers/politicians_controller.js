@@ -8,7 +8,6 @@ const debug = require('debug')('controllers:politicians_controller:' + process.p
     Authorize = require("../services/Authorize.js"),
     attributesToLoad = [
       'id',
-      'thumbnail',
       'firstName',
       'lastName',
       'jobTitle',
@@ -41,7 +40,6 @@ function updatePolitician(req, res, next) {
   debug("updatePolitician");
   load(req)
   .then(function(politician, err) {
-    politician.thumbnail = req.body.politician.thumbnail;
     politician.firstName = req.body.politician.firstName;
     politician.lastName = req.body.politician.lastName;
     politician.jobTitle = req.body.politician.jobTitle;
@@ -62,7 +60,6 @@ function updatePolitician(req, res, next) {
 function createPolitician(req, res, next) {
   debug("createPolitician");
   const newPolitician = models.Politician.build({
-    thumbnail: req.body.politician.thumbnail,
     firstName: req.body.politician.firstName,
     lastName: req.body.politician.lastName,
     jobTitle: req.body.politician.jobTitle,

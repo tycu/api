@@ -38,7 +38,6 @@ module.exports = function (models, api) {
     //     // var politician = res.body[0];
     //     // console.log('politician', politician);
     //     // politician.id.should.be.instanceof(Number);
-    //     // politician.thumbnail.should.be.instanceof(String);
     //     // politician.firstName.should.be.instanceof(String);
     //     // politician.lastName.should.be.instanceof(String);
     //     // politician.jobTitle.should.be.instanceof(String);

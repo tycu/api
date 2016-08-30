@@ -2,7 +2,6 @@
 
 const path = require('path'),
       Router = require("express").Router,
-      models = require('../models/index.js'),
       SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
       Authorize = require("../services/Authorize.js"),
       baseImageUrl = 'https://tally.imgix.net',

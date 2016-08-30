@@ -1,8 +1,7 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
   const Sequelize = require('sequelize');
-  const Politician = sequelize.define('Politician',
-  {
+  const Politician = sequelize.define('Politician', {
     id: {
       type: DataTypes.INTEGER,
       field: 'id',
@@ -56,7 +55,7 @@ module.exports = function(sequelize, DataTypes) {
       //   through: UserFollowers
       // })
 
-      // }
+      }
     },
     defaultScope: {
       where: {

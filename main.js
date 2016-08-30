@@ -84,7 +84,6 @@ const start = function() {
 
   // require('./controllers/contributions_controller')(app, redis);
   // require('./controllers/users_controller')(app);
-  // require('./controllers/events_controller')();
 
   // all other requests redirect to 404
   app.all("*", function (req, res, next) {

@@ -1,5 +1,6 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
+  const Sequelize = require('sequelize');
   const PoliticianPhoto = sequelize.define('PoliticianPhoto', {
     id: {
       type: DataTypes.INTEGER,
@@ -22,7 +23,7 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.DATE
     },
     updatedAt: {
-      type: DataTypes.DATE
+      type: Sequelize.DATE
     }
 
   }, {

@@ -1,8 +1,6 @@
 
 module.exports = function (models, api) {
   describe('authentication_controller_tests', function(){
-
-
     var token,
         newUser,
         email;
@@ -146,5 +144,4 @@ module.exports = function (models, api) {
       });
     });
   })
-
 }
