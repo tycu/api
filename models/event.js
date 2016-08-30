@@ -8,10 +8,18 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     isPinned: {
-      type: DataTypes.BOOLEAN
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      validate: {
+        isIn: [[true, false]]
+      }
     },
     isPublished: {
-      type: DataTypes.BOOLEAN
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      validate: {
+        isIn: [[true, false]]
+      }
     },
     imageUrl: {
       type: DataTypes.STRING
@@ -20,10 +28,15 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING
     },
     politicianId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isInt: true
+      }
     },
     headline: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false
     },
     summary: {
       type: DataTypes.TEXT
@@ -32,10 +45,12 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     }
   }, {
     paranoid: true,

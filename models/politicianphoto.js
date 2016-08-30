@@ -8,24 +8,31 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     politicianId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isInt: true
+      }
     },
     url: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false
     },
     main: {
-      type: Sequelize.BOOLEAN
+      type: Sequelize.BOOLEAN,
+      allowNull: false
     },
     deletedAt: {
       type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     }
-
   }, {
     paranoid: true,
     classMethods: {

@@ -37,8 +37,7 @@ module.exports = function (models, api) {
         api
         .post('/api/v1/signup')
         .send(body)
-        // .set('x-api-key', '123myapikey')
-        // .auth('correct', 'credentials')
+
         .expect(200)
         .expect('Content-Type', 'application/json; charset=utf-8')
         .end(function(err, res) {
@@ -47,7 +46,6 @@ module.exports = function (models, api) {
           }
           const response = res.body;
           response.should.be.instanceof(Object);
-          // console.log('response', response);
 
           response.id.should.be.instanceof(Number);
           response.email.should.be.instanceof(String)
@@ -66,7 +64,6 @@ module.exports = function (models, api) {
     })
     describe('GET /api/v1/signout', function() {
       it('should sign out user', function(done) {
-        // console.log('token', token);
 
         api
         .put('/api/v1/signout')
@@ -102,7 +99,6 @@ module.exports = function (models, api) {
           }
           const response = res.body;
           response.should.be.instanceof(Object);
-          // console.log('response', response);
 
           response.id.should.be.instanceof(Number);
           response.email.should.be.instanceof(String)
@@ -142,5 +138,14 @@ module.exports = function (models, api) {
 
       });
     });
+
+    describe('GET /api/v1/update_password', function() {});
+    describe('GET /api/v1/change_password', function() {});
+    describe('GET /api/v1/email_verification', function() {});
+
+    // NOTE not being used currently:
+    // describe('GET /api/v1/verify_auth', function() {})
+
+
   })
 }

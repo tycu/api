@@ -8,13 +8,18 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     name: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false
     },
     description: {
       type: DataTypes.STRING
     },
     color: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isIn: [['blue', 'red']]
+      }
     },
     twitterUsername: {
       type: DataTypes.STRING
@@ -23,10 +28,12 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     }
 }, {
     paranoid: true,

@@ -8,22 +8,34 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     pacId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      validate: {
+        isInt: true
+      }
     },
     eventId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isInt: true,
+      }
     },
     userId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      validate: {
+        isInt: true
+      }
     },
     deletedAt: {
       type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     }
   }, {
     paranoid: true,

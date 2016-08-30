@@ -11,13 +11,16 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING
     },
     firstName: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false
     },
     lastName: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false
     },
     jobTitle: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false
     },
     twitterUsername: {
       type: DataTypes.STRING
@@ -26,10 +29,12 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     }
   }, {
     paranoid: true,

@@ -84,10 +84,10 @@ module.exports = function (models, api, token) {
     });
 
 
-    describe('GET /api/v1/events/1/pac_events', function() {
+    describe('GET /api/v1/events/:eventId/pac_events', function() {
       it('should require authorization', function(done) {
         api
-        .get('/api/v1/events/1/pac_events')
+        .get('/api/v1/events/' + eventId + '/pac_events')
         .expect(401)
         .expect('Content-Type', 'text/html; charset=utf-8')
         .end(function(err, res) {

@@ -69,7 +69,8 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING
     },
     cryptedPassword: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      allowNull: false
     },
     refreshToken: {
       type: Sequelize.STRING
@@ -81,7 +82,11 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.STRING
     },
     role: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        isIn: [['user', 'admin']]
+      }
     },
     emailVerified: {
       type: DataTypes.BOOLEAN
@@ -114,10 +119,12 @@ module.exports = function(sequelize, DataTypes) {
       type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     }
   }, {
     paranoid: true,

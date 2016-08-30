@@ -36,7 +36,7 @@ var seq_test = function(next) {
     });
 
     after(function(done) {
-      models.User.findAll({attributes: ['id'],paranoid: false})
+      models.User.findAll({attributes: ['id'], paranoid: false})
       .then(function(allUsers){
         var ids = [];
         allUsers.forEach(function(user) {

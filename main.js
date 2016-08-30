@@ -13,7 +13,7 @@ const path = require("path"),
       tokenUtils = require(path.join(__dirname, "/services/tokenUtils.js"));
 
 const start = function() {
-  debug("Starting application");
+  debug("Starting application in NODE_ENV: %s", env);
 
   debug("Initializing express");
   const express = require('express'),

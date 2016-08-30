@@ -8,31 +8,48 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     amount: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        // what additional validation do we want here?
+      }
     },
-    chargeUuid: {
-      type: DataTypes.INTEGER
+    chargeUuid: { // NOTE format: ch_17x5NXF3SBSFqhmCMPSeo1Jr
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        len: [20, 50]
+      }
     },
     support: {
-      type: DataTypes.BOOLEAN
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      validate: {
+        isIn: [[true, false]]
+      }
     },
     userId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     eventId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     pacId: {
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      allowNull: false
     },
     deletedAt: {
       type: Sequelize.DATE
     },
     createdAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     },
     updatedAt: {
-      type: Sequelize.DATE
+      type: Sequelize.DATE,
+      allowNull: false
     }
   }, {
     paranoid: true,

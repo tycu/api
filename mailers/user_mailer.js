@@ -18,11 +18,6 @@ const renderToString = function(source, templateData) {
 };
 
 const send = function(request, next) {
-
-  if (env === 'test') {
-    return false;
-  }
-
   sg.API(request)
   .then(response => {
       debug("email status code: %s", response.statusCode);
@@ -41,8 +36,18 @@ const send = function(request, next) {
   });
 };
 
+const checkTest = function() {
+  if (env === 'test') {
+    return false;
+  }
+
+}
 
 module.exports.sendWelcomeMail = function(user, next) {
+  if (checkTest() === false) {
+    return false;
+  }
+
   debug("calling sendWelcomeMail");
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
 
@@ -99,6 +104,10 @@ module.exports.sendWelcomeMail = function(user, next) {
 
 
 module.exports.sendConfirmMail = function(user, next) {
+  if (checkTest() === false) {
+    return false;
+  }
+
   debug("calling sendConfirmMail");
 
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
@@ -151,6 +160,9 @@ module.exports.sendConfirmMail = function(user, next) {
 
 
 module.exports.sendPasswordResetEmail = function(user, next) {
+  if (checkTest() === false) {
+    return false;
+  }
   debug("calling sendPasswordResetEmail");
 
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
@@ -203,6 +215,9 @@ module.exports.sendPasswordResetEmail = function(user, next) {
 };
 
 module.exports.sendPasswordChangeAlert = function(user, next) {
+  if (checkTest() === false) {
+    return false;
+  }
   debug("calling sendPasswordChangeAlert");
 
   // {"user":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}

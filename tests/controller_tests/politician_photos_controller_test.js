@@ -48,10 +48,10 @@ module.exports = function (models, api, token) {
     });
 
 
-    describe('GET /api/v1/politicians/1/politician_photos', function() {
+    describe('GET /api/v1/politicians/:politicianId/politician_photos', function() {
       it('should require authorization', function(done) {
         api
-        .get('/api/v1/politicians/1/politician_photos')
+        .get('/api/v1/politicians/' + politicianId + '/politician_photos')
         .expect(401)
         .expect('Content-Type', 'text/html; charset=utf-8')
         .end(function(err, res) {

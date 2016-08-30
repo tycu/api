@@ -116,9 +116,9 @@ to migrate the test db (only when there is a new migration to run):
 `$ NODE_ENV=test sequelize db:migrate`
 
 start the server in the TEST env (always):
-`$ NODE_ENV=test npm start`
+`$ npm run testServer`
 
 to run the full test suite (always):
-`$ NODE_ENV=test npm run test`
+`$ npm run test`
 
 tests should pass

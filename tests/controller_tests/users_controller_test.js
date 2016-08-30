@@ -22,14 +22,11 @@ module.exports = function (models, api, data) {
       });
 
 
-
       // NOTE need to get Authorize.js to comply to get this working
       // NEED to pass request current user of a role of admin for it to work
 
-      // it('should return /api/v1/users/:id', function(done) {
-      //   if (data.token && data.id) {
-      //     console.log('data.id', data.id);
-      //     console.log('data.token', data.token);
+      it('should return /api/v1/users/:id', function(done) {
+        if (data.token && data.id) {
 
       //     api
       //     .get('/api/v1/users/' + data.id)
@@ -51,12 +48,12 @@ module.exports = function (models, api, data) {
       //       // user.createdAt.should.be.instanceof(String);
       //       // user.updatedAt.should.be.instanceof(String);
 
-      //       done();
-      //     });
-      //   } else {
-      //     done();
-      //   }
+            done();
       // });
+        } else {
+          done();
+        }
+      });
 
     });
   });
