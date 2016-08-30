@@ -17,5 +17,6 @@ describe("Controller Tests", seq_test(function () {
   require("./controller_tests/pacs_controller_test.js")(models, api);
   require("./controller_tests/ping_test.js")(models, api);
   require("./controller_tests/politicians_controller_test.js")(models, api);
+  require("./controller_tests/politician_photos_controller_test.js")(models, api);
   require("./controller_tests/users_controller_test.js")(models, api);
 }));
