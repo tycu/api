@@ -13,7 +13,6 @@ module.exports = function (models, api) {
     });
 
     after(function(done) {
-
       models.User.findAll({attributes: ['id'],paranoid: false})
       .then(function(allUsers){
         var ids = [];
