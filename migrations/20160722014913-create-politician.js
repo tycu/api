@@ -28,10 +28,6 @@ module.exports = {
       twitterUsername: {
         type: Sequelize.STRING
       },
-      isDeleted: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
-      },
       deletedAt: {
         type: Sequelize.DATE,
         defaultValue: null

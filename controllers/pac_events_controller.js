@@ -40,7 +40,6 @@ function deletePacEvent(req, res, next) {
   debug("deletePacEvent");
   load(req)
   .then(function(pacEvent, err) {
-    pacEvent.isDeleted = true;
     pacEvent.deletedAt = Date.now() / 1000;
     pacEvent.destroy(function(err) {
       if (err) { throw err; }

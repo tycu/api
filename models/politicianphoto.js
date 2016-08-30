@@ -13,16 +13,13 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING
     },
     main: {
-      type: DataTypes.BOOLEAN
-    },
-    isDeleted: {
-      type: DataTypes.BOOLEAN
+      type: Sequelize.BOOLEAN
     },
     deletedAt: {
-      type: DataTypes.DATE
+      type: Sequelize.DATE
     },
     createdAt: {
-      type: DataTypes.DATE
+      type: Sequelize.DATE
     },
     updatedAt: {
       type: DataTypes.DATE
@@ -37,13 +34,13 @@ module.exports = function(sequelize, DataTypes) {
     },
     defaultScope: {
       where: {
-        isDeleted: false
+        deletedAt: null
       }
     },
     scopes: {
       deleted: {
         where: {
-          isDeleted: true
+          deletedAt: {ne: null}
         }
       }
     }

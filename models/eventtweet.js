@@ -16,9 +16,6 @@ module.exports = function(sequelize, DataTypes) {
     userId: {
       type: DataTypes.INTEGER
     },
-    isDeleted: {
-      type: Sequelize.BOOLEAN
-    },
     deletedAt: {
       type: Sequelize.DATE
     },
@@ -39,13 +36,13 @@ module.exports = function(sequelize, DataTypes) {
     },
     defaultScope: {
       where: {
-        isDeleted: false
+        deletedAt: null
       }
     },
     scopes: {
       deleted: {
         where: {
-          isDeleted: true
+          deletedAt: {ne: null}
         }
       }
     }

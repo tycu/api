@@ -17,7 +17,6 @@ factory.define('event', Event, {
   //   return 'Headline' + n + 'For Tally US';
   // }),
   summary: 'Summary here',
-  isDeleted: false,
   deletedAt: null,
   createdAt:  Date.now() / 1000,
   updatedAt:  Date.now() / 1000

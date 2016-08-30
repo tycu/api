@@ -16,9 +16,6 @@ module.exports = function(sequelize, DataTypes) {
     support: {
       type: DataTypes.BOOLEAN
     },
-    isDeleted: {
-      type: Sequelize.BOOLEAN
-    },
     deletedAt: {
       type: Sequelize.DATE
     },
@@ -35,15 +32,16 @@ module.exports = function(sequelize, DataTypes) {
         PacEvent.belongsTo(models.Pac);
         PacEvent.belongsTo(models.Event);
       }
-    },defaultScope: {
+    },
+    defaultScope: {
       where: {
-        isDeleted: false
+        deletedAt: null
       }
     },
     scopes: {
       deleted: {
         where: {
-          isDeleted: true
+          deletedAt: {ne: null}
         }
       },
       support: {

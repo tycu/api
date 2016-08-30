@@ -15,7 +15,7 @@ function loadAdmin(req) {
 
   return models.Event.unscoped().findOne({
     attributes: attributesToLoad,
-    where: { id: id, isDeleted: false }
+    where: { id: id, deletedAt: null }
   });
 }
 
@@ -33,7 +33,7 @@ function unPinEvent(req, res, next) {
   // NOTE should only be one, but let's just safe
   var pinnedEvents = models.Event.unscoped().findOne({
     attributes: attributesToLoad,
-    where: { isPinned: true, isDeleted: false }
+    where: { isPinned: true, deletedAt: null }
   })
   .then(function(pinnedEvent, err) {
     debug("in pinnedEvents");
@@ -166,7 +166,7 @@ function getAllEvents(req, res, next) {
 function getAdminEvents(req, res, next) {
   debug("getAllEvents");
   models.Event.unscoped().findAll({
-    where: { isDeleted: false },
+    where: { deletedAt: null },
     attributes: attributesToLoad,
     offset: 0,
     limit: 5, // TODO make 100

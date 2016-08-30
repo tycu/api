@@ -37,10 +37,6 @@ module.exports = {
         onUpdate: 'cascade',
         onDelete: 'cascade'
       },
-      isDeleted: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
-      },
       deletedAt: {
         type: Sequelize.DATE,
         defaultValue: null

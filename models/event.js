@@ -28,9 +28,6 @@ module.exports = function(sequelize, DataTypes) {
     summary: {
       type: DataTypes.TEXT
     },
-    isDeleted: {
-      type: Sequelize.BOOLEAN
-    },
     deletedAt: {
       type: Sequelize.DATE
     },
@@ -57,14 +54,14 @@ module.exports = function(sequelize, DataTypes) {
     },
     defaultScope: {
       where: {
-        isDeleted: false,
+        deletedAt: null,
         isPublished: true
       }
     },
     scopes: {
       deleted: {
         where: {
-          isDeleted: true
+          deletedAt: {ne: null}
         }
       },
       pinned: {

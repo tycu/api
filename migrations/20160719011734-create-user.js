@@ -104,10 +104,6 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: null
       },
-      isDeleted: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
-      },
       createdAt: {
         type: Sequelize.DATE,
         defaultValue: null
@@ -143,3 +139,13 @@ module.exports = {
     return queryInterface.dropTable('Users');
   }
 };
+
+
+
+// NOTE if one wants to add a isDeleted column for speed as opposed
+// to looking up based on deletedAt being null:
+//       isDeleted: {
+//         type: Sequelize.BOOLEAN,
+//         defaultValue: false
+//       },
+
