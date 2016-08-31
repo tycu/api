@@ -144,14 +144,13 @@ const handleStripeError = function(err, res) {
 
 const getEventContributions = function(req, res, next) {
   debug("getEventContributions");
-  models.Contribution.findAll({
-    where: {eventId: req.eventId },
-    attributes: attributesToLoad,
-    limit: 50,
-    order: '"id" DESC'
-  }).then(function(contributions, err) {
-    debug(contributions);
-    req.contributions = contributions;
+  const eventId = req.params.eventId;
+
+  models.Contribution.find({where: {eventId: eventId },
+    attributes: [[models.sequelize.fn('SUM', models.sequelize.col('amount')), 'total']]
+  })
+  .then(function(result, err) {
+    req.contributions = result;
     next();
   });
 };
@@ -199,7 +198,7 @@ module.exports = function() {
   router.route("/events/:eventId/contributions")
   .get(Authorize.role("admin"), getEventContributions, function(req, res, next) {
     debug("in /events/:eventId/contributions route");
-    return res.status(200).json(req.events);
+    return res.status(200).json(req.contributions);
   });
 
   return router;
