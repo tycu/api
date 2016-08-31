@@ -11,6 +11,10 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
+      isBreaking: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       isPublished: {
         type: Sequelize.BOOLEAN,
         defaultValue: false

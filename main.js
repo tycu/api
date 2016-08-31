@@ -55,6 +55,7 @@ const start = function() {
     '/api/v1/signin',
     '/api/v1/signup',
     // '/api/v1/events', // breaking other event routes as not auth'd
+    '/api/v1/fetchBreaking',
     '/api/v1/email_verification',
     '/api/v1/email_reset',
     '/api/v1/update_password',
@@ -66,6 +67,7 @@ const start = function() {
     '/api/v1/signin',
     '/api/v1/signup',
     // '/api/v1/events',  // breaking other event routes as not auth'd
+    '/api/v1/fetchBreaking',
     '/api/v1/email_verification',
     '/api/v1/email_reset',
     '/api/v1/update_password',

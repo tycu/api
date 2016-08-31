@@ -14,6 +14,13 @@ module.exports = function(sequelize, DataTypes) {
         isIn: [[true, false]]
       }
     },
+    isBreaking: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      validate: {
+        isIn: [[true, false]]
+      }
+    },
     isPublished: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

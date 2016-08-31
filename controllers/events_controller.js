@@ -6,7 +6,7 @@ const debug = require('debug')('controllers:events_controller:' + process.pid),
     models = require('../models/index.js'),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
     Authorize = require("../services/Authorize.js"),
-    attributesToLoad = [ 'id', 'isPinned', 'isPublished', 'imageUrl', 'imageAttribution', 'politicianId', 'headline', 'summary', 'createdAt', 'updatedAt'];
+    attributesToLoad = ['id', 'isPinned', 'isBreaking', 'isPublished', 'imageUrl', 'imageAttribution', 'politicianId', 'headline', 'summary', 'createdAt', 'updatedAt'];
 
 
 function loadAdmin(req) {
@@ -30,20 +30,20 @@ function load(req) {
 }
 
 function unPinEvent(req, res, next) {
-  // NOTE should only be one, but let's just safe
-  var pinnedEvents = models.Event.unscoped().findOne({
+  debug('unPinEvent');
+
+  models.Event.unscoped().findOne({
     attributes: attributesToLoad,
     where: { isPinned: true, deletedAt: null }
   })
-  .then(function(pinnedEvent, err) {
-    debug("in pinnedEvents");
-    if (pinnedEvent) {
-      pinnedEvent.isPinned = false;
-      pinnedEvent.save(function(err) {
+  .then(function(event, err) {
+    if (event) {
+      event.isPinned = false;
+      event.save(function(err) {
         if (err) {
           throw err;
         }
-      }).then(function(existingUser) {
+      }).then(function() {
         next();
       });
     } else {
@@ -54,6 +54,7 @@ function unPinEvent(req, res, next) {
 
 function pinEvent(req, res, next) {
   debug("pinEvent");
+
   loadAdmin(req)
   .then(function(event, err) {
     event.isPinned = true;
@@ -69,6 +70,60 @@ function pinEvent(req, res, next) {
   .catch(function(error, event) {
     return next(new SequelizeError("422", {message: error}));
   });
+}
+
+
+function unsetBreakingNews(req, res, next) {
+  debug('unsetBreakingNews');
+
+  models.Event.unscoped().findOne({
+    attributes: attributesToLoad,
+    where: { isBreaking: true, deletedAt: null }
+  })
+  .then(function(event, err) {
+    debug("in pinnedEvents");
+    if (event) {
+      event.isBreaking = false;
+      event.save(function(err) {
+        if (err) {
+          throw err;
+        }
+      }).then(function() {
+        next();
+      });
+    } else {
+      next();
+    }
+  });
+}
+
+function setBreakingNews(req, res, next) {
+  debug("setBreakingNews");
+
+  loadAdmin(req)
+  .then(function(event, err) {
+    event.isBreaking = true;
+
+    event.updatedAt = Date.now() / 1000;
+    event.save(function(err) {
+      if (err) { throw err; }
+    }).then(function(event) {
+      req.event = event;
+      next();
+    });
+  })
+  .catch(function(error, event) {
+    return next(new SequelizeError("422", {message: error}));
+  });
+}
+
+function fetchBreaking(req, res, next) {
+  debug('fetchBreaking');
+  models.Event.findOne({attributes: ['id', 'isBreaking', 'headline', 'createdAt'], where: { isBreaking: true }})
+  .then(function(event, err) {
+    req.breakingEvent = event;
+    next();
+  })
 }
 
 function togglePublish(req, res, next) {
@@ -169,7 +224,7 @@ function getAdminEvents(req, res, next) {
     where: { deletedAt: null },
     attributes: attributesToLoad,
     offset: 0,
-    limit: 5, // TODO make 100
+    limit: 50, // TODO make 100
     order: '"id" DESC'
   }).then(function(objects, err) {
     req.events = objects;
@@ -222,10 +277,22 @@ module.exports = function() {
     return res.status(204).send(req.event);
   });
 
-  router.route("/events/:id/toggle_publish")
-  .put(Authorize.role("admin"), togglePublish, function(req, res, next) {
-    debug('in PUT-PIN /events/:id/toggle_publish');
-    return res.status(204).send({toggledId: req.params.id});
+  router.route("/events/:id/setBreaking")
+  .put(Authorize.role("admin"), unsetBreakingNews, setBreakingNews, function(req, res, next) {
+    debug('in PUT-PIN /events/:id/setBreaking');
+    return res.status(200).send(req.event);
+  });
+
+  router.route("/unSetBreaking")
+  .put(Authorize.role("admin"), unsetBreakingNews, function(req, res, next) {
+    debug('in PUT-PIN /unSetBreaking');
+    return res.status(204).send(req.event);
+  });
+
+  router.route('/fetchBreaking')
+  .get(fetchBreaking, function(req, res, next) {
+    debug('in GET /fetchBreaking');
+    return res.status(200).send(req.breakingEvent);
   });
 
   return router;
