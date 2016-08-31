@@ -8,7 +8,7 @@ module.exports = {
         autoIncrement: true
       },
       amount: {
-        type: Sequelize.STRING
+        type: Sequelize.DECIMAL
       },
       support: {
         type: Sequelize.BOOLEAN
