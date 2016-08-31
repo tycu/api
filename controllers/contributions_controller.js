@@ -10,28 +10,10 @@ const debug = require('debug')('controllers:contributions_controller:' + process
     UnauthorizedAccessError = require(path.join(__dirname, "..", "errors", "UnauthorizedAccessError.js")),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
     StripeError = require(path.join(__dirname, "..", "errors", "StripeError.js")),
-    Authorize = require("../services/Authorize.js");
-    // attributesToLoad = ['id', 'isPinned', 'imageUrl', 'imageAttribution', 'politicianId', 'headline', 'summary', 'createdAt', 'updatedAt'];
+    Authorize = require("../services/Authorize.js"),
+    attributesToLoad = ['id', 'amount', 'support', 'userId', 'eventId', 'pacId',
+    'createdAt', 'updatedAt']; // chargeUuid
 
-// var crypto = require('crypto')
-// var entities = require('../entities')(redis)
-    // request = require('request'),
-    // redisKeys = require('../redis-keys'),
-
-
-// const getEventContributions = function(req, res, next) {
-//   debug("getEventContributions");
-//   models.Event.findAll({
-//     where: {eventId: req.eventId },
-//     attributes: attributesToLoad,
-//     limit: 10,
-//     order: '"id" DESC'
-//   }).then(function(events, err) {
-//     debug(events);
-//     req.events = events;
-//     next();
-//   });
-// };
 
 const setCard = function(req, res, next) {
   debug("in setCard");
@@ -160,6 +142,32 @@ const handleStripeError = function(err, res) {
   }
 };
 
+const getEventContributions = function(req, res, next) {
+  debug("getEventContributions");
+  models.Contribution.findAll({
+    where: {eventId: req.eventId },
+    attributes: attributesToLoad,
+    limit: 50,
+    order: '"id" DESC'
+  }).then(function(contributions, err) {
+    debug(contributions);
+    req.contributions = contributions;
+    next();
+  });
+};
+
+const getContributionReport = function(req, res, next) {
+  debug("getContributionReport");
+
+  models.sequelize.query(
+    'SELECT date_trunc(\'day\', "c"."createdAt") AS "day", count(*) AS "contrib_per_day", SUM(CAST(coalesce("c"."amount", \'0\') AS integer)) AS "daily_sum" FROM "Contributions" AS "c" GROUP BY "day" ORDER BY 1 DESC LIMIT 30 OFFSET 0;'
+  ).then(function(contributions, err) {
+    debug(contributions);
+    req.contributions = contributions;
+    next();
+  });
+}
+
 module.exports = function() {
   const router = new Router();
 
@@ -181,11 +189,18 @@ module.exports = function() {
     });
   });
 
-  // router.route("/contributions")
-  // .get(getEventContributions, function(req, res, next) {
-  //   debug("in /events/:id/contributions route");
-  //   return res.status(200).json(req.events);
-  // });
+
+  router.route("/contribution_report")
+  .get(Authorize.role("admin"), getContributionReport, function(req, res, next) {
+    debug("in GET-INDEX /contribution_report");
+    return res.status(200).json(req.contributions);
+  });
+
+  router.route("/events/:eventId/contributions")
+  .get(Authorize.role("admin"), getEventContributions, function(req, res, next) {
+    debug("in /events/:eventId/contributions route");
+    return res.status(200).json(req.events);
+  });
 
   return router;
 };
