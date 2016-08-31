@@ -1,7 +1,7 @@
 const should    = require('should'),
       assert    = require('assert'),
       supertest = require('supertest'),
-      api       = supertest('http://localhost:5000');
+      api       = supertest('http://localhost:5001');
       // factory   = require('factory-girl'),
       // Event     = require('../../models/event');
       // eventFactory = require('./factories/EventFactory');

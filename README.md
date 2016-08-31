@@ -121,4 +121,7 @@ start the server in the TEST env (always):
 to run the full test suite (always):
 `$ npm run test`
 
+to find problematic syncronous (event loop blocking code)
+`$ npm run traceSync`
+
 tests should pass

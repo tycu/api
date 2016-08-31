@@ -51,8 +51,9 @@
   },
   "scripts": {
     "start": "DEBUG=* node main.js",
-    "testServer": "NODE_ENV=test DEBUG=* node main.js",
+    "testServer": "NODE_ENV=test PORT=5001 DEBUG=* node main.js",
     "test": "NODE_ENV=test mocha tests/test_helper.js --timeout 5000 --reporter nyan",
+    "traceSync": "node main.js --trace-sync-io",
     "createDb": "node config/database.js",
     "migrate": "sequelize db:migrate && sequelize db:seed:all"
   },
