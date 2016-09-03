@@ -8,7 +8,8 @@ const debug = require('debug')('controllers:user_mailer:' + process.pid),
       Handlebars = require('handlebars'),
       path = require("path"),
       fs = require("fs"),
-      sg = require('sendgrid')('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'); // TODO get from process.env.SENDGRID_API_KEY
+      sendGridKey = process.env.SENDGRID_API_KEY || require('../config/sendgridConfig.json'),
+      sg = require('sendgrid')(sendGridKey);
 
 
 const renderToString = function(source, templateData) {
