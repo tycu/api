@@ -43,7 +43,8 @@ const authenticate = function(req, res, next) {
       }
       existingUser.comparePassword(password, function (err, isMatch) {
         if (isMatch && !err) {
-
+          existingUser.lastLoginAt = existingUser.currentLoginAt
+          existingUser.currentLoginAt = new Date()
           existingUser.loginCount += 1;
           existingUser.lastLoginIp = existingUser.currentLoginIp;
           existingUser.currentLoginIp = req.connection.remoteAddress;

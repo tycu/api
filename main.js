@@ -54,6 +54,7 @@ const start = function() {
     '/',
     '/api/v1/signin',
     '/api/v1/signup',
+    '/api/v1/auth/facebook/callback',
     // '/api/v1/events', // breaking other event routes as not auth'd
     '/api/v1/fetchBreaking',
     '/api/v1/email_verification',
@@ -66,6 +67,7 @@ const start = function() {
     '/',
     '/api/v1/signin',
     '/api/v1/signup',
+    '/api/v1/auth/facebook/callback',
     // '/api/v1/events',  // breaking other event routes as not auth'd
     '/api/v1/fetchBreaking',
     '/api/v1/email_verification',
@@ -83,7 +85,10 @@ const start = function() {
   app.use("/api/v1", require(path.join(__dirname, "controllers", "politicians_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());
   app.use("/api/v1", require(path.join(__dirname, "controllers", "images_controller.js"))());
-  app.use("/api/v1", require(path.join(__dirname, "controllers", "politician_photos_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "politician_photos_controller.js"))()),
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "facebook_controller.js"))());
+
+
 
   // require('./controllers/contributions_controller')(app, redis);
   // require('./controllers/users_controller')(app);

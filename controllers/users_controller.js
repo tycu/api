@@ -8,6 +8,7 @@ const debug = require('debug')('controllers:users_controller:' + process.pid),
       Authorize = require("../services/Authorize.js"),
       attributesToLoad = [
       'id',
+      'facebookUuid',
       'occupation',
       'employer',
       'name',
