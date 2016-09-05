@@ -283,13 +283,13 @@ const verifyEmail = function(req, res, next) {
 module.exports = function () {
   const router = new Router();
 
-  // NOTE this route is not in use currently, but checks that a token is working, can use for refresh perhaps
-  router.route("/verify_auth").get(function (req, res, next) {
+  router.route("/verify_auth")
+  .get(function (req, res, next) {
     tokenUtils.verifyAuth(req, res, next);
-    return res.status(200).json(req.currentUser);
   });
 
-  router.route("/update_password").put(verifyEmail, function(req, res, next) {
+  router.route("/update_password")
+  .put(verifyEmail, function(req, res, next) {
     debug("in email_verification route");
 
     return res.status(200).json({
@@ -297,27 +297,31 @@ module.exports = function () {
     });
   });
 
-  router.route("/email_verification").get(verifyEmail, function(req, res, next) {
+  router.route("/email_verification")
+  .get(verifyEmail, function(req, res, next) {
     debug("in email_verification route");
     return res.status(200).json({
       "message": "User verified."
     });
   });
 
-  router.route("/change_password").put(Authorize.role("user"), authenticate, function(req, res, next) {
+  router.route("/change_password")
+  .put(Authorize.role("user"), authenticate, function(req, res, next) {
     debug("in change_password route");
     return res.status(200).json({
       "message": "Password updated successfully."
     });
   });
 
-  router.route("/email_reset").put(function(req, res, next) {
+  router.route("/email_reset")
+  .put(function(req, res, next) {
     debug("in email_reset route");
     generatePasswordReset(req, res, next);
     return res.status(200).json({"message": "Password reset email sent."});
   });
 
-  router.route("/signout").put(function(req, res, next) {
+  router.route("/signout")
+  .put(function(req, res, next) {
     if (tokenUtils.expire(req.query.token)) {
       return res.status(200).json({
         "message": "User has been successfully logged out"
@@ -327,11 +331,13 @@ module.exports = function () {
     }
   });
 
-  router.route("/signin").post(authenticate, function(req, res, next) {
+  router.route("/signin")
+  .post(authenticate, function(req, res, next) {
     return res.status(200).json(req.currentUser);
   });
 
-  router.route("/signup").post(createUser, function(req, res, next) {
+  router.route("/signup")
+  .post(createUser, function(req, res, next) {
     return res.status(200).json(req.currentUser);
   });
 

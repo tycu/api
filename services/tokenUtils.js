@@ -9,7 +9,7 @@ const debug = require('debug')('app:tokenUtils:' + process.pid),
       config = require("../config/jwtOptions.json")[env],
       jsonwebtoken = require("jsonwebtoken"),
       TOKEN_EXPIRATION = '5h',
-      TOKEN_EXPIRATION_SEC = (5 * 3600),
+      TOKEN_EXPIRATION_SEC = 18000,
       UnauthorizedAccessError = require(path.join(__dirname, '../', 'errors', 'UnauthorizedAccessError.js')),
       resetConfig = require('../config/resetConfig.json')[env],
       crypto = require('crypto');
@@ -21,6 +21,10 @@ client.on('error', function (err) {
 client.on('connect', function () {
   debug("Redis successfully connected");
 });
+
+const expiresWithinHour = function(expAt) {
+  return ((expAt - Date.now() / 3600000)) < 1;
+}
 
 module.exports.fetch = function(headers) {
   debug("in exports.fetch");
@@ -42,7 +46,7 @@ module.exports.fetch = function(headers) {
   }
 };
 
-module.exports.create = function(user, req, res, next) {
+module.exports.create = function(user, req, res, next, doesExpire) {
   debug("Create token");
 
   if (_.isEmpty(user)) {
@@ -53,7 +57,12 @@ module.exports.create = function(user, req, res, next) {
     id: user.id,
     email: user.email,
     refreshToken: user.refreshToken,
-    token: jsonwebtoken.sign({ id: user.id, email: user.email, refreshToken: user.refreshToken }, config.secret, {
+    token: jsonwebtoken.sign({
+      id: user.id,
+      email: user.email,
+      refreshToken: user.refreshToken,
+      randSeed: Math.random()
+    }, config.secret, {
       expiresIn: TOKEN_EXPIRATION
     }),
     role: user.role
@@ -76,8 +85,16 @@ module.exports.create = function(user, req, res, next) {
           return next(new Error(err)); // "Can not set the expire value for the token key"
         }
         if (reply) {
-          req.currentUser = data;
-          next(); // we have succeeded
+          if (doesExpire) {
+            res.currentUser = data;
+            debug('before calling res.currentUser');
+            debug(res.currentUser);
+            return res.status(200).send(res.currentUser);
+          }
+          else {
+            req.currentUser = data;
+            next(); // we have succeeded
+          }
         } else {
           return next(new Error('Expiration not set on redis'));
         }
@@ -107,7 +124,7 @@ module.exports.retrieve = function (id, done) {
       }
       if (_.isNull(reply)) {
         return done(new Error("token_invalid"), {
-          "message": "Token doesn't exist, are you sure it hasn't expired or been revoked?"
+          "message": "Token does not exist, are you sure it has not expired or been revoked?"
         });
       } else {
         const data = JSON.parse(reply);
@@ -117,7 +134,7 @@ module.exports.retrieve = function (id, done) {
           return done(null, data);
         } else {
           return done(new Error("token_doesnt_exist"), {
-            "message": "Token doesn't exist, login into the system so it can generate new token."
+            "message": "Token does not exist, login into the system so it can generate new token."
           });
         }
       }
@@ -145,8 +162,7 @@ module.exports.verifyEmail = function(existingUser, req, res, next) {
 
 module.exports.verifyAuth = function(req, res, next) {
   debug("Verifying token");
-  const verifyToken = exports.fetch(req.query.token);
-
+  const verifyToken = exports.fetch(req.headers);
   jsonwebtoken.verify(verifyToken, config.secret, function (err) { // NOTE could be (err, decode)
     if (err) {
       req.currentUser = undefined;
@@ -157,7 +173,15 @@ module.exports.verifyAuth = function(req, res, next) {
         req.currentUser = undefined;
         return next(new UnauthorizedAccessError("401", {message: 'invalid_token or ?'}));
       }
-      req.currentUser = data;
+
+      const doesExpire = expiresWithinHour(data.token_exp);
+      // NOTE to reduce DB lookups
+      if (doesExpire) {
+        exports.expire(verifyToken);
+        exports.create(req.currentUser, req, res, next, doesExpire)
+      } else {
+        return res.status(200).send(req.currentUser);
+      }
     });
   });
 };

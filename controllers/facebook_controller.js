@@ -62,15 +62,15 @@ const authorizeFacebook = function(req, res, next) {
       }
       if (existingUser) {
         // NOTE do not create new user, just keep data current
-        existingUser.email = fbResponse.email
-        existingUser.refreshToken = fbResponse.accessToken
-        existingUser.name = fbResponse.name
-        existingUser.loginCount += 1
-        existingUser.lastLoginAt = existingUser.currentLoginAt
-        existingUser.currentLoginAt = new Date()
-        existingUser.lastLoginIp = existingUser.currentLoginIp
-        existingUser.currentLoginIp = req.connection.remoteAddress
-        existingUser.picSquare = fbResponse.picture.url
+        existingUser.email = fbResponse.email;
+        existingUser.refreshToken = fbResponse.accessToken;
+        existingUser.name = fbResponse.name;
+        existingUser.loginCount += 1;
+        existingUser.lastLoginAt = existingUser.currentLoginAt;
+        existingUser.currentLoginAt = new Date();
+        existingUser.lastLoginIp = existingUser.currentLoginIp;
+        existingUser.currentLoginIp = req.connection.remoteAddress;
+        existingUser.picSquare = fbResponse.picture.data.url;
 
         existingUser.save(function(err) {
           if (err) { throw err; }
@@ -95,7 +95,7 @@ const authorizeFacebook = function(req, res, next) {
             currentLoginAt: new Date(),
             cryptedPassword: '',
             currentLoginIp: req.connection.remoteAddress,
-            picSquare: fbResponse.picture.url,
+            picSquare: fbResponse.picture.data.url,
             singleUseToken: encrypted,
             name: fbResponse.name
           });

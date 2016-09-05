@@ -15,6 +15,7 @@ const debug = require('debug')('controllers:users_controller:' + process.pid),
       'streetAddress',
       'city',
       'residenceState',
+      'picSquare',
       'zip'
     ];
 

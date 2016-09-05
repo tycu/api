@@ -143,8 +143,8 @@ module.exports = function (models, api) {
     describe('GET /api/v1/change_password', function() {});
     describe('GET /api/v1/email_verification', function() {});
 
-    // NOTE not being used currently:
-    // describe('GET /api/v1/verify_auth', function() {})
+    // TODO write test
+    // describe('GET /api/v1/verify_auth', function() {});
 
 
   })
