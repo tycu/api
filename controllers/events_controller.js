@@ -208,8 +208,8 @@ function getAllEvents(req, res, next) {
   debug("getAllEvents");
   models.Event.findAll({
     attributes: attributesToLoad,
-    offset: 0,
-    limit: 5, // NOTE make 10?
+    offset: req.query.offset,
+    limit: 10,
     order: '"id" DESC'
   }).then(function(objects, err) {
     req.events = objects;
@@ -223,8 +223,8 @@ function getAdminEvents(req, res, next) {
   models.Event.unscoped().findAll({
     where: { deletedAt: null },
     attributes: attributesToLoad,
-    offset: 0,
-    limit: 50, // TODO make 100
+    offset: req.query.offset,
+    limit: 100,
     order: '"id" DESC'
   }).then(function(objects, err) {
     req.events = objects;
