@@ -40,25 +40,8 @@ module.exports = function(sequelize, DataTypes) {
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        Politician.hasMany(models.PoliticianPhoto);
-
-        // this is breaking SQL statement, not sure why yet
-
-        // Politician.hasMany(models.Event);
-
-        // belongsToMany instead?
-        // Politician.hasMany(models.Contribution, {
-        //   through: models.Event
-        // });
-
-      // EXAMPLE Associations
-      // User.belongsToMany (User, {
-      //   as: {
-      //     singular: 'Follower',
-      //     plural: 'Followers'
-      //   },
-      //   through: UserFollowers
-      // })
+        Politician.hasMany(models.PoliticianPhoto, { foreignKey: 'politicianId' });
+        Politician.hasMany(models.Event, { foreignKey: 'politicianId' });
 
       }
     },

@@ -207,6 +207,7 @@ function createEvent(req, res, next) {
 function getAllEvents(req, res, next) {
   debug("getAllEvents");
   models.Event.findAll({
+    include: [ { model: models.Politician, include: [ models.PoliticianPhoto] } ],
     attributes: attributesToLoad,
     offset: req.query.offset,
     limit: 10,

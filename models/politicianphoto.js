@@ -37,7 +37,14 @@ module.exports = function(sequelize, DataTypes) {
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        PoliticianPhoto.belongsTo(models.Politician);
+        PoliticianPhoto.belongsTo(models.Politician, { foreignKey: 'politicianId' });
+
+        PoliticianPhoto.belongsToMany(models.Event, {
+          as:'event_pol_photos',
+          through: 'Politicians',
+          foreignKey: 'politicianId'
+        } );
+
       }
     },
     defaultScope: {

@@ -62,17 +62,18 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     paranoid: true,
     classMethods: {
-      // associate: function(models) {
-
-        // TODO set up proper association to pull contributions with fetch
-        // Event.hasMany(models.Contribution);
+      associate: function(models) {
+        Event.belongsTo(models.Politician, {foreignKey: 'politicianId'});
 
 
+        // Event.belongsToMany(models.PoliticianPhoto, {
+        //   as:'pol_photos',
+        //   through: 'Politicians',
+        //   foreignKey: 'id'
+        // } );
 
-        // this is breaking SQL statement, not sure why yet
-        // Event.belongsTo(models.Politician);
-        // Event.hasMany(models.EventTweet);
-      // }
+
+      }
     },
     defaultScope: {
       where: {
