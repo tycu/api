@@ -55,8 +55,8 @@ module.exports = function(sequelize, DataTypes) {
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        Contribution.belongsTo(models.User);
-        Contribution.belongsTo(models.Event);
+        Contribution.belongsTo(models.User, {foreignKey: 'userId'});
+        Contribution.belongsTo(models.Event, {foreignKey: 'eventId'});
       }
     },
     defaultScope: {

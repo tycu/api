@@ -41,8 +41,8 @@ module.exports = function(sequelize, DataTypes) {
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        PacEvent.belongsTo(models.Pac);
-        PacEvent.belongsTo(models.Event);
+        PacEvent.belongsTo(models.Pac, {foreignKey: 'pacId'});
+        PacEvent.belongsTo(models.Event, {foreignKey: 'eventId'});
       }
     },
     defaultScope: {

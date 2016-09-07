@@ -41,9 +41,9 @@ module.exports = function(sequelize, DataTypes) {
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        EventTweet.belongsTo(models.Pac);
-        EventTweet.belongsTo(models.Event);
-        EventTweet.belongsTo(models.User);
+        EventTweet.belongsTo(models.Pac, {foreignKey: 'pacId'});
+        EventTweet.belongsTo(models.Event, {foreignKey: 'eventId'});
+        EventTweet.belongsTo(models.User, {foreignKey: 'userId'});
       }
     },
     defaultScope: {
