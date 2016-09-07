@@ -19,6 +19,10 @@ module.exports = {
       twitterUsername: {
         type: Sequelize.STRING
       },
+      pacType: {
+        type: Sequelize.INTEGER,
+        // allowNull: false
+      },
       deletedAt: {
         type: Sequelize.DATE,
         defaultValue: null
