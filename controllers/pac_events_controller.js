@@ -89,12 +89,24 @@ function createPacEvent(req, res, next) {
 
 function getAllPacEvents(req, res, next) {
   debug("getAllPacEvents");
-  const eventId = req.params.eventId;
-  debug("eventId: %s", eventId);
+  const eventId      = req.params.eventId,
+        supportParam = req.query.support,
+        includePacsParam  = req.query.include_pacs;
+
+  var whereQuery = {eventId: eventId};
+  if (supportParam !== undefined) {
+    whereQuery.support = supportParam
+  }
+
+  var doesInclude = [];
+  if (includePacsParam !== undefined && includePacsParam === 'true') {
+    doesInclude = [{ model: models.Pac }]; // , attributes: pacIncludeAttributes
+  }
 
   models.PacEvent.findAll({
     attributes: attributesToLoad,
-    where: { eventId: eventId },
+    where: whereQuery,
+    include: doesInclude,
     offset: 0,
     limit: 50,
     order: '"updatedAt" DESC'
@@ -108,7 +120,7 @@ module.exports = function() {
   const router = new Router();
 
   router.route("/events/:eventId/pac_events")
-  .get(Authorize.role("admin"), getAllPacEvents, function(req, res, next) {
+  .get(Authorize.role("noAuth"), getAllPacEvents, function(req, res, next) {
     debug("in GET-INDEX /events/:eventId/pac_events");
     return res.status(200).json(req.pacEvents);
   })

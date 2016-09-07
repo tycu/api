@@ -18,7 +18,7 @@ module.exports.role = function(role) {
         message: 'Cannot access resource.'
       }));
     }
-    if (req.currentUser && req.currentUser.role === 'admin') {
+    if (role === 'noAuth' || req.currentUser && req.currentUser.role === 'admin') {
       return next();
     }
     else if (req.currentUser.role === role && (parseInt(req.currentUser.id, 10) === parseInt(req.params.id, 10)) || (req.currentUser.email === req.body.email)) {
