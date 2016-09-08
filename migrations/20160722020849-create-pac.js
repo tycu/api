@@ -16,12 +16,12 @@ module.exports = {
       color: {
         type: Sequelize.STRING
       },
+      colorType: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
       twitterUsername: {
         type: Sequelize.STRING
-      },
-      pacType: {
-        type: Sequelize.INTEGER,
-        // allowNull: false
       },
       deletedAt: {
         type: Sequelize.DATE,

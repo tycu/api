@@ -23,7 +23,12 @@ module.exports = {
         type: Sequelize.STRING
       },
       color: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        // allowNull: false // NOTE should require
+      },
+      colorType: {
+        type: Sequelize.INTEGER,
+        // allowNull: false // NOTE should require/use
       },
       twitterUsername: {
         type: Sequelize.STRING

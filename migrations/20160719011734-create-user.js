@@ -37,7 +37,14 @@ module.exports = {
         type: Sequelize.STRING
       },
       color: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'independent',
+        allowNull: false
+      },
+      colorType: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: false
       },
       picSquare: {
         type: Sequelize.STRING

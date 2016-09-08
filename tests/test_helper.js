@@ -3,7 +3,8 @@ const should    = require('should'),
       supertest = require('supertest'),
       api       = supertest('http://localhost:5001'),
       models    = require('../models/index'),
-      tokenUtils = require("../services/tokenUtils");
+      tokenUtils = require("../services/tokenUtils"),
+      colorTypes = require('../models/enums/colorTypes');
 
 var data = {},
     token;
@@ -20,6 +21,8 @@ var seq_test = function(next) {
         loginCount: 1,
         failedLoginCount: 0,
         lastLoginAt: new Date(),
+        color: 'undecided',
+        colorType: colorTypes.get('undecided').value,
         currentLoginAt: new Date(),
         currentLoginIp: '127.0.0.1',
         singleUseToken: '12345',

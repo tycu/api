@@ -4,7 +4,8 @@ const uuid = require('uuid');
 module.exports = {
   up: function (queryInterface) { // NOTE can receive(, Sequelize)
     const seedModel = require('../seed_data/users_seed.js'),
-          instances = [];
+          instances = [],
+          colorTypes = require('../models/enums/colorTypes');
     let instanceObject;
 
     for (const k in seedModel){
@@ -22,6 +23,8 @@ module.exports = {
           facebookUuid: instanceObject.facebookId,
           email: instanceObject.email,
           role: instanceObject.role || 'user',
+          colorType: colorTypes.get('undecided').value,
+          color: colorTypes.get('undecided').key,
           createdAt:  new Date(),
           updatedAt: new Date(),
           cryptedPassword: '',

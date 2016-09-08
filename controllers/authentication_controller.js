@@ -10,6 +10,7 @@ const debug = require('debug')('app:controllers:authentication' + process.pid),
     SequelizeError = require(path.join(__dirname, "..", "errors", "SequelizeError.js")),
     models = require('../models/index.js'),
     crypto = require('crypto'),
+    colorTypes = require('../models/enums/colorTypes'),
     env = process.env.NODE_ENV || "development",
     resetConfig = require('../config/resetConfig.json')[env],
     Authorize = require("../services/Authorize.js");
@@ -139,6 +140,8 @@ const createUser = function(req, res, next) {
             const newUser = models.User.build({
               email: email,
               loginCount: 1,
+              color: 'undecided',
+              colorType: colorTypes.get('undecided').value,
               failedLoginCount: 0,
               lastLoginAt: new Date(),
               currentLoginAt: new Date(),

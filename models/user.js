@@ -29,25 +29,25 @@ module.exports = function(sequelize, DataTypes) {
     occupation: {
       type: Sequelize.STRING,
       validate: {
-        len: [0,100]
+        len: [0, 100]
       }
     },
     employer: {
       type: Sequelize.STRING,
       validate: {
-        len: [0,100]
+        len: [0, 100]
       }
     },
     streetAddress: {
       type: Sequelize.STRING,
       validate: {
-        len: [0,100]
+        len: [0, 100]
       }
     },
     city: {
       type: Sequelize.STRING,
       validate: {
-        len: [0,100]
+        len: [0, 100]
       }
     },
     residenceState: {
@@ -56,11 +56,19 @@ module.exports = function(sequelize, DataTypes) {
     zip: {
       type: Sequelize.STRING,
       validate: {
-        len: [5,12]
+        len: [5, 12]
       }
     },
     color: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        isIn: [['blue', 'red', 'undecided', 'independent']]
+      }
+    },
+    colorType: {
+      type: Sequelize.INTEGER,
+      // allowNull: false
     },
     picSquare: {
       type: Sequelize.STRING

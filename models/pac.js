@@ -21,8 +21,8 @@ module.exports = function(sequelize, DataTypes) {
         isIn: [['blue', 'red']]
       }
     },
-    pacType: {
-      type: DataTypes.INTEGER,
+    colorType: {
+      type: Sequelize.INTEGER,
       // allowNull: false
     },
     twitterUsername: {

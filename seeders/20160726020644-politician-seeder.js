@@ -3,7 +3,8 @@
 module.exports = {
   up: function (queryInterface) { // NOTE can receive(, Sequelize)
     const seedModel = require('../seed_data/politicians_seed.js'),
-          instances = [];
+          instances = [],
+          colorTypes = require('../models/enums/colorTypes');
 
     let instanceObject,
         firstLast;
@@ -14,7 +15,7 @@ module.exports = {
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
         firstLast = instanceObject.name.split(' ');
-
+        // var colorType = colorTypes.get(instanceObject.color).value;
         // console.log('firstLast', firstLast);
         // console.log('instanceObject', instanceObject);
 
@@ -24,6 +25,8 @@ module.exports = {
           firstName: firstLast[0],
           lastName: firstLast[firstLast.length-1],
           fullName: instanceObject.name,
+          color: instanceObject.color,
+          // colorType: colorType,
           jobTitle: instanceObject.jobTitle,
           twitterUsername: instanceObject.twitterUsername,
           createdAt: new Date(),
