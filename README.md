@@ -1,14 +1,3 @@
-### Required
-[Homebrew](http://brew.sh/)
-xcode command line tools, install via app store
-
-### Suggested tools
-[iTerm 2](https://www.iterm2.com/)
-[sublime text 3](https://www.sublimetext.com/3)
-[postico postgresql db gui](https://eggerapps.at/ postico/)
-[postgres mac app](http://postgresapp.com/)
-
-
 #### NVM Setup
 make sure you have [Node version manager](https://github.com/creationix/nvm) installed (requires OSX command lines tools). make sure to do this from your base directory `$ cd ~`:
 
@@ -36,7 +25,7 @@ then cd to the appropriate tally repo
 
 [to read more about setup/version installation if necessary](https://github.com/creationix/nvm#usage)
 
-### Within Tally API  Repo
+### Within Tally API Repo
 
 get latest packages:
 `$ npm install`
@@ -44,21 +33,17 @@ get latest packages:
 remove unncessary stuff:
 `$ npm prune`
 
-start redis:
-`$ redis-server`
-start redis monitoring if desired:
 `$ redis-cli monitor`
 
 if you do not have redis installed:
 `$ brew install redis`
 
-start api server with dev logging:
-`$ npm run start`
-
-start api server without logging:
-`$ node main.js`
+start api server through node-foreman with dev logging:
+`$ npm start`
 
 If there are errors, make note of them, troubleshoot, need to fix.
+
+then cd to web_client start that up and go to the browser
 
 ### DB and migrations
 
@@ -118,6 +103,9 @@ to setup the test db (first time only):
 to migrate the test db (only when there is a new migration to run):
 `$ NODE_ENV=test sequelize db:migrate`
 
+make sure redis is running, if it is not running for dev in foreman
+`$ redis-server`
+
 start the server in the TEST env (always):
 `$ npm run testServer`
 
@@ -128,3 +116,14 @@ to find problematic syncronous (event loop blocking code)
 `$ npm run traceSync`
 
 tests should pass
+
+
+### Required
+[Homebrew](http://brew.sh/)
+xcode command line tools, install via app store
+
+### Suggested tools
+[iTerm 2](https://www.iterm2.com/)
+[sublime text 3](https://www.sublimetext.com/3)
+[postico postgresql db gui](https://eggerapps.at/ postico/)
+[postgres mac app](http://postgresapp.com/)

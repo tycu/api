@@ -27,6 +27,7 @@
     "express": "^4.13.4",
     "express-jwt": "^3.4.0",
     "express-unless": "^0.3.0",
+    "foreman": "2.0.0",
     "google-cloud": "^0.38.3",
     "graceful-fs": "^4.1.4",
     "handlebars": "^4.0.5",
@@ -51,12 +52,13 @@
     "node": "^5.7.0"
   },
   "scripts": {
-    "start": "DEBUG=* node main.js",
+    "start": "nf start",
     "testServer": "NODE_ENV=test PORT=5001 DEBUG=* node main.js",
     "test": "NODE_ENV=test mocha tests/test_helper.js --timeout 5000 --reporter nyan",
     "traceSync": "node main.js --trace-sync-io",
     "createDb": "node config/database.js",
-    "migrate": "sequelize db:migrate && sequelize db:seed:all"
+    "migrate": "sequelize db:migrate && sequelize db:seed:all",
+    "drop": "sequelize db:migrate:undo:all"
   },
   "bugs": {
     "url": "https://github.com/tallyus/api/issues"
