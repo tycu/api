@@ -17,10 +17,21 @@ module.exports = {
         type: Sequelize.STRING
       },
       colorType: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+        type: Sequelize.INTEGER
       },
       twitterUsername: {
+        type: Sequelize.STRING
+      },
+      streetAddress: {
+        type: Sequelize.STRING
+      },
+      city: {
+        type: Sequelize.STRING
+      },
+      mailingState: {
+        type: Sequelize.STRING
+      },
+      zip: {
         type: Sequelize.STRING
       },
       deletedAt: {

@@ -1,7 +1,8 @@
 const should    = require('should'),
       assert    = require('assert'),
       supertest = require('supertest'),
-      api       = supertest('http://localhost:5001')
+      api       = supertest('http://localhost:5001'),
+      colorTypes = require('../../models/enums/colorTypes');
 
 module.exports = function (models, api, token) {
 
@@ -15,6 +16,8 @@ module.exports = function (models, api, token) {
         firstName: 'Bob',
         lastName: 'Dole',
         jobTitle: 'President',
+        color: 'red',
+        colorType: colorTypes.get('red').value,
         twitterUsername: 'whatIsInternet',
         updatedAt: Date.now() / 1000
       })

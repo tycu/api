@@ -12,8 +12,13 @@ const debug = require('debug')('controllers:pacs_controller:' + process.pid),
       'description',
       'color',
       'twitterUsername',
+      'streetAddress',
+      'city',
+      'mailingState',
+      'zip',
       'createdAt',
-      'updatedAt'];
+      'updatedAt'
+    ];
 
 function load(req) {
   const id = req.params.id;

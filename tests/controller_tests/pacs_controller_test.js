@@ -12,6 +12,10 @@ module.exports = function (models, api, token) {
         name: 'Test PacName',
         description: 'Raising money, asyncronously.',
         color: 'blue',
+        streetAddress: '123 Main Street',
+        city: 'Etna',
+        mailingState: 'NH',
+        zip: '12345',
         twitterUsername: 'tweetAtMyPac',
         updatedAt: Date.now() / 1000
       })
@@ -68,6 +72,10 @@ module.exports = function (models, api, token) {
             pac.name.should.be.instanceof(String);
             pac.description.should.be.instanceof(String);
             pac.color.should.be.instanceof(String);
+            pac.streetAddress.should.be.instanceof(String);
+            pac.city.should.be.instanceof(String);
+            pac.mailingState.should.be.instanceof(String);
+            pac.zip.should.be.instanceof(String);
             pac.twitterUsername.should.be.instanceof(String);
             pac.createdAt.should.be.instanceof(String);
             pac.updatedAt.should.be.instanceof(String);

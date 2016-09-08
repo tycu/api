@@ -28,6 +28,27 @@ module.exports = function(sequelize, DataTypes) {
     twitterUsername: {
       type: DataTypes.STRING
     },
+    streetAddress: {
+      type: Sequelize.STRING,
+      validate: {
+        len: [0, 100]
+      }
+    },
+    city: {
+      type: Sequelize.STRING,
+      validate: {
+        len: [0, 100]
+      }
+    },
+    mailingState: {
+      type: Sequelize.STRING
+    },
+    zip: {
+      type: Sequelize.STRING,
+      validate: {
+        len: [5, 12]
+      }
+    },
     deletedAt: {
       type: Sequelize.DATE
     },

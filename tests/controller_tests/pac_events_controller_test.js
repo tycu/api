@@ -1,7 +1,8 @@
 const should    = require('should'),
       assert    = require('assert'),
       supertest = require('supertest'),
-      api       = supertest('http://localhost:5001')
+      api       = supertest('http://localhost:5001'),
+      colorTypes = require('../../models/enums/colorTypes');
 
 module.exports = function (models, api, token) {
 
@@ -15,6 +16,8 @@ module.exports = function (models, api, token) {
       const newPolitician = models.Politician.build({
         firstName: 'Bob',
         lastName: 'Dole',
+        color: 'red',
+        colorType: colorTypes.get('red').value,
         jobTitle: 'President',
         twitterUsername: 'whatIsInternet',
         updatedAt: Date.now() / 1000
@@ -26,6 +29,7 @@ module.exports = function (models, api, token) {
           isPublished: true,
           imageUrl: 'image.url.com',
           imageAttribution: 'NYT',
+          isBreaking: false,
           politicianId: newPolitician.id,
           headline: 'Here is an event headline',
           summary: 'Here is an event summary',
