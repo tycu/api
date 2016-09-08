@@ -23,11 +23,14 @@ verify installation:
 `$ command -v nvm`
 this should output 'nvm' if the installation was successful
 
-use correct node version (5.7) there is an .nvmrc file specifying this
+use correct node version (6.5.0) there is an .nvmrc file specifying this
 
-`$ nvm use` should use 5.7
+you can set this alias which will set default to node 6.5.0
+`$ nvm alias default 6.5.0`
+
+`$ nvm use` should use 6.5.0
 if not found:
-`$ nvm install` will install 5.7
+`$ nvm install` will install 6.5.0
 
 then cd to the appropriate tally repo
 
