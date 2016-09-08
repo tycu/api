@@ -8,7 +8,7 @@ const debug = require('debug')('controllers:user_mailer:' + process.pid),
       Handlebars = require('handlebars'),
       path = require("path"),
       fs = require("fs"),
-      sendGridKey = process.env.SENDGRID_API_KEY || require('../config/sendgridConfig.json'),
+      sendGridKey = process.env.SENDGRID_API_KEY || require('../config/sendgridConfig.json')[env]['ApiKey'],
       sg = require('sendgrid')(sendGridKey);
 
 
@@ -19,6 +19,11 @@ const renderToString = function(source, templateData) {
 };
 
 const send = function(request, next) {
+  debug('calling send!');
+  if (sendGridKey === undefined) {
+    throw "sendgrid key not found! check env loading";
+  }
+
   sg.API(request)
   .then(response => {
       debug("email status code: %s", response.statusCode);
