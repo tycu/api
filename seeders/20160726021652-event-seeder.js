@@ -6,18 +6,27 @@ module.exports = {
           instances = [];
 
     let instanceObject;
+    let count = 0
 
-    for (const k in seedModel){
+    for (const k in seedModel) {
       if (seedModel.hasOwnProperty(k)) {
         // console.log('key', k);
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
         // console.log('instanceObject', instanceObject);
 
+        count++;
+        var imageUrl = instanceObject.imageUrl;
+        if (count > 103) {
+          // NOTE so we're not hitting tally image service in dev as much
+          imageUrl = 'http://www.aviewoncities.com/img/washington/kveus1179s.jpg';
+        }
+
+
         instances.push({
           // id: parseInt(instanceObject.iden, 10),
           imageAttribution: instanceObject.imageAttribution,
-          imageUrl: instanceObject.imageUrl,
+          imageUrl: imageUrl,
           politicianId: instanceObject.politician,
           headline: instanceObject.headline,
           summary: instanceObject.summary,
