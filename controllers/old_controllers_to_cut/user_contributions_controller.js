@@ -24,7 +24,7 @@ module.exports = function(app, redis) {
         var usingLiveStripeKey = false
         var stripe
         if (req.body.stripeKey == 'pk_live_EvHoe9L6R3fKkOyA6WNe3r1S') {
-            stripe = require('stripe')(stripeLiveSecretKey)
+            // stripe = require('stripe')(stripeLiveSecretKey)
             usingLiveStripeKey = true
         } else {
             stripe = require('stripe')(stripeTestSecretKey)

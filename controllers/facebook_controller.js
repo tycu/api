@@ -2,7 +2,6 @@
 
 const debug = require('debug')('controllers:facebook_controller:' + process.pid),
       Router = require("express").Router,
-      // passport = require('passport'),
       models = require('../models/index.js'),
       env = process.env.NODE_ENV || "development",
       oauthConfig = require('../config/oauthConfig')[env],
@@ -11,7 +10,6 @@ const debug = require('debug')('controllers:facebook_controller:' + process.pid)
       crypto = require('crypto'),
       colorTypes = require('../models/enums/colorTypes'),
       resetConfig = require('../config/resetConfig.json')[env],
-      // FacebookStrategy = require('passport-facebook').Strategy,
       SequelizeError = require("../errors/SequelizeError.js"),
       // Authorize = require("../services/Authorize.js"),
       attributesToLoad = [
@@ -25,7 +23,6 @@ const debug = require('debug')('controllers:facebook_controller:' + process.pid)
         'residenceState',
         'zip'
       ];
-
 
 
 const loadUser = function(req) {
@@ -147,11 +144,6 @@ module.exports = function() {
   const router = new Router();
 
 
-  // router.route("/auth/facebook")
-  // .get(passport.authenticate('facebook'), function(req, res, next) {
-  //   debug('in GET /auth/facebook');
-  //   return res.status(200).json(req);
-  // });
 
   router.route("/auth/facebook/callback")
   .post(authorizeFacebook, function(req, res, next) {
@@ -159,41 +151,10 @@ module.exports = function() {
     return res.status(200).json(req.currentUser);
   })
 
-  // NOTE need to add ssl locally
-  // http://localhost:5000/api/v1/auth/facebook/deauthorize
-  // and add to facebook
-  // router.route('/auth/facebook/deauthorize')
-  // .post(deauthorizeFacebook, function(req, res, next) {
-  //   debug('in POST /auth/facebook/deauthorize');
-  //   return res.status(200).json(req.user);
-  // })
+  // NOTE need to add long facebook auth
+  // NOTE need to add deauthorize facebook
 
+  // see old_controllers_to_cut/facebook_cut
 
   return router;
 };
-
-
-// TODO move to long lasting server based access tokens
-// https://developers.facebook.com/docs/facebook-login/access-tokens/expiration-and-extension
-
-// const getFacebookUserInfo = function(facebookToken, callback) {
-//   const appIdAndSecret = '980119325404337|55224c68bd1df55da4bcac85dc879906';
-//   const url = 'https://graph.facebook.com/v2.7/debug_token?access_token=' + appIdAndSecret + '&input_token=' + facebookToken;
-//   request.get(url, function(err, res, body) {
-//     if (res.statusCode == 200) {
-//       if (JSON.parse(body).data.is_valid) {
-//         const url = 'https://graph.facebook.com/v2.7/me?fields=id,name,email&access_token=' + facebookToken;
-//         request.get(url, function(err, res, body) {
-//           if (res.statusCode == 200) {
-//             callback(true, JSON.parse(body));
-//           } else {
-//             callback(false);
-//           }
-//         });
-//         return;
-//       }
-//     }
-//     callback(false);
-//   });
-// };
-

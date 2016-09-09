@@ -24,8 +24,7 @@ const path = require('path'),
 const getExtension = function(req, res, next) {
   const extension = fileTypeExtensions[req.query.fileType];
   if (!extension) {
-    // TODO add no file extension error here
-    res.sendStatus(400);
+    res.status(400).send({error: 'improper file extension'});
     return;
   } else {
     return extension;
