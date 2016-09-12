@@ -48,6 +48,10 @@ function updatePac(req, res, next) {
     pac.description = req.body.pac.description;
     pac.color = req.body.pac.color;
     pac.twitterUsername = req.body.pac.twitterUsername;
+    pac.streetAddress = req.body.pac.streetAddress;
+    pac.city = req.body.pac.city;
+    pac.mailingState = req.body.pac.mailingState;
+    pac.zip = req.body.pac.zip;
     pac.updatedAt = Date.now() / 1000;
     pac.save(function(err) {
       if (err) { throw err; }
