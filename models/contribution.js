@@ -7,8 +7,15 @@ module.exports = function(sequelize, DataTypes) {
       field: 'id',
       primaryKey: true
     },
-    amount: {
-      type: DataTypes.DECIMAL,
+    donationAmount: { // NOTE this is in cents
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        // what additional validation do we want here?
+      }
+    },
+    feeAmount: { // NOTE this is in cents
+      type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
         // what additional validation do we want here?
@@ -55,8 +62,9 @@ module.exports = function(sequelize, DataTypes) {
     paranoid: true,
     classMethods: {
       associate: function(models) {
-        Contribution.belongsTo(models.User, {foreignKey: 'userId'});
+        Contribution.belongsTo(models.User,  {foreignKey: 'userId'});
         Contribution.belongsTo(models.Event, {foreignKey: 'eventId'});
+        Contribution.belongsTo(models.Pac,   {foreignKey: 'pacId'});
       }
     },
     defaultScope: {

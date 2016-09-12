@@ -1,0 +1,18 @@
+{
+  "development": {
+    "secretKey": "sk_test_EoKLhh6S0Kvb1MFWlr4PrNdi"
+  },
+  "test": {
+    "secretKey": "sk_test_EoKLhh6S0Kvb1MFWlr4PrNdi"
+  },
+  "production": {
+    "publicKey": "pk_live_xA1b8BrgpABNkeSdeCMvGYg8"
+  },
+
+
+  "_commment_prod": {
+    "secretKey":   "sk_live_0qmsxPOV8apIjioQGMjlRt0o"
+  }
+}
+
+

@@ -13,11 +13,13 @@ module.exports = {
         // console.log('val', seedModel[k]);
         instanceObject = seedModel[k];
         // console.log('instanceObject', instanceObject);
+        const donationAmount = parseInt(instanceObject.amount, 10) * 100;
 
         instances.push({
           // id: parseInt(instanceObject.iden, 10),
           chargeUuid: instanceObject.chargeId,
-          amount: parseInt(instanceObject.amount, 10),
+          donationAmount: donationAmount,
+          feeAmount: (donationAmount * 0.15),
           userId: parseInt(instanceObject.user, 10),
           eventId: parseInt(instanceObject.event, 10),
           pacId: parseInt(instanceObject.pac, 10),

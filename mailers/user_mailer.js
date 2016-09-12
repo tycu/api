@@ -274,3 +274,65 @@ module.exports.sendPasswordChangeAlert = function(user, next) {
     }
   });
 };
+
+module.exports.sendDonationReceivedMail = function(contribution, email, next) {
+
+
+
+
+// TODO write this email and template etc
+
+
+  if (checkTest() === false) {
+    return false;
+  }
+
+  debug("calling sendDonationReceivedMail");
+
+  // {"contribution":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
+
+  const templateData = {
+          "contribution": contribution,
+          "email": email
+        },
+        filePath = path.join(__dirname, '/templates/donation_received.handlebars');
+
+  var compiledEmail,
+      source,
+      request;
+
+  fs.readFile(filePath, function(err, data) {
+    if (!err) {
+      source = data.toString();
+
+      compiledEmail = renderToString(source, templateData);
+      request = sg.emptyRequest({
+        method: 'POST',
+        path: '/v3/mail/send',
+        body: {
+          personalizations: [
+            {
+              to: [
+                { email: email }
+              ],
+              subject: 'Tally.us - Thank you for Your Donation'
+            }
+          ],
+          from: { email: 'info@tally.us' },
+          content: [
+            { type: 'text/html',
+              value: compiledEmail
+            }
+          ]
+        }
+      });
+      send(request, function(err, response) {
+        return next(err, response);
+      });
+    } else {
+      debug("handlebar template load error:");
+      debug(err);
+    }
+  });
+
+};

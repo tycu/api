@@ -74,7 +74,7 @@ to run ALL migrations and seed ALL tables at the same time:
 `$ npm run migrate`
 
 to create a new model/migration file:
-`$ sequelize model:create --name Contribution --attributes id:integer,user_id:integer,charge_id:integer,amount:string,event_id:integer,pac_id:integer,support:boolean`
+`$ sequelize model:create --name Contribution --attributes id:integer,user_id:integer,charge_id:integer,donationAmount:integer,feeAmount:integer,event_id:integer,pac_id:integer,support:boolean`
 
 
 ### Command line access to production Redis database

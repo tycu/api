@@ -7,8 +7,12 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true
       },
-      amount: {
-        type: Sequelize.DECIMAL
+      donationAmount: { // NOTE this is in cents
+        type: Sequelize.INTEGER
+
+      },
+      feeAmount: { // NOTE this is in cents
+        type: Sequelize.INTEGER
       },
       support: {
         type: Sequelize.BOOLEAN
