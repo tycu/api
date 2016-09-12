@@ -11,6 +11,7 @@ const debug = require('debug')('controllers:politicians_controller:' + process.p
       'firstName',
       'lastName',
       'jobTitle',
+      'color',
       'twitterUsername',
       'createdAt',
       'updatedAt'
@@ -44,6 +45,7 @@ function updatePolitician(req, res, next) {
     politician.lastName = req.body.politician.lastName;
     politician.jobTitle = req.body.politician.jobTitle;
     politician.twitterUsername = req.body.politician.twitterUsername;
+    politician.color = req.body.politician.color;
 
     politician.updatedAt = Date.now() / 1000;
     politician.save(function(err) {
@@ -60,11 +62,12 @@ function updatePolitician(req, res, next) {
 function createPolitician(req, res, next) {
   debug("createPolitician");
   const newPolitician = models.Politician.build({
-    firstName: req.body.politician.firstName,
-    lastName: req.body.politician.lastName,
-    jobTitle: req.body.politician.jobTitle,
+    firstName:       req.body.politician.firstName,
+    lastName:        req.body.politician.lastName,
+    jobTitle:        req.body.politician.jobTitle,
     twitterUsername: req.body.politician.twitterUsername,
-    updatedAt: Date.now() / 1000
+    color:           req.body.politician.color,
+    updatedAt:       Date.now() / 1000
   });
   newPolitician.save(function(err) {
     if (err) { throw err; }

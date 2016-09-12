@@ -14,6 +14,7 @@ function loadAdmin(req) {
   debug("id: %s", id);
 
   return models.Event.unscoped().findOne({
+    include: [ { model: models.Politician, attributes: ['color', 'firstName', 'lastName', 'jobTitle'] } ],
     attributes: attributesToLoad,
     where: { id: id, deletedAt: null }
   });
