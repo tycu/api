@@ -133,6 +133,10 @@ const start = function() {
     redis = require("redis").createClient();
   }
 
+
+  // NOTE that nginx should be sitting in front so https is not
+  // necessary for requests to the node application
+
   // Require HTTPS in production
   if (process.env.NODE_ENV === 'production') {
     app.use(function(req, res, next) {
