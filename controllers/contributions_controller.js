@@ -14,7 +14,7 @@ const debug = require('debug')('controllers:contributions_controller:' + process
     StripeError = require(path.join(__dirname, "..", "errors", "StripeError.js")),
     Authorize = require("../services/Authorize.js"),
     async = require("async"),
-    userMailer = require("../mailers/user_mailer.js"),
+    contributionMailer = require("../mailers/contribution_mailer.js"),
     attributesToLoad = ['id', 'donationAmount', 'feeAmount', 'support', 'userId', 'eventId', 'pacId',
     'createdAt', 'updatedAt']; // chargeUuid
 
@@ -157,8 +157,8 @@ const chargeCustomer = function(req, res, next) {
         amount     = req.body.amount,
         userId     = req.currentUser.id,
         email      = req.currentUser.email,
-        donationCents = Math.floor(req.body.amount * 100),
-        feeCents  = Math.min(Math.round(donationCents * 0.15), 2000), // MAX fee $20.00
+        donationCents = Math.floor(Math.max(req.body.amount * 100, 500)), // NOTE force never less than 500 cents
+        feeCents  = Math.max(Math.round(donationCents * 0.15), 99),       // NOTE min fee is 99 cents
         stripe = getStripeSecretKey(req, res, next),
         requiredParams = ['customerId', 'eventId', 'pacId',
           'support','amount'];
@@ -169,7 +169,6 @@ const chargeCustomer = function(req, res, next) {
       return;
     }
   });
-
 
   var usingLiveStripeKey = false;
   var tasks = [];
@@ -265,11 +264,19 @@ const chargeCustomer = function(req, res, next) {
           .then(function(newContribution, err) {
 
 
-            userMailer.sendDonationReceivedMail(newContribution, email, function(error, response) {
-              debug("confirm sending donation received email:");
-              debug(response);
-              next(err, newContribution);
-            });
+            models.Event.unscoped().findOne({
+              include: [ { model: models.Politician, attributes: ['firstName', 'lastName'] } ],
+              attributes: ['headline'],
+              where: { id: eventId, deletedAt: null }
+            })
+            .then(function(eventPolData, err) {
+              contributionMailer.sendDonationReceivedMail(newContribution, eventPolData, email, function(error, response) {
+                debug("confirm sending donation received email:");
+                debug(response);
+                next(err, newContribution);
+              });
+            })
+
           });
 
 

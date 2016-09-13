@@ -5,49 +5,9 @@
 const debug = require('debug')('controllers:user_mailer:' + process.pid),
       env = process.env.NODE_ENV || "development",
       resetConfig = require('../config/resetConfig.json')[env],
-      Handlebars = require('handlebars'),
       path = require("path"),
       fs = require("fs"),
-      sendGridKey = process.env.SENDGRID_API_KEY || require('../config/sendgridConfig.json')[env]['ApiKey'],
-      sg = require('sendgrid')(sendGridKey);
-
-
-const renderToString = function(source, templateData) {
-  const template = Handlebars.compile(source);
-  const compiledEmail = template(templateData);
-  return compiledEmail;
-};
-
-const send = function(request, next) {
-  debug('calling send!');
-  if (sendGridKey === undefined) {
-    throw "sendgrid key not found! check env loading";
-  }
-
-  sg.API(request)
-  .then(response => {
-      debug("email status code: %s", response.statusCode);
-      next(null, response);
-  })
-  .catch(error => {
-
-    // TODO throw error from sendgrid.
-
-    // debug("sendgrid error");
-    // debug(error);
-    // console.log(util.inspect(error, {showHidden: false, depth: null}));
-    // The Error is an instance of SendGridError
-    // The full response is attached to error.response
-    next(error, response);
-  });
-};
-
-const checkTest = function() {
-  if (env === 'test') {
-    return false;
-  }
-
-}
+      baseMailer = require('./base_mailer');
 
 module.exports.sendWelcomeMail = function(user, next) {
   if (checkTest() === false) {
@@ -71,9 +31,9 @@ module.exports.sendWelcomeMail = function(user, next) {
   fs.readFile(filePath, function(err, data) {
     if (!err) {
       source = data.toString();
-      compiledEmail = renderToString(source, templateData);
+      compiledEmail = baseMailer.renderToString(source, templateData);
 
-      var request = sg.emptyRequest({
+      var request = baseMailer.sg.emptyRequest({
         method: 'POST',
         path: '/v3/mail/send',
         body: {
@@ -98,7 +58,7 @@ module.exports.sendWelcomeMail = function(user, next) {
           ]
         }
       });
-      send(request, function(err, response) {
+      baseMailer.send(request, function(err, response) {
         return next(err, response);
       });
     } else {
@@ -110,7 +70,7 @@ module.exports.sendWelcomeMail = function(user, next) {
 
 
 module.exports.sendConfirmMail = function(user, next) {
-  if (checkTest() === false) {
+  if (baseMailer.checkTest() === false) {
     return false;
   }
 
@@ -133,8 +93,8 @@ module.exports.sendConfirmMail = function(user, next) {
     if (!err) {
       source = data.toString();
 
-      compiledEmail = renderToString(source, templateData);
-      request = sg.emptyRequest({
+      compiledEmail = baseMailer.renderToString(source, templateData);
+      request = baseMailer.sg.emptyRequest({
         method: 'POST',
         path: '/v3/mail/send',
         body: {
@@ -154,7 +114,7 @@ module.exports.sendConfirmMail = function(user, next) {
           ]
         }
       });
-      send(request, function(err, response) {
+      baseMailer.send(request, function(err, response) {
         return next(err, response);
       });
     } else {
@@ -166,7 +126,7 @@ module.exports.sendConfirmMail = function(user, next) {
 
 
 module.exports.sendPasswordResetEmail = function(user, next) {
-  if (checkTest() === false) {
+  if (baseMailer.checkTest() === false) {
     return false;
   }
   debug("calling sendPasswordResetEmail");
@@ -188,8 +148,8 @@ module.exports.sendPasswordResetEmail = function(user, next) {
     if (!err) {
       source = data.toString();
 
-      compiledEmail = renderToString(source, templateData);
-      request = sg.emptyRequest({
+      compiledEmail = baseMailer.renderToString(source, templateData);
+      request = baseMailer.sg.emptyRequest({
         method: 'POST',
         path: '/v3/mail/send',
         body: {
@@ -210,7 +170,7 @@ module.exports.sendPasswordResetEmail = function(user, next) {
           ]
         }
       });
-      send(request, function(err, response) {
+      baseMailer.send(request, function(err, response) {
         return next(err, response);
       });
     } else {
@@ -221,7 +181,7 @@ module.exports.sendPasswordResetEmail = function(user, next) {
 };
 
 module.exports.sendPasswordChangeAlert = function(user, next) {
-  if (checkTest() === false) {
+  if (baseMailer.checkTest() === false) {
     return false;
   }
   debug("calling sendPasswordChangeAlert");
@@ -243,8 +203,8 @@ module.exports.sendPasswordChangeAlert = function(user, next) {
     if (!err) {
       source = data.toString();
 
-      compiledEmail = renderToString(source, templateData);
-      request = sg.emptyRequest({
+      compiledEmail = baseMailer.renderToString(source, templateData);
+      request = baseMailer.sg.emptyRequest({
         method: 'POST',
         path: '/v3/mail/send',
         body: {
@@ -265,7 +225,7 @@ module.exports.sendPasswordChangeAlert = function(user, next) {
           ]
         }
       });
-      send(request, function(err, response) {
+      baseMailer.send(request, function(err, response) {
         return next(err, response);
       });
     } else {
@@ -273,66 +233,4 @@ module.exports.sendPasswordChangeAlert = function(user, next) {
       debug(err);
     }
   });
-};
-
-module.exports.sendDonationReceivedMail = function(contribution, email, next) {
-
-
-
-
-// TODO write this email and template etc
-
-
-  if (checkTest() === false) {
-    return false;
-  }
-
-  debug("calling sendDonationReceivedMail");
-
-  // {"contribution":{"email":"matt@tally.us", "singleUseToken":"asd"},"domain": "http://localhost:8080/"}
-
-  const templateData = {
-          "contribution": contribution,
-          "email": email
-        },
-        filePath = path.join(__dirname, '/templates/donation_received.handlebars');
-
-  var compiledEmail,
-      source,
-      request;
-
-  fs.readFile(filePath, function(err, data) {
-    if (!err) {
-      source = data.toString();
-
-      compiledEmail = renderToString(source, templateData);
-      request = sg.emptyRequest({
-        method: 'POST',
-        path: '/v3/mail/send',
-        body: {
-          personalizations: [
-            {
-              to: [
-                { email: email }
-              ],
-              subject: 'Tally.us - Thank you for Your Donation'
-            }
-          ],
-          from: { email: 'info@tally.us' },
-          content: [
-            { type: 'text/html',
-              value: compiledEmail
-            }
-          ]
-        }
-      });
-      send(request, function(err, response) {
-        return next(err, response);
-      });
-    } else {
-      debug("handlebar template load error:");
-      debug(err);
-    }
-  });
-
 };
