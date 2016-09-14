@@ -7,6 +7,10 @@ const debug = require('debug')('controllers:contribution_mailer:' + process.pid)
       fs = require("fs"),
       baseMailer = require('./base_mailer');
 
+const numberWithCommas = function(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 module.exports.sendDonationReceivedMail = function(contribution, eventPolData, email, next) {
   if (baseMailer.checkTest() === false) {
     return false;
@@ -16,7 +20,7 @@ module.exports.sendDonationReceivedMail = function(contribution, eventPolData, e
 
   const politicianName = eventPolData.Politician.firstName + ' ' + eventPolData.Politician.lastName,
         templateData = {
-          "donationAmount": contribution.donationAmount / 100,
+          "donationAmount": numberWithCommas(contribution.donationAmount / 100),
           "support": contribution.support ? 'support of' : 'opposition to',
           "headline": eventPolData.headline,
           "politicianName": politicianName,
