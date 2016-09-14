@@ -93,11 +93,6 @@ function getAllPacEvents(req, res, next) {
         supportParam = req.query.support,
         includePacsParam  = req.query.include_pacs;
 
-  var whereQuery = {eventId: eventId};
-  if (supportParam !== undefined) {
-    whereQuery.support = supportParam
-  }
-
   var doesInclude = [];
   if (includePacsParam !== undefined && includePacsParam === 'true') {
     doesInclude = [{ model: models.Pac }]; // , attributes: pacIncludeAttributes
@@ -105,7 +100,7 @@ function getAllPacEvents(req, res, next) {
 
   models.PacEvent.findAll({
     attributes: attributesToLoad,
-    where: whereQuery,
+    where: {eventId: eventId},
     include: doesInclude,
     offset: 0,
     limit: 50,
