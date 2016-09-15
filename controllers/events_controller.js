@@ -166,11 +166,12 @@ function updateEvent(req, res, next) {
   debug("updateEvent");
   loadAdmin(req)
   .then(function(event, err) {
-    event.isPinned = req.body.event.isPinned;
-    // event.isPublished = req.body.event.isPublished;
+    event.isPinned = false;
+    // event.isPublished = req.body.event.isPublished; // NOTE use publish method only
     event.imageUrl = req.body.event.imageUrl;
     event.imageAttribution = req.body.event.imageAttribution;
-    event.politicianId = req.body.event.politicianId;
+
+    // event.politicianId = req.body.event.politicianId; // NOTE cannot change politician ID (can add draft option later but not now.)
     event.headline = req.body.event.headline;
     event.summary = req.body.event.summary;
     event.updatedAt = Date.now() / 1000;
@@ -190,6 +191,7 @@ function createEvent(req, res, next) {
   const newEvent = models.Event.build({
     isPinned: false,
     isPublished: false,
+    isBreaking: false,
     imageUrl: req.body.event.imageUrl,
     imageAttribution: req.body.event.imageAttribution,
     politicianId: req.body.event.politicianId,
