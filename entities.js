@@ -10,21 +10,21 @@ module.exports = function(redis) {
         return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
     }
 
-    entities.getUsers = function(idens, callback) {
-        redis.hmget(redisKeys.users, idens, function(err, reply) {
-            if (err) {
-                callback(err)
-            } else if (reply) {
-                var pacs = []
-                reply.forEach(function(json) {
-                    pacs.push(JSON.parse(json))
-                })
-                callback(null, pacs)
-            } else {
-                callback()
-            }
-        })
-    }
+    // entities.getUsers = function(idens, callback) {
+    //     redis.hmget(redisKeys.users, idens, function(err, reply) {
+    //         if (err) {
+    //             callback(err)
+    //         } else if (reply) {
+    //             var pacs = []
+    //             reply.forEach(function(json) {
+    //                 pacs.push(JSON.parse(json))
+    //             })
+    //             callback(null, pacs)
+    //         } else {
+    //             callback()
+    //         }
+    //     })
+    // }
 
     entities.getPolitician = function(iden, callback) {
         entities.getPoliticians([iden], function(err, politicians) {
@@ -54,22 +54,22 @@ module.exports = function(redis) {
         })
     }
 
-    entities.listPoliticians = function(callback) {
-        redis.hgetall(redisKeys.politicians, function(err, reply) {
-            if (err) {
-                callabck(err)
-            } else {
-                var politicians = []
-                if (reply) {
-                    Object.keys(reply).forEach(function(iden) {
-                        politicians.push(JSON.parse(reply[iden]))
-                    })
-                }
+    // entities.listPoliticians = function(callback) {
+    //     redis.hgetall(redisKeys.politicians, function(err, reply) {
+    //         if (err) {
+    //             callabck(err)
+    //         } else {
+    //             var politicians = []
+    //             if (reply) {
+    //                 Object.keys(reply).forEach(function(iden) {
+    //                     politicians.push(JSON.parse(reply[iden]))
+    //                 })
+    //             }
 
-                callback(null, sortByName(politicians))
-            }
-        })
-    }
+    //             callback(null, sortByName(politicians))
+    //         }
+    //     })
+    // }
 
     entities.getPac = function(iden, callback) {
         entities.getPacs([iden], function(err, pacs) {
@@ -99,22 +99,22 @@ module.exports = function(redis) {
         })
     }
 
-    entities.listPacs = function(callback) {
-        redis.hgetall(redisKeys.pacs, function(err, reply) {
-            if (err) {
-                callabck(err)
-            } else {
-                var pacs = []
-                if (reply) {
-                    Object.keys(reply).forEach(function(iden) {
-                        pacs.push(JSON.parse(reply[iden]))
-                    })
-                }
+    // entities.listPacs = function(callback) {
+    //     redis.hgetall(redisKeys.pacs, function(err, reply) {
+    //         if (err) {
+    //             callabck(err)
+    //         } else {
+    //             var pacs = []
+    //             if (reply) {
+    //                 Object.keys(reply).forEach(function(iden) {
+    //                     pacs.push(JSON.parse(reply[iden]))
+    //                 })
+    //             }
 
-                callback(null, sortByName(pacs))
-            }
-        })
-    }
+    //             callback(null, sortByName(pacs))
+    //         }
+    //     })
+    // }
 
     entities.getEvent = function(iden, callback) {
         entities.getEvents([iden], function(err, events) {
@@ -161,50 +161,50 @@ module.exports = function(redis) {
         })
     }
 
-    entities.listEvents = function(callback) {
-        var tasks = []
-        tasks.push(function(callback) {
-            redis.lrange(redisKeys.reverseChronologicalEvents, 0, -1, function(err, reply) {
-                callback(err, reply)
-            })
-        })
-        tasks.push(function(callback) {
-            redis.get(redisKeys.pinnedEventIden, function(err, reply) {
-                callback(err, reply)
-            })
-        })
+    // entities.listEvents = function(callback) {
+    //     var tasks = []
+    //     tasks.push(function(callback) {
+    //         redis.lrange(redisKeys.reverseChronologicalEvents, 0, -1, function(err, reply) {
+    //             callback(err, reply)
+    //         })
+    //     })
+    //     tasks.push(function(callback) {
+    //         redis.get(redisKeys.pinnedEventIden, function(err, reply) {
+    //             callback(err, reply)
+    //         })
+    //     })
 
-        async.parallel(tasks, function(err, results) {
-            if (err) {
-                callback(err)
-            } else {
-                var idens = results[0]
-                var pinned = results[1]
+    //     async.parallel(tasks, function(err, results) {
+    //         if (err) {
+    //             callback(err)
+    //         } else {
+    //             var idens = results[0]
+    //             var pinned = results[1]
 
-                if (pinned) {
-                    var index = idens.indexOf(pinned)
-                    if (index != -1) {
-                        idens.splice(index, 1)
-                    }
-                    idens.unshift(pinned)
-                }
+    //             if (pinned) {
+    //                 var index = idens.indexOf(pinned)
+    //                 if (index != -1) {
+    //                     idens.splice(index, 1)
+    //                 }
+    //                 idens.unshift(pinned)
+    //             }
 
-                entities.getEvents(idens, function(err, events) {
-                    if (err) {
-                        callback(err)
-                    } else {
-                        if (pinned) {
-                            if (events[0].iden == pinned) {
-                                events[0].pinned = true
-                            }
-                        }
+    //             entities.getEvents(idens, function(err, events) {
+    //                 if (err) {
+    //                     callback(err)
+    //                 } else {
+    //                     if (pinned) {
+    //                         if (events[0].iden == pinned) {
+    //                             events[0].pinned = true
+    //                         }
+    //                     }
 
-                        callback(null, events)
-                    }
-                })
-            }
-        })
-    }
+    //                     callback(null, events)
+    //                 }
+    //             })
+    //         }
+    //     })
+    // }
 
     entities.getContribution = function(iden, callback) {
         entities.getContributions([iden], function(err, contributions) {
@@ -317,17 +317,17 @@ module.exports = function(redis) {
     return entities
 }
 
-var sortByName = function(entities) {
-    return entities.sort(function(a, b) {
-        if (a.name > b.name) {
-            return 1
-        } else if (a.name < b.name) {
-            return -1
-        } else {
-            return 0
-        }
-    })
-}
+// var sortByName = function(entities) {
+//     return entities.sort(function(a, b) {
+//         if (a.name > b.name) {
+//             return 1
+//         } else if (a.name < b.name) {
+//             return -1
+//         } else {
+//             return 0
+//         }
+//     })
+// }
 
 var mapifyEntities = function(entities) {
     var map = {}

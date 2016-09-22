@@ -1,0 +1,94 @@
+'use strict';
+module.exports = function(sequelize, DataTypes) {
+  const Sequelize = require('sequelize');
+  const Contribution = sequelize.define('Contribution', {
+    id: {
+      type: DataTypes.INTEGER,
+      field: 'id',
+      primaryKey: true
+    },
+    donationAmount: { // NOTE this is in cents
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        // what additional validation do we want here?
+      }
+    },
+    feeAmount: { // NOTE this is in cents
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        // what additional validation do we want here?
+      }
+    },
+    chargeUuid: { // NOTE format: ch_17x5NXF3SBSFqhmCMPSeo1Jr
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        len: [20, 50]
+      }
+    },
+    support: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      validate: {
+        isIn: [[true, false]]
+      }
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    eventId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    pacId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    deletedAt: {
+      type: Sequelize.DATE
+    },
+    createdAt: {
+      type: Sequelize.DATE,
+      allowNull: false
+    },
+    updatedAt: {
+      type: Sequelize.DATE,
+      allowNull: false
+    }
+  }, {
+    paranoid: true,
+    classMethods: {
+      associate: function(models) {
+        Contribution.belongsTo(models.User,  {foreignKey: 'userId'});
+        Contribution.belongsTo(models.Event, {foreignKey: 'eventId'});
+        Contribution.belongsTo(models.Pac,   {foreignKey: 'pacId'});
+      }
+    },
+    defaultScope: {
+      where: {
+        deletedAt: null
+      }
+    },
+    scopes: {
+      deleted: {
+        where: {
+          deletedAt: {ne: null}
+        }
+      },
+      support: {
+        where: {
+          support: true
+        }
+      },
+      oppose: {
+        where: {
+          support: false
+        }
+      }
+    }
+  });
+  return Contribution;
+};

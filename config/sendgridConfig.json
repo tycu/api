@@ -1,0 +1,11 @@
+{
+  "development": {
+    "ApiKey": "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"
+},
+  "test": {
+    "ApiKey": "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"
+  },
+  "production": {
+     "ApiKey": "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"
+  }
+}

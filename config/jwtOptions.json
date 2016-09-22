@@ -1,0 +1,34 @@
+{
+  "development": {
+    "secret": "4ukI0uIVnB3iI1yxj646fVXSE3ZVk4doZgz6fTbNg7jO41EAtl20J5F7Trtwe7OM",
+    "expiresInMinutes": 3600,
+    "issuer":      "api.tally.us",
+    "audience":    "tally.us",
+    "jwtFromRequest": null,
+    "algorithms": ["HS256"],
+    "ignoreExpiration": false,
+    "passReqToCallback": false,
+    "session": false
+  },
+  "test": {
+    "secret": "test_secret",
+    "expiresInMinutes": 3600,
+    "issuer":      "api.tally.us",
+    "audience":    "tally.us",
+    "jwtFromRequest": null,
+    "algorithms": ["HS256"],
+    "ignoreExpiration": false,
+    "passReqToCallback": false,
+    "session": false
+  },
+  "production": {
+    "expiresInMinutes": 3600,
+    "issuer":      "api.tally.us",
+    "audience":    "tally.us",
+    "jwtFromRequest": null,
+    "algorithms": ["HS256"],
+    "ignoreExpiration": false,
+    "passReqToCallback": false,
+    "session": false
+  }
+}

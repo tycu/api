@@ -1,97 +1,172 @@
-'use strict'
+"use strict";
 
-var workers = process.env.WEB_CONCURRENCY || 1
-var port = process.env.PORT || 5000
+const path = require("path"),
+      bodyParser = require('body-parser'),
+      workers = process.env.WEB_CONCURRENCY || 1,
+      port = process.env.PORT || 5000,
+      jwt = require("express-jwt"),
+      env = process.env.NODE_ENV || "development",
+      config = require("./config/jwtOptions.json")[env],
+      onFinished = require('on-finished'),
+      debug = require('debug')('app:' + process.pid),
+      NotFoundError = require(path.join(__dirname, "errors", "NotFoundError.js")),
+      tokenUtils = require(path.join(__dirname, "/services/tokenUtils.js"));
 
-var start = function() {
-    var express = require('express')
-    var app = express()
-    var redisKeys = require('./redis-keys')
+const start = function() {
+  debug("Starting application in NODE_ENV: %s", env);
 
-    var redis
-    if (process.env.REDISCLOUD_URL) {
-        redis = require("redis").createClient(process.env.REDISCLOUD_URL, { 'no_ready_check': true })
-    } else {
-        redis = require("redis").createClient()
+  debug("Initializing express");
+  const express = require('express'),
+        app = express();
+
+  let redis;
+
+  debug("Attaching plugins");
+  app.use(require('morgan')("dev"));
+  app.use(require('cors')());
+  app.use(require('body-parser').json());
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(require('compression')());
+  app.use(require('response-time')());
+
+  app.use(function (req, res, next) {
+    onFinished(res, function () { // NOTE could be (err)
+      debug("[%s] finished request", req.connection.remoteAddress);
+    });
+    next();
+  });
+
+  // NOTE allow base route/status ping
+  app.get('/', function(req, res) {
+    res.json({
+      'revitalizingDemocracy': true
+    });
+  });
+
+  // TODO this is not good but prevents errors for now.
+  app.get('/favicon.ico', function(req, res) {
+    res.status(200);
+  });
+
+  app.use(jwt({
+    secret: config.secret
+  }).unless({path: [
+    '/',
+    '/api/v1/signin',
+    '/api/v1/signup',
+    '/api/v1/auth/facebook/callback',
+    '/api/v1/events',
+    '/api/v1/fetchBreaking',
+    '/api/v1/email_verification',
+    '/api/v1/email_reset',
+    '/api/v1/update_password',
+    '/favicon.*'
+  ]}));
+
+  app.use(tokenUtils.middleware().unless({path: [
+    '/',
+    '/api/v1/signin',
+    '/api/v1/signup',
+    '/api/v1/auth/facebook/callback',
+    '/api/v1/events',
+    '/api/v1/fetchBreaking',
+    '/api/v1/email_verification',
+    '/api/v1/email_reset',
+    '/api/v1/update_password',
+    '/favicon.*'
+  ]}));
+
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "authentication_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "users_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "contributions_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "pacs_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "pac_events_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "politicians_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "events_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "images_controller.js"))());
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "politician_photos_controller.js"))()),
+  app.use("/api/v1", require(path.join(__dirname, "controllers", "facebook_controller.js"))());
+
+
+
+  // require('./controllers/contributions_controller')(app, redis);
+  // require('./controllers/users_controller')(app);
+
+  // all other requests redirect to 404
+  app.all("*", function (req, res, next) {
+    next(new NotFoundError("404"));
+  });
+
+  // error handler for all the applications
+  app.use(function (err, req, res) {
+    if (env === 'development' || env === 'test') {
+      debug("err from main.js %s", err);
     }
 
-    // -----------------------------------------------------------------------------
+    const errorType = typeof err;
 
-    // Require HTTPS in production
-    // if (process.env.NODE_ENV == 'production') {
-    //     app.use(function(req, res, next) {
-    //         if (req.headers['x-forwarded-proto'] !== 'https') {
-    //             res.status(403).json({
-    //                 'error': {
-    //                     'message': 'This server is only accessible over HTTPS.'
-    //                 }
-    //             })
-    //         } else {
-    //             next()
-    //         }
-    //     })
-    // }
+    let   code = 500,
+          msg = { message: "Internal Server Error" };
 
-    app.use(require('cors')())
+    switch (err.name) {
+      case "UnauthorizedError":
+        code = err.status;
+        msg = undefined;
+        break;
+      case "BadRequestError":
+      case "UnauthorizedAccessError":
+      case "NotFoundError":
+      case "SequelizeError":
+        code = err.status;
+        msg = err.inner;
+        break;
+      default:
+        break;
+    }
+    return res.status(code).json({msg: msg, errorType: errorType});
+  });
 
-    app.use(require('body-parser').json())
+  if (process.env.REDISCLOUD_URL) {
+    redis = require("redis").createClient(process.env.REDISCLOUD_URL, { 'no_ready_check': true });
+  } else {
+    redis = require("redis").createClient();
+  }
 
-    // Patch sendStatus to always send json
+
+  // NOTE that nginx should be sitting in front so https is not
+  // necessary for requests to the node application
+
+  // Require HTTPS in production
+  if (process.env.NODE_ENV === 'production') {
     app.use(function(req, res, next) {
-        res.sendStatus = function(statusCode) {
-            res.status(statusCode).json({})
-        }
-        next()
-    })
+      if (req.headers['x-forwarded-proto'] !== 'https') {
+        res.status(403).json({
+          'error': {
+            'message': 'This server is only accessible over HTTPS.'
+          }
+        });
+      } else {
+        next();
+      }
+    });
+  }
 
-    // If the authorization header is present, verify the token and set req.user
-    app.use(function(req, res, next) {
-        if (!req.headers.authorization) {
-            if (req.url == '/' || req.url == '/v1/authenticate') {
-                next()
-            } else {
-                res.sendStatus(401)
-            }
-            return
-        }
+  // Patch sendStatus to always send json
+  app.use(function(req, res, next) {
+    res.sendStatus = function(statusCode) {
+      res.status(statusCode).json({});
+    };
+    next();
+  });
 
-        var parts = req.headers.authorization.split(' ')
-        if (parts.length == 2 && parts[0] == 'Bearer') {
-            var token = parts[1]
-            redis.hget(redisKeys.accessTokenToUserIden, token, function(err, reply) {
-                if (err) {
-                    res.sendStatus(500)
-                    console.error(err)
-                } else if (reply) {
-                    redis.hget(redisKeys.users, reply, function(err, reply) {
-                        if (err) {
-                            res.sendStatus(500)
-                            console.error(err)
-                        } else if (reply) {
-                            req.user = JSON.parse(reply)
-                            next()
-                        } else {
-                            res.sendStatus(500)
-                            console.error('entry for ' + userIden + ' missing in ' + redisKeys.users)
-                        }
-                    })
-                } else {
-                    res.sendStatus(401)
-                }
-            })
-        } else {
-            res.sendStatus(401)
-        }
-    })
+  app.listen(port, function() {
+    debug('SUCCESS: tally-api listening on port ' + port);
+  });
+};
 
-    require('./endpoints')(app, redis)
-
-    app.listen(port, function() {
-        console.log('tally-api listening on port ' + port)
-    })
-}
-
+debug("Starting throng on port: %s, with workers: %s", port, workers);
 require('throng')(start, {
-    'workers': workers,
-    'lifetime': Infinity
-})
+  'workers': workers,
+  'lifetime': Infinity
+});

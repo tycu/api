@@ -1,0 +1,26 @@
+{
+  "development": {
+    "facebook": {
+      "clientID": "1627626620901370",
+      "clientSecret": "b0aad4aaaf3c0466abb9ecb54a8f0125",
+      "api_version": "v2.7",
+      "callbackURL": "http://127.0.0.1:5000/api/v1/auth/facebook/callback"
+    }
+  },
+  "test": {
+    "facebook": {
+      "clientID": "1627626620901370",
+      "clientSecret": "b0aad4aaaf3c0466abb9ecb54a8f0125",
+      "api_version": "v2.7",
+      "callbackURL": "http://127.0.0.1:5001/api/v1/auth/facebook/callback"
+    }
+  },
+  "production": {
+    "facebook": {
+      "clientID": "1627624840901548",
+      "clientSecret": "c3f64eda37712b98ca891e7a3d361ca2",
+      "api_version": "v2.7",
+      "callbackURL": "http://api.tally.us/api/v1/auth/facebook/callback"
+    }
+  }
+}
