@@ -49,7 +49,7 @@
   },
   "optionalDependencies": {},
   "engines": {
-    "node": "^5.7.0"
+    "node": ">=6.5.0"
   },
   "scripts": {
     "start": "nf start",

@@ -18,7 +18,7 @@ const debug = require('debug')('controllers:pacs_controller:' + process.pid),
       'zip',
       'createdAt',
       'updatedAt'
-    ];
+    ]; // Note includes admin only attrs (address)
 
 function load(req) {
   const id = req.params.id;
